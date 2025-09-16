@@ -1,0 +1,40 @@
+{
+  "name": "transf",
+  "version": "0.0.1",
+  "description": "A browser extension for page rotation",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "start": "wxt",
+    "build": "wxt build",
+    "zip": "wxt zip",
+    "postinstall": "wxt prepare",
+    "typecheck": "tsc --noEmit",
+    "format": "biome check --write --formatter-enabled=true --assist-enabled=true --unsafe",
+    "check": "biome check .",
+    "test": "vitest run",
+    "ls-lint": "ls-lint",
+    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.3",
+    "@ls-lint/ls-lint": "^2.3.1",
+    "@tailwindcss/vite": "^4.1.13",
+    "@types/react": "^19.1.12",
+    "@types/react-dom": "^19.1.9",
+    "@wxt-dev/module-react": "^1.1.5",
+    "lefthook": "^1.12.4",
+    "tailwindcss": "^4.1.5",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "wxt": "0.20.11"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.1",
+    "tailwind-merge": "^3.3.1",
+    "valibot": "^1.1.0"
+  }
+}

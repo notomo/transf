@@ -1,0 +1,9 @@
+ls:
+  .ts: kebab-case
+  .tsx: kebab-case
+
+ignore:
+  - node_modules
+  - .output
+  - dist
+  - build

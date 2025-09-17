@@ -1,5 +1,29 @@
 import { useCallback, useId, useState } from "react";
 
+async function applyCSS(style: string) {
+  const [tab] = await browser.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+
+  const tabId = tab?.id;
+  if (!tabId) {
+    return;
+  }
+
+  await browser.scripting.executeScript({
+    target: { tabId },
+    args: [
+      {
+        style,
+      },
+    ],
+    func: (args) => {
+      document.documentElement.style.cssText = args.style;
+    },
+  });
+}
+
 export function App() {
   const [centerX, setCenterX] = useState(50);
   const [centerY, setCenterY] = useState(50);
@@ -11,47 +35,18 @@ export function App() {
 
   const applyTransform = useCallback(
     async (newCenterX: number, newCenterY: number, newRotation: number) => {
-      const [tab] = await browser.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      if (tab?.id) {
-        await browser.scripting.executeScript({
-          target: { tabId: tab.id },
-          args: [
-            {
-              centerX: newCenterX,
-              centerY: newCenterY,
-              rotation: newRotation,
-            },
-          ],
-          func: (args) => {
-            const style = `
-        transform-origin: ${args.centerX}% ${args.centerY}%;
-        transform: rotate(${args.rotation}deg);
+      const style = `
+        transform-origin: ${newCenterX}% ${newCenterY}%;
+        transform: rotate(${newRotation}deg);
         transition: transform 0.3s ease;
       `;
-            document.documentElement.style.cssText = style;
-          },
-        });
-      }
+      applyCSS(style);
     },
     [],
   );
 
   const handleReset = async () => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    if (tab?.id) {
-      await browser.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-          document.documentElement.style.cssText = "";
-        },
-      });
-    }
+    applyCSS("");
     setCenterX(50);
     setCenterY(50);
     setRotation(0);

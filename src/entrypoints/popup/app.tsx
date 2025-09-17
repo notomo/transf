@@ -112,27 +112,30 @@ async function applyCSS(style: string) {
 }
 
 export function App() {
-  const [centerX, setCenterX] = useState(50);
-  const [centerY, setCenterY] = useState(50);
-  const [rotation, setRotation] = useState(0);
+  const [transform, setTransform] = useState({
+    centerX: 50,
+    centerY: 50,
+    rotation: 0,
+  });
 
   const applyTransform = useCallback(
-    async (newCenterX: number, newCenterY: number, newRotation: number) => {
+    async (updates: Partial<typeof transform>) => {
+      const newTransform = { ...transform, ...updates };
+      setTransform(newTransform);
+
       const style = `
-        transform-origin: ${newCenterX}% ${newCenterY}%;
-        transform: rotate(${newRotation}deg);
+        transform-origin: ${newTransform.centerX}% ${newTransform.centerY}%;
+        transform: rotate(${newTransform.rotation}deg);
         transition: transform 0.3s ease;
       `;
       applyCSS(style);
     },
-    [],
+    [transform],
   );
 
   const handleReset = async () => {
+    setTransform({ centerX: 50, centerY: 50, rotation: 0 });
     applyCSS("");
-    setCenterX(50);
-    setCenterY(50);
-    setRotation(0);
   };
 
   return (
@@ -140,27 +143,18 @@ export function App() {
       <h1 className="text-center font-bold text-lg">Page Rotation</h1>
 
       <CenterXInput
-        centerX={centerX}
-        onChange={(newValue) => {
-          setCenterX(newValue);
-          applyTransform(newValue, centerY, rotation);
-        }}
+        centerX={transform.centerX}
+        onChange={(newValue) => applyTransform({ centerX: newValue })}
       />
 
       <CenterYInput
-        centerY={centerY}
-        onChange={(newValue) => {
-          setCenterY(newValue);
-          applyTransform(centerX, newValue, rotation);
-        }}
+        centerY={transform.centerY}
+        onChange={(newValue) => applyTransform({ centerY: newValue })}
       />
 
       <RotationInput
-        rotation={rotation}
-        onChange={(newValue) => {
-          setRotation(newValue);
-          applyTransform(centerX, centerY, newValue);
-        }}
+        rotation={transform.rotation}
+        onChange={(newValue) => applyTransform({ rotation: newValue })}
       />
 
       <div className="flex justify-center">

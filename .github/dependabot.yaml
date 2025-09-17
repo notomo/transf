@@ -1,0 +1,38 @@
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "12:00"
+      timezone: "Asia/Tokyo"
+    assignees:
+      - "notomo"
+    cooldown:
+      default-days: 7
+
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "saturday"
+      time: "12:00"
+      timezone: "Asia/Tokyo"
+    assignees:
+      - "notomo"
+    open-pull-requests-limit: 10
+    groups:
+      tailwindcss:
+        patterns:
+          - tailwindcss
+          - "@tailwindcss/*"
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+    cooldown:
+      default-days: 7

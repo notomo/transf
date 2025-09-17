@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useCallback, useId, useState } from "react";
 
 export function App() {
   const [centerX, setCenterX] = useState(50);
@@ -9,32 +9,35 @@ export function App() {
   const centerYId = useId();
   const rotationId = useId();
 
-  const handleApply = async () => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      currentWindow: true,
-    });
-    if (tab?.id) {
-      await browser.scripting.executeScript({
-        target: { tabId: tab.id },
-        args: [
-          {
-            centerX,
-            centerY,
-            rotation,
-          },
-        ],
-        func: (args) => {
-          const style = `
+  const applyTransform = useCallback(
+    async (newCenterX: number, newCenterY: number, newRotation: number) => {
+      const [tab] = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+      if (tab?.id) {
+        await browser.scripting.executeScript({
+          target: { tabId: tab.id },
+          args: [
+            {
+              centerX: newCenterX,
+              centerY: newCenterY,
+              rotation: newRotation,
+            },
+          ],
+          func: (args) => {
+            const style = `
         transform-origin: ${args.centerX}% ${args.centerY}%;
         transform: rotate(${args.rotation}deg);
         transition: transform 0.3s ease;
       `;
-          document.documentElement.style.cssText = style;
-        },
-      });
-    }
-  };
+            document.documentElement.style.cssText = style;
+          },
+        });
+      }
+    },
+    [],
+  );
 
   const handleReset = async () => {
     const [tab] = await browser.tabs.query({
@@ -68,7 +71,11 @@ export function App() {
           min="0"
           max="100"
           value={centerX}
-          onChange={(e) => setCenterX(Number(e.target.value))}
+          onChange={(e) => {
+            const newValue = Number(e.target.value);
+            setCenterX(newValue);
+            applyTransform(newValue, centerY, rotation);
+          }}
           className="w-full"
         />
       </div>
@@ -83,7 +90,11 @@ export function App() {
           min="0"
           max="100"
           value={centerY}
-          onChange={(e) => setCenterY(Number(e.target.value))}
+          onChange={(e) => {
+            const newValue = Number(e.target.value);
+            setCenterY(newValue);
+            applyTransform(centerX, newValue, rotation);
+          }}
           className="w-full"
         />
       </div>
@@ -98,23 +109,20 @@ export function App() {
           min="-180"
           max="180"
           value={rotation}
-          onChange={(e) => setRotation(Number(e.target.value))}
+          onChange={(e) => {
+            const newValue = Number(e.target.value);
+            setRotation(newValue);
+            applyTransform(centerX, centerY, newValue);
+          }}
           className="w-full"
         />
       </div>
 
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={handleApply}
-          className="flex-1 rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700"
-        >
-          Apply
-        </button>
+      <div className="flex justify-center">
         <button
           type="button"
           onClick={handleReset}
-          className="flex-1 rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
+          className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
         >
           Reset
         </button>

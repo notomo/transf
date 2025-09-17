@@ -15,11 +15,23 @@ export function App() {
       currentWindow: true,
     });
     if (tab?.id) {
-      await browser.tabs.sendMessage(tab.id, {
-        action: "rotate",
-        centerX,
-        centerY,
-        rotation,
+      await browser.scripting.executeScript({
+        target: { tabId: tab.id },
+        args: [
+          {
+            centerX,
+            centerY,
+            rotation,
+          },
+        ],
+        func: (args) => {
+          const style = `
+        transform-origin: ${args.centerX}% ${args.centerY}%;
+        transform: rotate(${args.rotation}deg);
+        transition: transform 0.3s ease;
+      `;
+          document.documentElement.style.cssText = style;
+        },
       });
     }
   };
@@ -30,8 +42,11 @@ export function App() {
       currentWindow: true,
     });
     if (tab?.id) {
-      await browser.tabs.sendMessage(tab.id, {
-        action: "reset",
+      await browser.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: () => {
+          document.documentElement.style.cssText = "";
+        },
       });
     }
     setCenterX(50);

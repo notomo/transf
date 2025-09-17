@@ -10,10 +10,10 @@ This is a browser extension called "transf" that allows users to rotate web page
 
 The extension follows WXT's entrypoint-based architecture:
 
-- **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for rotation controls (center X/Y coordinates as percentages, rotation angle in degrees). Uses `browser.runtime.sendMessage` to communicate with content scripts.
-- **Content Script** (`src/entrypoints/content/index.ts`): Listens for messages from popup via `browser.runtime.onMessage.addListener` and applies CSS transforms to `document.documentElement` for page rotation.
+- **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for rotation controls (center X/Y coordinates as percentages, rotation angle in degrees). Uses `browser.scripting.executeScript` for direct code injection.
+- **Content Script Injection**: Uses `browser.scripting.executeScript` to directly inject transformation code into active tabs, applying CSS transforms to `document.documentElement` for page rotation.
 
-Communication flow: Popup UI → `browser.runtime.sendMessage` → Content Script → DOM manipulation with CSS transforms.
+Communication flow: Popup UI → `browser.scripting.executeScript` → Direct DOM manipulation with CSS transforms.
 
 ## Development Commands
 
@@ -37,7 +37,10 @@ npm run check
 # Run tests
 npm run test
 
-# Format, lint, typecheck, and test (run before commits)
+# File naming lint (kebab-case)
+npm run ls-lint
+
+# Format, lint, typecheck, and file naming (run before commits)
 npm run check_all
 ```
 
@@ -45,7 +48,7 @@ npm run check_all
 
 - WXT handles manifest generation and build process
 - Development server runs on localhost:3000 with HMR
-- Extension manifest includes `activeTab` and `tabs` permissions for page manipulation
+- Extension manifest includes `activeTab`, `tabs`, and `scripting` permissions for page manipulation
 - Built extension outputs to `.output/chrome-mv3/` directory
 - Load the built extension in Chrome developer mode by selecting the output directory
 
@@ -53,5 +56,7 @@ npm run check_all
 
 - Uses Biome for formatting and linting (configured in `biome.json`)
 - Lefthook for pre-commit hooks that auto-format code
-- TypeScript with strict configuration
+- TypeScript with strict configuration  
 - Vitest for testing framework
+- ls-lint enforces kebab-case file naming for TypeScript files
+- TailwindCSS for styling with custom configuration

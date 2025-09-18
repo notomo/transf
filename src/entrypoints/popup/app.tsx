@@ -1,53 +1,26 @@
 import { useCallback, useId, useState } from "react";
 
-function CenterXInput({
-  centerX,
+function AxisPercentInput({
+  label,
+  value,
   onChange,
 }: {
-  centerX: number;
+  label: string;
+  value: number;
   onChange: (value: number) => void;
 }) {
   const id = useId();
   return (
     <div className="space-y-2">
       <label htmlFor={id} className="block font-medium text-sm">
-        Center X (%): {centerX}
+        {label}: {value}
       </label>
       <input
         id={id}
         type="range"
         min="0"
         max="100"
-        value={centerX}
-        onChange={(e) => {
-          const newValue = Number(e.target.value);
-          onChange(newValue);
-        }}
-        className="w-full"
-      />
-    </div>
-  );
-}
-
-function CenterYInput({
-  centerY,
-  onChange,
-}: {
-  centerY: number;
-  onChange: (value: number) => void;
-}) {
-  const id = useId();
-  return (
-    <div className="space-y-2">
-      <label htmlFor={id} className="block font-medium text-sm">
-        Center Y (%): {centerY}
-      </label>
-      <input
-        id={id}
-        type="range"
-        min="0"
-        max="100"
-        value={centerY}
+        value={value}
         onChange={(e) => {
           const newValue = Number(e.target.value);
           onChange(newValue);
@@ -142,13 +115,15 @@ export function App() {
     <div className="w-80 space-y-4 p-4">
       <h1 className="text-center font-bold text-lg">Page Rotation</h1>
 
-      <CenterXInput
-        centerX={transform.centerX}
+      <AxisPercentInput
+        label="Center X (%)"
+        value={transform.centerX}
         onChange={(newValue) => applyTransform({ centerX: newValue })}
       />
 
-      <CenterYInput
-        centerY={transform.centerY}
+      <AxisPercentInput
+        label="Center Y (%)"
+        value={transform.centerY}
         onChange={(newValue) => applyTransform({ centerY: newValue })}
       />
 

@@ -14,7 +14,8 @@
     "check": "biome check .",
     "test": "vitest run",
     "ls-lint": "ls-lint",
-    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint"
+    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint",
+    "deploy_for_local": "npm run build && mkdir -p $TRANSF_LOCAL && cp -rf ./.output/chrome-mv3/* $TRANSF_LOCAL"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.3",

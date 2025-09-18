@@ -60,6 +60,36 @@ function RotationInput({
   );
 }
 
+function ScaleInput({
+  scale,
+  onChange,
+}: {
+  scale: number;
+  onChange: (value: number) => void;
+}) {
+  const id = useId();
+  return (
+    <div className="space-y-2">
+      <label htmlFor={id} className="block font-medium text-sm">
+        Scale: {scale}x
+      </label>
+      <input
+        id={id}
+        type="range"
+        min="0.1"
+        max="5"
+        step="0.1"
+        value={scale}
+        onChange={(e) => {
+          const newValue = Number(e.target.value);
+          onChange(newValue);
+        }}
+        className="w-full"
+      />
+    </div>
+  );
+}
+
 async function applyCSS(style: string) {
   const [tab] = await browser.tabs.query({
     active: true,
@@ -89,6 +119,7 @@ export function App() {
     centerX: 50,
     centerY: 50,
     rotation: 0,
+    scale: 1,
   });
 
   const applyTransform = useCallback(
@@ -98,7 +129,7 @@ export function App() {
 
       const style = `
         transform-origin: ${newTransform.centerX}% ${newTransform.centerY}%;
-        transform: rotate(${newTransform.rotation}deg);
+        transform: rotate(${newTransform.rotation}deg) scale(${newTransform.scale});
         transition: transform 0.3s ease;
       `;
       applyCSS(style);
@@ -107,7 +138,7 @@ export function App() {
   );
 
   const handleReset = async () => {
-    setTransform({ centerX: 50, centerY: 50, rotation: 0 });
+    setTransform({ centerX: 50, centerY: 50, rotation: 0, scale: 1 });
     applyCSS("");
   };
 
@@ -130,6 +161,11 @@ export function App() {
       <RotationInput
         rotation={transform.rotation}
         onChange={(newValue) => applyTransform({ rotation: newValue })}
+      />
+
+      <ScaleInput
+        scale={transform.scale}
+        onChange={(newValue) => applyTransform({ scale: newValue })}
       />
 
       <div className="flex justify-center">

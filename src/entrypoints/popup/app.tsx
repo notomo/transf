@@ -90,6 +90,37 @@ function ScaleInput({
   );
 }
 
+function TranslateInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+}) {
+  const id = useId();
+  return (
+    <div className="space-y-2">
+      <label htmlFor={id} className="block font-medium text-sm">
+        {label}: {value}px
+      </label>
+      <input
+        id={id}
+        type="range"
+        min="-5000"
+        max="5000"
+        value={value}
+        onChange={(e) => {
+          const newValue = Number(e.target.value);
+          onChange(newValue);
+        }}
+        className="w-full"
+      />
+    </div>
+  );
+}
+
 async function applyCSS(style: string) {
   const [tab] = await browser.tabs.query({
     active: true,
@@ -120,6 +151,8 @@ export function App() {
     centerY: 50,
     rotation: 0,
     scale: 1,
+    translateX: 0,
+    translateY: 0,
   });
 
   const applyTransform = useCallback(
@@ -129,7 +162,7 @@ export function App() {
 
       const style = `
         transform-origin: ${newTransform.centerX}% ${newTransform.centerY}%;
-        transform: rotate(${newTransform.rotation}deg) scale(${newTransform.scale});
+        transform: translate(${newTransform.translateX}px, ${newTransform.translateY}px) rotate(${newTransform.rotation}deg) scale(${newTransform.scale});
         transition: transform 0.3s ease;
       `;
       applyCSS(style);
@@ -138,7 +171,14 @@ export function App() {
   );
 
   const handleReset = async () => {
-    setTransform({ centerX: 50, centerY: 50, rotation: 0, scale: 1 });
+    setTransform({
+      centerX: 50,
+      centerY: 50,
+      rotation: 0,
+      scale: 1,
+      translateX: 0,
+      translateY: 0,
+    });
     applyCSS("");
   };
 
@@ -166,6 +206,18 @@ export function App() {
       <ScaleInput
         scale={transform.scale}
         onChange={(newValue) => applyTransform({ scale: newValue })}
+      />
+
+      <TranslateInput
+        label="Translate X (px)"
+        value={transform.translateX}
+        onChange={(newValue) => applyTransform({ translateX: newValue })}
+      />
+
+      <TranslateInput
+        label="Translate Y (px)"
+        value={transform.translateY}
+        onChange={(newValue) => applyTransform({ translateY: newValue })}
       />
 
       <div className="flex justify-center">

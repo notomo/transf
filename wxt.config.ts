@@ -8,7 +8,7 @@ export default defineConfig({
     name: "transf",
     description: "A browser extension for page rotation",
     version: "0.0.1",
-    permissions: ["activeTab", "tabs", "scripting"],
+    permissions: ["storage", "activeTab", "tabs", "scripting"],
     host_permissions: ["http://*/*", "https://*/*"],
     action: {
       default_popup: "src/entrypoints/popup/index.html",

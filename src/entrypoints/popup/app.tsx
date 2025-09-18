@@ -1,4 +1,10 @@
-import { useCallback, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState } from "react";
+import {
+  DEFAULT_TRANSFORM,
+  getTransformState,
+  setTransformState,
+  type TransformState,
+} from "./storage";
 
 function AxisPercentInput({
   label,
@@ -145,40 +151,40 @@ async function applyCSS(style: string) {
   });
 }
 
-export function App() {
-  const [transform, setTransform] = useState({
-    centerX: 50,
-    centerY: 50,
-    rotation: 0,
-    scale: 1,
-    translateX: 0,
-    translateY: 0,
-  });
-
-  const applyTransform = useCallback(
-    async (updates: Partial<typeof transform>) => {
-      const newTransform = { ...transform, ...updates };
-      setTransform(newTransform);
-
-      const style = `
-        transform-origin: ${newTransform.centerX}% ${newTransform.centerY}%;
-        transform: translate(${newTransform.translateX}px, ${newTransform.translateY}px) rotate(${newTransform.rotation}deg) scale(${newTransform.scale});
+function applyTransformCSS(transform: TransformState) {
+  const style = `
+        transform-origin: ${transform.centerX}% ${transform.centerY}%;
+        transform: translate(${transform.translateX}px, ${transform.translateY}px) rotate(${transform.rotation}deg) scale(${transform.scale});
         transition: transform 0.3s ease;
       `;
-      applyCSS(style);
+  applyCSS(style);
+}
+
+export function App() {
+  const [transform, setTransform] = useState<TransformState>(DEFAULT_TRANSFORM);
+
+  useEffect(() => {
+    const loadStoredState = async () => {
+      const stored = await getTransformState();
+      setTransform(stored);
+      applyTransformCSS(stored);
+    };
+    loadStoredState();
+  }, []);
+
+  const applyTransform = useCallback(
+    async (updates: Partial<TransformState>) => {
+      const newTransform = { ...transform, ...updates };
+      setTransform(newTransform);
+      await setTransformState(newTransform);
+      applyTransformCSS(newTransform);
     },
     [transform],
   );
 
   const handleReset = async () => {
-    setTransform({
-      centerX: 50,
-      centerY: 50,
-      rotation: 0,
-      scale: 1,
-      translateX: 0,
-      translateY: 0,
-    });
+    setTransform(DEFAULT_TRANSFORM);
+    await setTransformState(DEFAULT_TRANSFORM);
     applyCSS("");
   };
 

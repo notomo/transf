@@ -1,10 +1,5 @@
-import { useCallback, useEffect, useId, useState } from "react";
-import {
-  DEFAULT_TRANSFORM,
-  getTransformState,
-  setTransformState,
-  type TransformState,
-} from "./storage";
+import { useId } from "react";
+import { useTransform } from "./transform";
 
 function AxisPercentInput({
   label,
@@ -127,66 +122,8 @@ function TranslateInput({
   );
 }
 
-async function applyCSS(style: string) {
-  const [tab] = await browser.tabs.query({
-    active: true,
-    currentWindow: true,
-  });
-
-  const tabId = tab?.id;
-  if (!tabId) {
-    return;
-  }
-
-  await browser.scripting.executeScript({
-    target: { tabId },
-    args: [
-      {
-        style,
-      },
-    ],
-    func: (args) => {
-      document.documentElement.style.cssText = args.style;
-    },
-  });
-}
-
-function applyTransformCSS(transform: TransformState) {
-  const style = `
-        transform-origin: ${transform.centerX}% ${transform.centerY}%;
-        transform: translate(${transform.translateX}px, ${transform.translateY}px) rotate(${transform.rotation}deg) scale(${transform.scale});
-        transition: transform 0.3s ease;
-      `;
-  applyCSS(style);
-}
-
 export function App() {
-  const [transform, setTransform] = useState<TransformState>(DEFAULT_TRANSFORM);
-
-  useEffect(() => {
-    const loadStoredState = async () => {
-      const stored = await getTransformState();
-      setTransform(stored);
-      applyTransformCSS(stored);
-    };
-    loadStoredState();
-  }, []);
-
-  const applyTransform = useCallback(
-    async (updates: Partial<TransformState>) => {
-      const newTransform = { ...transform, ...updates };
-      setTransform(newTransform);
-      await setTransformState(newTransform);
-      applyTransformCSS(newTransform);
-    },
-    [transform],
-  );
-
-  const handleReset = async () => {
-    setTransform(DEFAULT_TRANSFORM);
-    await setTransformState(DEFAULT_TRANSFORM);
-    applyCSS("");
-  };
+  const { transform, applyTransform, resetTransform } = useTransform();
 
   return (
     <div className="w-80 space-y-4 p-4">
@@ -229,7 +166,7 @@ export function App() {
       <div className="flex justify-center">
         <button
           type="button"
-          onClick={handleReset}
+          onClick={resetTransform}
           className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
         >
           Reset

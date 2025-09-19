@@ -1,7 +1,7 @@
 {
   "name": "transf",
   "version": "0.0.1",
-  "description": "A browser extension for page rotation",
+  "description": "A browser extension for page transformation (rotation, scaling, translation)",
   "type": "module",
   "scripts": {
     "dev": "wxt",

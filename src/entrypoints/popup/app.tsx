@@ -127,7 +127,7 @@ export function App() {
 
   return (
     <div className="w-80 space-y-4 p-4">
-      <h1 className="text-center font-bold text-lg">Page Rotation</h1>
+      <h1 className="text-center font-bold text-lg">Page Transform</h1>
 
       <AxisPercentInput
         label="Center X (%)"

@@ -4,16 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a browser extension called "transf" that allows users to rotate web pages around a specified center point with a custom angle. Built using the WXT framework for modern browser extension development with React and TypeScript.
+This is a browser extension called "transf" that allows users to transform web pages with rotation, scaling, and translation effects around a specified center point. Built using the WXT framework for modern browser extension development with React and TypeScript.
 
 ## Architecture
 
 The extension follows WXT's entrypoint-based architecture:
 
-- **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for rotation controls (center X/Y coordinates as percentages, rotation angle in degrees). Uses `browser.scripting.executeScript` for direct code injection.
-- **Content Script Injection**: Uses `browser.scripting.executeScript` to directly inject transformation code into active tabs, applying CSS transforms to `document.documentElement` for page rotation.
+- **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for transformation controls (center X/Y coordinates as percentages, rotation angle in degrees, scale factor, and translation in pixels). Uses `browser.scripting.executeScript` for direct code injection.
+- **Content Script Injection**: Uses `browser.scripting.executeScript` to directly inject transformation code into active tabs, applying CSS transforms to `document.documentElement` for page transformation (rotation, scaling, translation).
 
-Communication flow: Popup UI → `browser.scripting.executeScript` → Direct DOM manipulation with CSS transforms.
+Communication flow: Popup UI → `browser.scripting.executeScript` → Direct DOM manipulation with CSS transforms for comprehensive page transformation.
 
 ## Development Commands
 
@@ -48,7 +48,7 @@ npm run check_all
 
 - WXT handles manifest generation and build process
 - Development server runs on localhost:3000 with HMR
-- Extension manifest includes `activeTab`, `tabs`, and `scripting` permissions for page manipulation
+- Extension manifest includes `activeTab`, `tabs`, `scripting`, and `storage` permissions for page transformation and state persistence
 - Built extension outputs to `.output/chrome-mv3/` directory
 - Load the built extension in Chrome developer mode by selecting the output directory
 

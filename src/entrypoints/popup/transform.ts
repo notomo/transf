@@ -1,3 +1,7 @@
+import { useCallback, useEffect, useState } from "react";
+import { browser } from "wxt/browser";
+import { storage } from "wxt/utils/storage";
+
 type TransformState = {
   centerX: number;
   centerY: number;
@@ -16,7 +20,6 @@ const DEFAULT_TRANSFORM: TransformState = {
   translateY: 0,
 };
 
-// export to test only
 export const transformStateItem = storage.defineItem<TransformState>(
   "session:transformState",
   {

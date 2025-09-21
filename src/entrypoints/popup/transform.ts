@@ -20,12 +20,11 @@ const DEFAULT_TRANSFORM: TransformState = {
   translateY: 0,
 };
 
-export const transformStateItem = storage.defineItem<TransformState>(
-  "session:transformState",
-  {
-    defaultValue: DEFAULT_TRANSFORM,
-  },
-);
+export const transformStateItem = storage.defineItem<
+  Record<string, TransformState>
+>("session:transformStates", {
+  defaultValue: {},
+});
 
 async function applyCSS(style: string) {
   const [tab] = await browser.tabs.query({
@@ -61,35 +60,65 @@ transition: transform 0.3s ease;
 }
 
 export function useTransform() {
-  const [transform, setTransform] = useState(DEFAULT_TRANSFORM);
+  const [transform, setTransform] = useState<TransformState | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>("");
 
   useEffect(() => {
     const loadStored = async () => {
-      const stored = await transformStateItem.getValue();
-      setTransform(stored);
-      applyTransformCSS(stored);
+      const [tab] = await browser.tabs.query({
+        active: true,
+        currentWindow: true,
+      });
+
+      const url = tab?.url;
+      if (!url) return;
+
+      setCurrentUrl(url);
+      const storedStates = await transformStateItem.getValue();
+      const urlState = storedStates[url];
+
+      if (urlState) {
+        setTransform(urlState);
+        applyTransformCSS(urlState);
+      } else {
+        setTransform(null);
+        applyCSS("");
+      }
     };
     loadStored();
   }, []);
 
   const applyTransform = useCallback(
     async (updates: Partial<TransformState>) => {
-      const newTransform = { ...transform, ...updates };
+      if (!currentUrl) return;
+
+      const currentTransform = transform || DEFAULT_TRANSFORM;
+      const newTransform = { ...currentTransform, ...updates };
       setTransform(newTransform);
-      await transformStateItem.setValue(newTransform);
+
+      const storedStates = await transformStateItem.getValue();
+      await transformStateItem.setValue({
+        ...storedStates,
+        [currentUrl]: newTransform,
+      });
       applyTransformCSS(newTransform);
     },
-    [transform],
+    [transform, currentUrl],
   );
 
   const resetTransform = useCallback(async () => {
-    setTransform(DEFAULT_TRANSFORM);
-    await transformStateItem.setValue(DEFAULT_TRANSFORM);
+    if (!currentUrl) return;
+
+    setTransform(null);
+    const storedStates = await transformStateItem.getValue();
+    const newStates = { ...storedStates };
+    delete newStates[currentUrl];
+    await transformStateItem.setValue(newStates);
     applyCSS("");
-  }, []);
+  }, [currentUrl]);
 
   return {
-    transform,
+    transform: transform || DEFAULT_TRANSFORM,
     applyTransform,
     resetTransform,
   };

@@ -123,13 +123,13 @@ export function useTransform() {
         ...(transform ?? DEFAULT_TRANSFORM),
         ...updates,
       };
-      setTransform(newTransform);
+      await setTransform(newTransform);
     },
     [transform, setTransform],
   );
 
   const resetTransform = useCallback(async () => {
-    setTransform(null);
+    await setTransform(null);
   }, [setTransform]);
 
   return {

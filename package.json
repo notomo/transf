@@ -13,13 +13,15 @@
     "format": "biome check --write --formatter-enabled=true --assist-enabled=true --unsafe",
     "check": "biome check .",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "ls-lint": "ls-lint",
-    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint",
+    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint && npm run test:e2e",
     "deploy_for_local": "npm run build && mkdir -p $TRANSF_LOCAL && cp -rf ./.output/chrome-mv3/* $TRANSF_LOCAL"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.3",
     "@ls-lint/ls-lint": "^2.3.1",
+    "@playwright/test": "^1.55.0",
     "@tailwindcss/vite": "^4.1.13",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",

@@ -40,3 +40,7 @@ web-ext-artifacts/
 
 # Claude
 .claude/settings.local.json
+
+# Playwright
+/playwright-report
+/test-results

@@ -31,9 +31,12 @@ async function applyTransformCSS(transform: TransformState | null) {
     return;
   }
 
+  const scaleX = transform.flipHorizontal ? -transform.scale : transform.scale;
+  const scaleY = transform.flipVertical ? -transform.scale : transform.scale;
+
   const style = `
 transform-origin: ${transform.centerX}% ${transform.centerY}%;
-transform: translate(${transform.translateX}px, ${transform.translateY}px) rotate(${transform.rotation}deg) scale(${transform.scale});
+transform: translate(${transform.translateX}px, ${transform.translateY}px) rotate(${transform.rotation}deg) scale(${scaleX}, ${scaleY});
 transition: transform 0.3s ease;
 `;
   await applyCSS(style);
@@ -46,6 +49,8 @@ type TransformState = {
   scale: number;
   translateX: number;
   translateY: number;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
 };
 
 const DEFAULT_TRANSFORM: TransformState = {
@@ -55,6 +60,8 @@ const DEFAULT_TRANSFORM: TransformState = {
   scale: 1,
   translateX: 0,
   translateY: 0,
+  flipHorizontal: false,
+  flipVertical: false,
 };
 
 const transformStates = storage.defineItem<Record<string, TransformState>>(

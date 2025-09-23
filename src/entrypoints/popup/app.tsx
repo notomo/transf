@@ -122,6 +122,32 @@ function TranslateInput({
   );
 }
 
+function FlipCheckbox({
+  label,
+  checked,
+  onChange,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+}) {
+  const id = useId();
+  return (
+    <div className="flex items-center space-x-2">
+      <input
+        id={id}
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        className="h-4 w-4"
+      />
+      <label htmlFor={id} className="font-medium text-sm">
+        {label}
+      </label>
+    </div>
+  );
+}
+
 export function App() {
   const { transform, applyTransform, resetTransform } = useTransform();
 
@@ -162,6 +188,19 @@ export function App() {
         value={transform.translateY}
         onChange={(newValue) => applyTransform({ translateY: newValue })}
       />
+
+      <div className="space-y-2">
+        <FlipCheckbox
+          label="Horizontal Flip"
+          checked={transform.flipHorizontal}
+          onChange={(checked) => applyTransform({ flipHorizontal: checked })}
+        />
+        <FlipCheckbox
+          label="Vertical Flip"
+          checked={transform.flipVertical}
+          onChange={(checked) => applyTransform({ flipVertical: checked })}
+        />
+      </div>
 
       <div className="flex justify-center">
         <button

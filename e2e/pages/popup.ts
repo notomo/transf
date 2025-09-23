@@ -17,6 +17,8 @@ export async function openPopup({
     getCenterYSlider: () => page.getByLabel(/Center Y/),
     getRotationSlider: () => page.getByLabel(/Rotation/),
     getScaleSlider: () => page.getByLabel(/Scale/),
+    getHorizontalFlipCheckbox: () => page.getByLabel("Horizontal Flip"),
+    getVerticalFlipCheckbox: () => page.getByLabel("Vertical Flip"),
     clickReset: async () => {
       const resetButton = popup.getResetButton();
       await resetButton.click();

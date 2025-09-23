@@ -17,6 +17,8 @@ export async function openPopup({
     getCenterYSlider: () => page.getByLabel(/Center Y/),
     getRotationSlider: () => page.getByLabel(/Rotation/),
     getScaleSlider: () => page.getByLabel(/Scale/),
+    getTranslateXSlider: () => page.getByLabel(/Translate X/),
+    getTranslateYSlider: () => page.getByLabel(/Translate Y/),
     getHorizontalFlipCheckbox: () => page.getByLabel("Horizontal Flip"),
     getVerticalFlipCheckbox: () => page.getByLabel("Vertical Flip"),
     clickReset: async () => {

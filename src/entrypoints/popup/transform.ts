@@ -65,7 +65,7 @@ const DEFAULT_TRANSFORM: TransformState = {
 };
 
 const transformStates = storage.defineItem<Record<string, TransformState>>(
-  "session:transformStates",
+  "local:transformStates",
   {
     defaultValue: {},
   },

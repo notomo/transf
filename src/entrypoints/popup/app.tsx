@@ -13,7 +13,7 @@ function AxisPercentInput({
   const id = useId();
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block font-medium text-sm">
+      <label htmlFor={id} className="block select-none font-medium text-sm">
         {label}: {value}
       </label>
       <input
@@ -42,7 +42,7 @@ function RotationInput({
   const id = useId();
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block font-medium text-sm">
+      <label htmlFor={id} className="block select-none font-medium text-sm">
         Rotation (degrees): {rotation}
       </label>
       <input
@@ -71,7 +71,7 @@ function ScaleInput({
   const id = useId();
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block font-medium text-sm">
+      <label htmlFor={id} className="block select-none font-medium text-sm">
         Scale: {scale}x
       </label>
       <input
@@ -103,7 +103,7 @@ function TranslateInput({
   const id = useId();
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="block font-medium text-sm">
+      <label htmlFor={id} className="block select-none font-medium text-sm">
         {label}: {value}px
       </label>
       <input

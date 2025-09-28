@@ -6,9 +6,10 @@ export default defineConfig({
   entrypointsDir: "src/entrypoints",
   manifest: {
     name: "transf",
-    description: "A browser extension for page rotation",
+    description:
+      "A browser extension for page transformation (rotation, scaling, translation)",
     version: "0.0.1",
-    permissions: ["storage", "activeTab", "tabs", "scripting"],
+    permissions: ["storage", "activeTab", "scripting"],
     host_permissions: ["http://*/*", "https://*/*"],
     action: {
       default_popup: "src/entrypoints/popup/index.html",

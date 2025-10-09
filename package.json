@@ -7,6 +7,7 @@
     "dev": "wxt",
     "start": "wxt",
     "build": "wxt build",
+    "build:dev": "wxt build --mode development",
     "zip": "wxt zip",
     "postinstall": "wxt prepare",
     "typecheck": "tsc --noEmit",
@@ -14,8 +15,9 @@
     "check": "biome check .",
     "test": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:dev": "npm run build:dev && npm run test:e2e",
     "ls-lint": "ls-lint",
-    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint && npm run test:e2e",
+    "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint && npm run test:e2e:dev",
     "deploy_for_local": "npm run build && mkdir -p $TRANSF_LOCAL && cp -rf ./.output/chrome-mv3/* $TRANSF_LOCAL"
   },
   "devDependencies": {

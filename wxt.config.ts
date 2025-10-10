@@ -36,5 +36,6 @@ export default defineConfig({
     binaries: {
       chrome: "google-chrome",
     },
+    chromiumArgs: ["--window-position=3520,0", "--window-size=1920,1080"],
   },
 });

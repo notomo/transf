@@ -16,6 +16,8 @@ export const test = base.extend<{
       args: [
         `--disable-extensions-except=${pathToExtension}`,
         `--load-extension=${pathToExtension}`,
+        "--window-position=3520,0",
+        "--window-size=1920,1080",
       ],
     });
     await use(context);

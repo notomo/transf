@@ -25,7 +25,10 @@ async function applyCSS(style: string) {
   });
 }
 
-async function applyTransformCSS(transform: TransformState | null) {
+async function applyTransformCSS(
+  transform: TransformState | null,
+  animated: boolean = false,
+) {
   if (transform === null) {
     applyCSS("");
     return;
@@ -37,7 +40,7 @@ async function applyTransformCSS(transform: TransformState | null) {
   const style = `
 transform-origin: ${transform.centerX}% ${transform.centerY}%;
 transform: translate(${transform.translateX}px, ${transform.translateY}px) rotate(${transform.rotation}deg) scale(${scaleX}, ${scaleY});
-transition: transform 0.3s ease;
+${animated ? "" : "transition: transform 0.3s ease;"}
 `;
   await applyCSS(style);
 }
@@ -53,6 +56,28 @@ type TransformState = {
   flipVertical: boolean;
 };
 
+type Keyframe = {
+  time: number;
+  value: number;
+};
+
+type AnimationState = {
+  keyframes: {
+    rotation: Keyframe[];
+    scale: Keyframe[];
+    translateX: Keyframe[];
+    translateY: Keyframe[];
+  };
+  duration: number;
+  isPlaying: boolean;
+  currentTime: number;
+};
+
+type ExtendedState = {
+  transform: TransformState;
+  animation: AnimationState;
+};
+
 const DEFAULT_TRANSFORM: TransformState = {
   centerX: 50,
   centerY: 50,
@@ -64,15 +89,27 @@ const DEFAULT_TRANSFORM: TransformState = {
   flipVertical: false,
 };
 
-const transformStates = storage.defineItem<Record<string, TransformState>>(
-  "local:transformStates",
+const DEFAULT_ANIMATION: AnimationState = {
+  keyframes: {
+    rotation: [],
+    scale: [],
+    translateX: [],
+    translateY: [],
+  },
+  duration: 5000,
+  isPlaying: false,
+  currentTime: 0,
+};
+
+const extendedStates = storage.defineItem<Record<string, ExtendedState>>(
+  "local:extendedStates",
   {
     defaultValue: {},
   },
 );
 
-function useTransformState() {
-  const [transform, set] = useState<TransformState | null>(null);
+function useExtendedState() {
+  const [state, setState] = useState<ExtendedState | null>(null);
   const [url, setUrl] = useState("");
 
   useEffect(() => {
@@ -87,61 +124,206 @@ function useTransformState() {
       }
       setUrl(url);
 
-      const stored = await transformStates.getValue();
-      const state = stored[url] ?? null;
-      set(state);
-      await applyTransformCSS(state);
+      const stored = await extendedStates.getValue();
+      const extendedState = stored[url] ?? null;
+      setState(extendedState);
+      await applyTransformCSS(extendedState?.transform ?? null);
     })();
   }, []);
 
-  const setTransform = useCallback(
-    async (state: TransformState | null) => {
-      set(state);
-      await applyTransformCSS(state);
+  const setExtendedState = useCallback(
+    async (newState: ExtendedState | null, animated: boolean = false) => {
+      setState(newState);
+      await applyTransformCSS(newState?.transform ?? null, animated);
 
-      const stored = await transformStates.getValue();
-      if (state) {
-        await transformStates.setValue({
+      const stored = await extendedStates.getValue();
+      if (newState) {
+        await extendedStates.setValue({
           ...stored,
-          [url]: state,
+          [url]: newState,
         });
         return;
       }
 
       const states = { ...stored };
       delete states[url];
-      await transformStates.setValue(states);
+      await extendedStates.setValue(states);
     },
     [url],
   );
 
   return {
-    transform,
-    setTransform,
+    state,
+    setExtendedState,
   };
 }
 
+function interpolateKeyframes(
+  keyframes: Keyframe[],
+  time: number,
+  defaultValue: number,
+): number {
+  if (keyframes.length === 0) {
+    return defaultValue;
+  }
+
+  const sortedKeyframes = [...keyframes].sort((a, b) => a.time - b.time);
+  const firstKeyframe = sortedKeyframes[0];
+  const lastKeyframe = sortedKeyframes[sortedKeyframes.length - 1];
+
+  if (!firstKeyframe || !lastKeyframe) {
+    return defaultValue;
+  }
+
+  if (time <= firstKeyframe.time) {
+    return firstKeyframe.value;
+  }
+
+  if (time >= lastKeyframe.time) {
+    return lastKeyframe.value;
+  }
+
+  for (let i = 0; i < sortedKeyframes.length - 1; i++) {
+    const current = sortedKeyframes[i];
+    const next = sortedKeyframes[i + 1];
+
+    if (!current || !next) {
+      continue;
+    }
+
+    if (time >= current.time && time <= next.time) {
+      const progress = (time - current.time) / (next.time - current.time);
+      return current.value + (next.value - current.value) * progress;
+    }
+  }
+
+  return defaultValue;
+}
+
 export function useTransform() {
-  const { transform, setTransform } = useTransformState();
+  const { state, setExtendedState } = useExtendedState();
+
+  const currentState = state ?? {
+    transform: DEFAULT_TRANSFORM,
+    animation: DEFAULT_ANIMATION,
+  };
+
+  const getAnimatedTransform = useCallback(
+    (time: number): TransformState => {
+      const { animation, transform } = currentState;
+
+      return {
+        ...transform,
+        rotation: interpolateKeyframes(
+          animation.keyframes.rotation,
+          time,
+          transform.rotation,
+        ),
+        scale: interpolateKeyframes(
+          animation.keyframes.scale,
+          time,
+          transform.scale,
+        ),
+        translateX: interpolateKeyframes(
+          animation.keyframes.translateX,
+          time,
+          transform.translateX,
+        ),
+        translateY: interpolateKeyframes(
+          animation.keyframes.translateY,
+          time,
+          transform.translateY,
+        ),
+      };
+    },
+    [currentState],
+  );
 
   const applyTransform = useCallback(
     async (updates: Partial<TransformState>) => {
       const newTransform = {
-        ...(transform ?? DEFAULT_TRANSFORM),
+        ...currentState.transform,
         ...updates,
       };
-      await setTransform(newTransform);
+      const newState = {
+        ...currentState,
+        transform: newTransform,
+      };
+      await setExtendedState(newState);
     },
-    [transform, setTransform],
+    [currentState, setExtendedState],
   );
 
-  const resetTransform = useCallback(async () => {
-    await setTransform(null);
-  }, [setTransform]);
+  const updateAnimation = useCallback(
+    async (updates: Partial<AnimationState>) => {
+      const newAnimation = {
+        ...currentState.animation,
+        ...updates,
+      };
+      const newState = {
+        ...currentState,
+        animation: newAnimation,
+      };
+
+      if (updates.currentTime !== undefined && newAnimation.isPlaying) {
+        const animatedTransform = getAnimatedTransform(updates.currentTime);
+        const finalState = {
+          ...newState,
+          transform: animatedTransform,
+        };
+        await setExtendedState(finalState, true);
+      } else {
+        await setExtendedState(newState);
+      }
+    },
+    [currentState, setExtendedState, getAnimatedTransform],
+  );
+
+  const addKeyframe = useCallback(
+    async (property: keyof AnimationState["keyframes"], value: number) => {
+      const time = currentState.animation.currentTime;
+      const existingKeyframes = currentState.animation.keyframes[property];
+      const newKeyframes = existingKeyframes.filter((kf) => kf.time !== time);
+      newKeyframes.push({ time, value });
+
+      await updateAnimation({
+        keyframes: {
+          ...currentState.animation.keyframes,
+          [property]: newKeyframes,
+        },
+      });
+    },
+    [currentState.animation, updateAnimation],
+  );
+
+  const removeKeyframe = useCallback(
+    async (property: keyof AnimationState["keyframes"]) => {
+      const time = currentState.animation.currentTime;
+      const existingKeyframes = currentState.animation.keyframes[property];
+      const newKeyframes = existingKeyframes.filter((kf) => kf.time !== time);
+
+      await updateAnimation({
+        keyframes: {
+          ...currentState.animation.keyframes,
+          [property]: newKeyframes,
+        },
+      });
+    },
+    [currentState.animation, updateAnimation],
+  );
+
+  const resetAll = useCallback(async () => {
+    await setExtendedState(null);
+  }, [setExtendedState]);
 
   return {
-    transform: transform ?? DEFAULT_TRANSFORM,
+    transform: currentState.transform,
+    animation: currentState.animation,
     applyTransform,
-    resetTransform,
+    updateAnimation,
+    addKeyframe,
+    removeKeyframe,
+    resetAll,
+    getAnimatedTransform,
   };
 }

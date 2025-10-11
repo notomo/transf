@@ -14,7 +14,7 @@ function AxisPercentInput({
   return (
     <div className="space-y-2">
       <label htmlFor={id} className="block select-none font-medium text-sm">
-        {label}: {value}
+        {label}: {Math.round(value * 10) / 10}
       </label>
       <input
         id={id}
@@ -37,37 +37,33 @@ function RotationInput({
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
+  hasKeyframe,
 }: {
   rotation: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
+  hasKeyframe: boolean;
 }) {
   const id = useId();
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          Rotation (degrees): {rotation}
+          Rotation (degrees): {Math.round(rotation * 10) / 10}
         </label>
-        <div className="flex space-x-1">
-          <button
-            type="button"
-            onClick={onAddKeyframe}
-            className="rounded bg-green-500 px-2 py-1 text-white text-xs hover:bg-green-600"
-            title="Add keyframe"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            onClick={onRemoveKeyframe}
-            className="rounded bg-red-500 px-2 py-1 text-white text-xs hover:bg-red-600"
-            title="Remove keyframe"
-          >
-            -
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
+          className={`flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs ${
+            hasKeyframe
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
+          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+        >
+          {hasKeyframe ? "-" : "+"}
+        </button>
       </div>
       <input
         id={id}
@@ -90,37 +86,33 @@ function ScaleInput({
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
+  hasKeyframe,
 }: {
   scale: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
+  hasKeyframe: boolean;
 }) {
   const id = useId();
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          Scale: {scale}x
+          Scale: {Math.round(scale * 100) / 100}x
         </label>
-        <div className="flex space-x-1">
-          <button
-            type="button"
-            onClick={onAddKeyframe}
-            className="rounded bg-green-500 px-2 py-1 text-white text-xs hover:bg-green-600"
-            title="Add keyframe"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            onClick={onRemoveKeyframe}
-            className="rounded bg-red-500 px-2 py-1 text-white text-xs hover:bg-red-600"
-            title="Remove keyframe"
-          >
-            -
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
+          className={`flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs ${
+            hasKeyframe
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
+          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+        >
+          {hasKeyframe ? "-" : "+"}
+        </button>
       </div>
       <input
         id={id}
@@ -145,38 +137,34 @@ function TranslateInput({
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
+  hasKeyframe,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
+  hasKeyframe: boolean;
 }) {
   const id = useId();
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          {label}: {value}px
+          {label}: {Math.round(value)}px
         </label>
-        <div className="flex space-x-1">
-          <button
-            type="button"
-            onClick={onAddKeyframe}
-            className="rounded bg-green-500 px-2 py-1 text-white text-xs hover:bg-green-600"
-            title="Add keyframe"
-          >
-            +
-          </button>
-          <button
-            type="button"
-            onClick={onRemoveKeyframe}
-            className="rounded bg-red-500 px-2 py-1 text-white text-xs hover:bg-red-600"
-            title="Remove keyframe"
-          >
-            -
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
+          className={`flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs ${
+            hasKeyframe
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-green-500 hover:bg-green-600"
+          }`}
+          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+        >
+          {hasKeyframe ? "-" : "+"}
+        </button>
       </div>
       <input
         id={id}
@@ -298,7 +286,7 @@ function Timeline({
   };
 
   return (
-    <div className="space-y-3 border-gray-200 border-b pb-4">
+    <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="font-medium text-sm">Animation Timeline</h3>
         <div className="flex space-x-2">
@@ -330,12 +318,12 @@ function Timeline({
 
       <div className="space-y-2">
         <label htmlFor={durationId} className="block font-medium text-sm">
-          Duration: {(animation.duration / 1000).toFixed(1)}s
+          Duration: {animation.duration}ms
         </label>
         <input
           id={durationId}
           type="range"
-          min="1000"
+          min="50"
           max="10000"
           step="100"
           value={animation.duration}
@@ -409,10 +397,8 @@ export function App() {
   } = useTransform();
 
   return (
-    <div className="w-80 space-y-4 p-4">
+    <div className="w-128 space-y-3 p-4">
       <h1 className="text-center font-bold text-lg">Page Transform</h1>
-
-      <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
 
       <AxisPercentInput
         label="Center X (%)"
@@ -431,6 +417,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ rotation: newValue })}
         onAddKeyframe={() => addKeyframe("rotation", transform.rotation)}
         onRemoveKeyframe={() => removeKeyframe("rotation")}
+        hasKeyframe={animation.keyframes.rotation.some(
+          (kf) => kf.time === animation.currentTime,
+        )}
       />
 
       <ScaleInput
@@ -438,6 +427,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ scale: newValue })}
         onAddKeyframe={() => addKeyframe("scale", transform.scale)}
         onRemoveKeyframe={() => removeKeyframe("scale")}
+        hasKeyframe={animation.keyframes.scale.some(
+          (kf) => kf.time === animation.currentTime,
+        )}
       />
 
       <TranslateInput
@@ -446,6 +438,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ translateX: newValue })}
         onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
         onRemoveKeyframe={() => removeKeyframe("translateX")}
+        hasKeyframe={animation.keyframes.translateX.some(
+          (kf) => kf.time === animation.currentTime,
+        )}
       />
 
       <TranslateInput
@@ -454,6 +449,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ translateY: newValue })}
         onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
         onRemoveKeyframe={() => removeKeyframe("translateY")}
+        hasKeyframe={animation.keyframes.translateY.some(
+          (kf) => kf.time === animation.currentTime,
+        )}
       />
 
       <div className="space-y-2">
@@ -468,6 +466,8 @@ export function App() {
           onChange={(checked) => applyTransform({ flipVertical: checked })}
         />
       </div>
+
+      <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
 
       <div className="flex justify-center">
         <button

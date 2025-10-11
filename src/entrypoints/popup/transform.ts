@@ -249,7 +249,41 @@ export function useTransform() {
         ...currentState,
         transform: newTransform,
       };
-      await setExtendedState(newState);
+
+      // Check if any of the updated properties have keyframes at the current time
+      // and update those keyframes as well
+      const updatedKeyframes = { ...currentState.animation.keyframes };
+      const currentTime = currentState.animation.currentTime;
+      let hasKeyframeUpdates = false;
+
+      for (const [property, value] of Object.entries(updates)) {
+        if (property in updatedKeyframes && typeof value === "number") {
+          const keyframes =
+            updatedKeyframes[property as keyof typeof updatedKeyframes];
+          const existingKeyframeIndex = keyframes.findIndex(
+            (kf) => kf.time === currentTime,
+          );
+
+          if (existingKeyframeIndex !== -1) {
+            // Update the existing keyframe
+            keyframes[existingKeyframeIndex] = { time: currentTime, value };
+            hasKeyframeUpdates = true;
+          }
+        }
+      }
+
+      if (hasKeyframeUpdates) {
+        const finalState = {
+          ...newState,
+          animation: {
+            ...currentState.animation,
+            keyframes: updatedKeyframes,
+          },
+        };
+        await setExtendedState(finalState);
+      } else {
+        await setExtendedState(newState);
+      }
     },
     [currentState, setExtendedState],
   );

@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from "react";
+import { cn } from "@/src/lib/tailwind";
 import { useTransform } from "./transform";
 
 function AxisPercentInput({
@@ -55,11 +56,12 @@ function RotationInput({
         <button
           type="button"
           onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
-          className={`flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs ${
+          className={cn(
+            "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
             hasKeyframe
               ? "bg-red-500 hover:bg-red-600"
-              : "bg-green-500 hover:bg-green-600"
-          }`}
+              : "bg-green-500 hover:bg-green-600",
+          )}
           title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
         >
           {hasKeyframe ? "-" : "+"}
@@ -366,7 +368,12 @@ function Timeline({
                   {keyframes.map((kf, i) => (
                     <div
                       key={`${property}-${kf.time}-${i}`}
-                      className="-translate-x-1 absolute h-2 w-2 transform rounded-full bg-blue-500"
+                      className={cn(
+                        "-translate-x-1 absolute h-3 w-3 transform rounded-full",
+                        kf.time === animation.currentTime
+                          ? "border border-blue-500 bg-blue-300"
+                          : "bg-gray-400",
+                      )}
                       style={{
                         left: `${(kf.time / animation.duration) * 100}%`,
                       }}

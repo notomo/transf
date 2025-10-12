@@ -287,35 +287,6 @@ function Timeline({
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <h3 className="font-medium text-sm">Animation Timeline</h3>
-        <div className="flex space-x-2">
-          <button
-            type="button"
-            onClick={() => navigateToKeyframe("prev")}
-            className="rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
-          >
-            ←
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              onUpdateAnimation({ isPlaying: !animation.isPlaying })
-            }
-            className="rounded bg-blue-500 px-3 py-1 text-white text-xs hover:bg-blue-600"
-          >
-            {animation.isPlaying ? "Stop" : "Play"}
-          </button>
-          <button
-            type="button"
-            onClick={() => navigateToKeyframe("next")}
-            className="rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
-          >
-            →
-          </button>
-        </div>
-      </div>
-
       <div className="space-y-2">
         <label htmlFor={durationId} className="block font-medium text-sm">
           Duration: {animation.duration}ms
@@ -335,37 +306,63 @@ function Timeline({
       </div>
 
       <div ref={timelineRef} className="relative">
-        <div className="relative h-8 rounded bg-gray-100">
-          <div
-            className="absolute top-0 z-10 h-full w-0.5 bg-red-500"
-            style={{ left: `${currentTimePercent}%` }}
-          />
-
-          <div className="absolute inset-0 flex items-center px-2">
-            <input
-              type="range"
-              min="0"
-              max={animation.duration}
-              value={animation.currentTime}
-              onChange={(e) =>
-                onUpdateAnimation({
-                  currentTime: Number(e.target.value),
-                  isPlaying: false,
-                })
+        <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+          <div className="flex space-x-2">
+            <button
+              type="button"
+              onClick={() => navigateToKeyframe("prev")}
+              className="flex h-full w-6 items-center justify-center rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                onUpdateAnimation({ isPlaying: !animation.isPlaying })
               }
-              className="w-full opacity-50"
-            />
+              className="flex h-full w-6 items-center justify-center rounded bg-blue-500 px-3 py-1 text-white text-xs hover:bg-blue-600"
+            >
+              {animation.isPlaying ? "■" : "▶"}
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateToKeyframe("next")}
+              className="flex h-full w-6 items-center justify-center rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
+            >
+              →
+            </button>
           </div>
-        </div>
+          <div className="relative col-span-1 h-8 rounded bg-gray-100">
+            <div
+              className="absolute top-0 z-10 h-full w-0.5 bg-red-500"
+              style={{ left: `${currentTimePercent}%` }}
+            />
 
-        <div className="mt-2 space-y-1">
+            <div className="absolute inset-0 flex items-center px-2">
+              <input
+                type="range"
+                min="0"
+                max={animation.duration}
+                value={animation.currentTime}
+                onChange={(e) =>
+                  onUpdateAnimation({
+                    currentTime: Number(e.target.value),
+                    isPlaying: false,
+                  })
+                }
+                className="w-full opacity-50"
+              />
+            </div>
+          </div>
           {Object.entries(animation.keyframes).map(([property, keyframes]) => {
             if (keyframes.length === 0) return null;
 
             return (
-              <div key={property} className="flex items-center space-x-2">
-                <span className="w-16 flex-shrink-0 text-xs">{property}:</span>
-                <div className="relative h-2 flex-1">
+              <>
+                <span key={`${property}-label`} className="text-xs">
+                  {property}
+                </span>
+                <div key={`${property}-timeline`} className="relative h-2">
                   {keyframes.map((kf, i) => (
                     <div
                       key={`${property}-${kf.time}-${i}`}
@@ -376,7 +373,7 @@ function Timeline({
                     />
                   ))}
                 </div>
-              </div>
+              </>
             );
           })}
         </div>

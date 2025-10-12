@@ -12,9 +12,9 @@ function AxisPercentInput({
 }) {
   const id = useId();
   return (
-    <div className="space-y-2">
+    <div>
       <label htmlFor={id} className="block select-none font-medium text-sm">
-        {label}: {Math.round(value * 10) / 10}
+        {label}: {Math.round(value * 10) / 10}%
       </label>
       <input
         id={id}
@@ -47,10 +47,10 @@ function RotationInput({
 }) {
   const id = useId();
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          Rotation (degrees): {Math.round(rotation * 10) / 10}
+          Rotation: {Math.round(rotation * 10) / 10}°
         </label>
         <button
           type="button"
@@ -96,7 +96,7 @@ function ScaleInput({
 }) {
   const id = useId();
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
           Scale: {Math.round(scale * 100) / 100}x
@@ -148,7 +148,7 @@ function TranslateInput({
 }) {
   const id = useId();
   return (
-    <div className="space-y-2">
+    <div>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
           {label}: {Math.round(value)}px
@@ -201,7 +201,7 @@ function FlipCheckbox({
         onChange={(e) => onChange(e.target.checked)}
         className="h-4 w-4"
       />
-      <label htmlFor={id} className="font-medium text-sm">
+      <label htmlFor={id} className="select-none font-medium text-sm">
         {label}
       </label>
     </div>
@@ -287,7 +287,7 @@ function Timeline({
 
   return (
     <div className="space-y-3">
-      <div className="space-y-2">
+      <div>
         <label htmlFor={durationId} className="block font-medium text-sm">
           Duration: {animation.duration}ms
         </label>
@@ -332,7 +332,7 @@ function Timeline({
               →
             </button>
           </div>
-          <div className="relative col-span-1 h-8 rounded bg-gray-100">
+          <div className="relative col-span-1 h-6 rounded bg-gray-100">
             <div
               className="absolute top-0 z-10 h-full w-0.5 bg-red-500"
               style={{ left: `${currentTimePercent}%` }}
@@ -394,17 +394,26 @@ export function App() {
   } = useTransform();
 
   return (
-    <div className="w-128 space-y-3 p-4">
-      <h1 className="text-center font-bold text-lg">Page Transform</h1>
+    <div className="w-128 space-y-2 border border-gray-200 p-4">
+      <div className="relative">
+        <h1 className="text-center font-bold text-lg">Page Transform</h1>
+        <button
+          type="button"
+          onClick={resetAll}
+          className="absolute top-0 right-0 rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
+        >
+          Reset
+        </button>
+      </div>
 
       <AxisPercentInput
-        label="Center X (%)"
+        label="Center X"
         value={transform.centerX}
         onChange={(newValue) => applyTransform({ centerX: newValue })}
       />
 
       <AxisPercentInput
-        label="Center Y (%)"
+        label="Center Y"
         value={transform.centerY}
         onChange={(newValue) => applyTransform({ centerY: newValue })}
       />
@@ -430,7 +439,7 @@ export function App() {
       />
 
       <TranslateInput
-        label="Translate X (px)"
+        label="Translate X"
         value={transform.translateX}
         onChange={(newValue) => applyTransform({ translateX: newValue })}
         onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
@@ -441,7 +450,7 @@ export function App() {
       />
 
       <TranslateInput
-        label="Translate Y (px)"
+        label="Translate Y"
         value={transform.translateY}
         onChange={(newValue) => applyTransform({ translateY: newValue })}
         onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
@@ -451,7 +460,7 @@ export function App() {
         )}
       />
 
-      <div className="space-y-2">
+      <div className="flex space-x-4">
         <FlipCheckbox
           label="Horizontal Flip"
           checked={transform.flipHorizontal}
@@ -465,16 +474,6 @@ export function App() {
       </div>
 
       <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
-
-      <div className="flex justify-center">
-        <button
-          type="button"
-          onClick={resetAll}
-          className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
-        >
-          Reset All
-        </button>
-      </div>
     </div>
   );
 }

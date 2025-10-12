@@ -404,13 +404,22 @@ export function App() {
     <div className="w-128 space-y-2 border border-gray-200 p-4">
       <div className="relative">
         <h1 className="text-center font-bold text-lg">Page Transform</h1>
-        <button
-          type="button"
-          onClick={resetAll}
-          className="absolute top-0 right-0 rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
-        >
-          Reset
-        </button>
+        <div className="absolute top-0 right-0 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={resetAll}
+            className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
+          >
+            Reset
+          </button>
+          <a
+            href={`chrome-extension://${browser.runtime.id}/popup.html`}
+            target="_blank"
+            className="rounded border px-4 py-2"
+          >
+            Dev
+          </a>
+        </div>
       </div>
 
       <AxisPercentInput

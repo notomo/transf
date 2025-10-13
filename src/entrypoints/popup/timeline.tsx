@@ -2,36 +2,36 @@ import { useEffect, useId, useRef } from "react";
 import { cn } from "@/src/lib/tailwind";
 import type { useTransform } from "./transform";
 
-export function Timeline({
-  animation,
+function useAnimation({
+  isPlaying,
+  duration,
+  currentTime,
   onUpdateAnimation,
 }: {
-  animation: ReturnType<typeof useTransform>["animation"];
-  onUpdateAnimation: (
-    updates: Partial<ReturnType<typeof useTransform>["animation"]>,
-  ) => void;
+  isPlaying: boolean;
+  duration: number;
+  currentTime: number;
+  onUpdateAnimation: (updates: { currentTime: number }) => void;
 }) {
-  const timelineRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
-  const durationId = useId();
 
   useEffect(() => {
-    if (!animation.isPlaying) {
+    if (!isPlaying) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
       return;
     }
 
-    const startTime = Date.now() - animation.currentTime;
+    const startTime = Date.now() - currentTime;
 
     function animate() {
       const elapsed = Date.now() - startTime;
-      const progress = elapsed % animation.duration;
+      const progress = elapsed % duration;
 
       onUpdateAnimation({ currentTime: progress });
 
-      if (animation.isPlaying) {
+      if (isPlaying) {
         animationFrameRef.current = requestAnimationFrame(animate);
       }
     }
@@ -43,139 +43,239 @@ export function Timeline({
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [
-    animation.isPlaying,
-    animation.duration,
-    onUpdateAnimation,
-    animation.currentTime,
-  ]);
+  }, [isPlaying, duration, onUpdateAnimation, currentTime]);
+}
 
-  const currentTimePercent = (animation.currentTime / animation.duration) * 100;
+function DurationInput({
+  duration,
+  onDurationChange,
+}: {
+  duration: number;
+  onDurationChange: (duration: number) => void;
+}) {
+  const durationId = useId();
+  return (
+    <div>
+      <label htmlFor={durationId} className="block font-medium text-sm">
+        Duration: {duration}ms
+      </label>
+      <input
+        id={durationId}
+        type="range"
+        min="50"
+        max="10000"
+        step="100"
+        value={duration}
+        onChange={(e) => onDurationChange(Number(e.target.value))}
+        className="w-full"
+      />
+    </div>
+  );
+}
 
-  const getAllKeyframeTimes = () => {
+function PlayStopButton({
+  isPlaying,
+  onTogglePlay,
+}: {
+  isPlaying: boolean;
+  onTogglePlay: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onTogglePlay}
+      className="flex h-full w-6 items-center justify-center rounded bg-blue-500 px-3 py-1 text-white text-xs hover:bg-blue-600"
+    >
+      {isPlaying ? "■" : "▶"}
+    </button>
+  );
+}
+
+function KeyframeNextPrevButton({
+  direction,
+  keyframes,
+  currentTime,
+  onClick,
+}: {
+  direction: "prev" | "next";
+  keyframes: ReturnType<typeof useTransform>["animation"]["keyframes"];
+  currentTime: number;
+  onClick: (currentTime: number) => void;
+}) {
+  const navigateToKeyframe = () => {
     const times = new Set<number>();
-    Object.values(animation.keyframes).forEach((keyframes) => {
+    Object.values(keyframes).forEach((keyframes) => {
       for (const kf of keyframes) {
         times.add(kf.time);
       }
     });
-    return Array.from(times).sort((a, b) => a - b);
-  };
+    const allTimes = Array.from(times).sort((a, b) => a - b);
 
-  const navigateToKeyframe = (direction: "prev" | "next") => {
-    const allTimes = getAllKeyframeTimes();
-    const currentTime = animation.currentTime;
-
-    if (direction === "prev") {
-      const prevTime = allTimes.filter((t) => t < currentTime).pop();
-      if (prevTime !== undefined) {
-        onUpdateAnimation({ currentTime: prevTime, isPlaying: false });
+    switch (direction) {
+      case "prev": {
+        const prevTime = allTimes.filter((t) => t < currentTime).pop();
+        if (prevTime !== undefined) {
+          onClick(prevTime);
+        }
+        return;
       }
-    } else {
-      const nextTime = allTimes.find((t) => t > currentTime);
-      if (nextTime !== undefined) {
-        onUpdateAnimation({ currentTime: nextTime, isPlaying: false });
+      case "next": {
+        const nextTime = allTimes.find((t) => t > currentTime);
+        if (nextTime !== undefined) {
+          onClick(nextTime);
+        }
+        return;
       }
+      default:
+        throw new Error(`unexpected direction: ${direction satisfies never}`);
     }
   };
 
   return (
-    <div className="space-y-3">
-      <div>
-        <label htmlFor={durationId} className="block font-medium text-sm">
-          Duration: {animation.duration}ms
-        </label>
+    <button
+      type="button"
+      onClick={navigateToKeyframe}
+      className="flex h-full w-6 items-center justify-center rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
+    >
+      {direction === "prev" ? "←" : "→"}
+    </button>
+  );
+}
+
+function TimeIndicator({
+  currentTime,
+  duration,
+  onTimeChange,
+}: {
+  currentTime: number;
+  duration: number;
+  onTimeChange: (time: number) => void;
+}) {
+  const currentTimePercent = (currentTime / duration) * 100;
+
+  return (
+    <div className="relative col-span-1 h-6 rounded bg-gray-100">
+      <div
+        className="absolute top-0 z-10 h-full w-0.5 bg-red-500"
+        style={{ left: `${currentTimePercent}%` }}
+      />
+      <div className="absolute inset-0 flex items-center px-2">
         <input
-          id={durationId}
           type="range"
-          min="50"
-          max="10000"
-          step="100"
-          value={animation.duration}
-          onChange={(e) =>
-            onUpdateAnimation({ duration: Number(e.target.value) })
-          }
-          className="w-full"
+          min="0"
+          max={duration}
+          value={currentTime}
+          onChange={(e) => onTimeChange(Number(e.target.value))}
+          className="w-full opacity-50"
         />
       </div>
+    </div>
+  );
+}
 
-      <div ref={timelineRef} className="relative">
-        <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
-          <div className="flex space-x-2">
-            <button
-              type="button"
-              onClick={() => navigateToKeyframe("prev")}
-              className="flex h-full w-6 items-center justify-center rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
-            >
-              ←
-            </button>
-            <button
-              type="button"
-              onClick={() =>
-                onUpdateAnimation({ isPlaying: !animation.isPlaying })
-              }
-              className="flex h-full w-6 items-center justify-center rounded bg-blue-500 px-3 py-1 text-white text-xs hover:bg-blue-600"
-            >
-              {animation.isPlaying ? "■" : "▶"}
-            </button>
-            <button
-              type="button"
-              onClick={() => navigateToKeyframe("next")}
-              className="flex h-full w-6 items-center justify-center rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
-            >
-              →
-            </button>
-          </div>
-          <div className="relative col-span-1 h-6 rounded bg-gray-100">
-            <div
-              className="absolute top-0 z-10 h-full w-0.5 bg-red-500"
-              style={{ left: `${currentTimePercent}%` }}
-            />
+function KeyframeLine({
+  property,
+  keyframes,
+  currentTime,
+  duration,
+}: {
+  property: string;
+  keyframes: Array<{ time: number; value: number }>;
+  currentTime: number;
+  duration: number;
+}) {
+  if (keyframes.length === 0) return null;
 
-            <div className="absolute inset-0 flex items-center px-2">
-              <input
-                type="range"
-                min="0"
-                max={animation.duration}
-                value={animation.currentTime}
-                onChange={(e) =>
-                  onUpdateAnimation({
-                    currentTime: Number(e.target.value),
-                    isPlaying: false,
-                  })
-                }
-                className="w-full opacity-50"
-              />
-            </div>
-          </div>
-          {Object.entries(animation.keyframes).map(([property, keyframes]) => {
-            if (keyframes.length === 0) return null;
+  return (
+    <>
+      <span key={`${property}-label`} className="text-xs">
+        {property}
+      </span>
+      <div key={`${property}-timeline`} className="relative h-2">
+        {keyframes.map((kf, i) => (
+          <div
+            key={`${property}-${kf.time}-${i}`}
+            className={cn(
+              "-translate-x-1 absolute h-3 w-3 transform rounded-full",
+              kf.time === currentTime
+                ? "border border-blue-500 bg-blue-300"
+                : "bg-gray-400",
+            )}
+            style={{
+              left: `${(kf.time / duration) * 100}%`,
+            }}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
 
-            return (
-              <>
-                <span key={`${property}-label`} className="text-xs">
-                  {property}
-                </span>
-                <div key={`${property}-timeline`} className="relative h-2">
-                  {keyframes.map((kf, i) => (
-                    <div
-                      key={`${property}-${kf.time}-${i}`}
-                      className={cn(
-                        "-translate-x-1 absolute h-3 w-3 transform rounded-full",
-                        kf.time === animation.currentTime
-                          ? "border border-blue-500 bg-blue-300"
-                          : "bg-gray-400",
-                      )}
-                      style={{
-                        left: `${(kf.time / animation.duration) * 100}%`,
-                      }}
-                    />
-                  ))}
-                </div>
-              </>
-            );
-          })}
+export function Timeline({
+  animation,
+  onUpdateAnimation,
+}: {
+  animation: ReturnType<typeof useTransform>["animation"];
+  onUpdateAnimation: (
+    updates: Partial<ReturnType<typeof useTransform>["animation"]>,
+  ) => void;
+}) {
+  useAnimation({
+    isPlaying: animation.isPlaying,
+    duration: animation.duration,
+    currentTime: animation.currentTime,
+    onUpdateAnimation: ({ currentTime }) => onUpdateAnimation({ currentTime }),
+  });
+
+  return (
+    <div className="space-y-3">
+      <DurationInput
+        duration={animation.duration}
+        onDurationChange={(duration) => onUpdateAnimation({ duration })}
+      />
+
+      <div className="relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+        <div className="flex gap-2">
+          <KeyframeNextPrevButton
+            direction="prev"
+            keyframes={animation.keyframes}
+            currentTime={animation.currentTime}
+            onClick={(currentTime) =>
+              onUpdateAnimation({ currentTime, isPlaying: false })
+            }
+          />
+          <PlayStopButton
+            isPlaying={animation.isPlaying}
+            onTogglePlay={() =>
+              onUpdateAnimation({ isPlaying: !animation.isPlaying })
+            }
+          />
+          <KeyframeNextPrevButton
+            direction="next"
+            keyframes={animation.keyframes}
+            currentTime={animation.currentTime}
+            onClick={(currentTime) =>
+              onUpdateAnimation({ currentTime, isPlaying: false })
+            }
+          />
         </div>
+
+        <TimeIndicator
+          currentTime={animation.currentTime}
+          duration={animation.duration}
+          onTimeChange={(currentTime) =>
+            onUpdateAnimation({ currentTime, isPlaying: false })
+          }
+        />
+        {Object.entries(animation.keyframes).map(([property, keyframes]) => (
+          <KeyframeLine
+            key={property}
+            property={property}
+            keyframes={keyframes}
+            currentTime={animation.currentTime}
+            duration={animation.duration}
+          />
+        ))}
       </div>
     </div>
   );

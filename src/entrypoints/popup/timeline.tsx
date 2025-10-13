@@ -184,19 +184,20 @@ function KeyframeLine({
   currentTime: number;
   duration: number;
 }) {
-  if (keyframes.length === 0) return null;
-
   return (
     <>
       <span key={`${property}-label`} className="text-xs">
         {property}
       </span>
-      <div key={`${property}-timeline`} className="relative h-2">
+      <div
+        key={`${property}-timeline`}
+        className="relative h-full border border-gray-400"
+      >
         {keyframes.map((kf, i) => (
           <div
             key={`${property}-${kf.time}-${i}`}
             className={cn(
-              "-translate-x-1 absolute h-3 w-3 transform rounded-full",
+              "-translate-x-1/2 absolute h-full w-1.5 transform rounded-full",
               kf.time === currentTime
                 ? "border border-blue-500 bg-blue-300"
                 : "bg-gray-400",

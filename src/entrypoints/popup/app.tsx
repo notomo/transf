@@ -3,6 +3,33 @@ import { cn } from "@/src/lib/tailwind";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
 
+function DurationInput({
+  duration,
+  onDurationChange,
+}: {
+  duration: number;
+  onDurationChange: (duration: number) => void;
+}) {
+  const durationId = useId();
+  return (
+    <div>
+      <label htmlFor={durationId} className="block font-medium text-sm">
+        Duration: {duration}ms
+      </label>
+      <input
+        id={durationId}
+        type="range"
+        min="50"
+        max="10000"
+        step="100"
+        value={duration}
+        onChange={(e) => onDurationChange(Number(e.target.value))}
+        className="w-full"
+      />
+    </div>
+  );
+}
+
 function AxisPercentInput({
   label,
   value,
@@ -310,6 +337,11 @@ export function App() {
           onChange={(checked) => applyTransform({ flipVertical: checked })}
         />
       </div>
+
+      <DurationInput
+        duration={animation.duration}
+        onDurationChange={(duration) => updateAnimation({ duration })}
+      />
 
       <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
     </div>

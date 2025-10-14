@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/src/lib/tailwind";
 import type { useTransform } from "./transform";
 
@@ -44,33 +44,6 @@ function useAnimation({
       }
     };
   }, [isPlaying, duration, onUpdateAnimation, currentTime]);
-}
-
-function DurationInput({
-  duration,
-  onDurationChange,
-}: {
-  duration: number;
-  onDurationChange: (duration: number) => void;
-}) {
-  const durationId = useId();
-  return (
-    <div>
-      <label htmlFor={durationId} className="block font-medium text-sm">
-        Duration: {duration}ms
-      </label>
-      <input
-        id={durationId}
-        type="range"
-        min="50"
-        max="10000"
-        step="100"
-        value={duration}
-        onChange={(e) => onDurationChange(Number(e.target.value))}
-        className="w-full"
-      />
-    </div>
-  );
 }
 
 function PlayStopButton({
@@ -229,55 +202,48 @@ export function Timeline({
   });
 
   return (
-    <div className="space-y-3">
-      <DurationInput
-        duration={animation.duration}
-        onDurationChange={(duration) => onUpdateAnimation({ duration })}
-      />
-
-      <div className="relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
-        <div className="flex gap-2">
-          <KeyframeNextPrevButton
-            direction="prev"
-            keyframes={animation.keyframes}
-            currentTime={animation.currentTime}
-            onClick={(currentTime) =>
-              onUpdateAnimation({ currentTime, isPlaying: false })
-            }
-          />
-          <PlayStopButton
-            isPlaying={animation.isPlaying}
-            onTogglePlay={() =>
-              onUpdateAnimation({ isPlaying: !animation.isPlaying })
-            }
-          />
-          <KeyframeNextPrevButton
-            direction="next"
-            keyframes={animation.keyframes}
-            currentTime={animation.currentTime}
-            onClick={(currentTime) =>
-              onUpdateAnimation({ currentTime, isPlaying: false })
-            }
-          />
-        </div>
-
-        <TimeIndicator
+    <div className="relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+      <div className="flex gap-2">
+        <KeyframeNextPrevButton
+          direction="prev"
+          keyframes={animation.keyframes}
           currentTime={animation.currentTime}
-          duration={animation.duration}
-          onTimeChange={(currentTime) =>
+          onClick={(currentTime) =>
             onUpdateAnimation({ currentTime, isPlaying: false })
           }
         />
-        {Object.entries(animation.keyframes).map(([property, keyframes]) => (
-          <KeyframeLine
-            key={property}
-            property={property}
-            keyframes={keyframes}
-            currentTime={animation.currentTime}
-            duration={animation.duration}
-          />
-        ))}
+        <PlayStopButton
+          isPlaying={animation.isPlaying}
+          onTogglePlay={() =>
+            onUpdateAnimation({ isPlaying: !animation.isPlaying })
+          }
+        />
+        <KeyframeNextPrevButton
+          direction="next"
+          keyframes={animation.keyframes}
+          currentTime={animation.currentTime}
+          onClick={(currentTime) =>
+            onUpdateAnimation({ currentTime, isPlaying: false })
+          }
+        />
       </div>
+
+      <TimeIndicator
+        currentTime={animation.currentTime}
+        duration={animation.duration}
+        onTimeChange={(currentTime) =>
+          onUpdateAnimation({ currentTime, isPlaying: false })
+        }
+      />
+      {Object.entries(animation.keyframes).map(([property, keyframes]) => (
+        <KeyframeLine
+          key={property}
+          property={property}
+          keyframes={keyframes}
+          currentTime={animation.currentTime}
+          duration={animation.duration}
+        />
+      ))}
     </div>
   );
 }

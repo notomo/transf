@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
-import type { AnimationState } from "./keyframe";
+import type { AnimationState, KeyframeFieldName } from "./keyframe";
 import {
   addKeyframe as addKeyframeUtil,
   interpolateKeyframes,
+  keyframeFieldNames,
   removeKeyframe as removeKeyframeUtil,
   updateKeyframe,
 } from "./keyframe";
@@ -198,26 +199,30 @@ export function useTransform() {
         transform: newTransform,
       };
 
-      // Check if any of the updated properties have keyframes at the current time
-      // and update those keyframes as well
       const updatedKeyframes = { ...currentState.animation.keyframes };
       const currentTime = currentState.animation.currentTime;
       let hasKeyframeUpdates = false;
+      for (const field of keyframeFieldNames) {
+        const value = updates[field];
+        if (!value) {
+          continue;
+        }
 
-      for (const [property, value] of Object.entries(updates)) {
-        if (property in updatedKeyframes && typeof value === "number") {
-          const keyframes =
-            updatedKeyframes[property as keyof typeof updatedKeyframes];
-          const existingKeyframeIndex = keyframes.findIndex(
-            (kf) => kf.time === currentTime,
+        const keyframes = updatedKeyframes[field];
+        if (keyframes.length === 0) {
+          continue;
+        }
+
+        const existingKeyframeIndex = keyframes.findIndex(
+          (kf) => kf.time === currentTime,
+        );
+        if (existingKeyframeIndex !== -1) {
+          updatedKeyframes[field] = updateKeyframe(
+            keyframes,
+            currentTime,
+            value,
           );
-
-          if (existingKeyframeIndex !== -1) {
-            // Update the existing keyframe
-            updatedKeyframes[property as keyof typeof updatedKeyframes] =
-              updateKeyframe(keyframes, currentTime, value);
-            hasKeyframeUpdates = true;
-          }
+          hasKeyframeUpdates = true;
         }
       }
 
@@ -263,7 +268,7 @@ export function useTransform() {
   );
 
   const addKeyframe = useCallback(
-    async (property: keyof AnimationState["keyframes"], value: number) => {
+    async (property: KeyframeFieldName, value: number) => {
       const time = currentState.animation.currentTime;
       const existingKeyframes = currentState.animation.keyframes[property];
       const newKeyframes = addKeyframeUtil(existingKeyframes, time, value);
@@ -279,7 +284,7 @@ export function useTransform() {
   );
 
   const removeKeyframe = useCallback(
-    async (property: keyof AnimationState["keyframes"]) => {
+    async (property: KeyframeFieldName) => {
       const time = currentState.animation.currentTime;
       const existingKeyframes = currentState.animation.keyframes[property];
       const newKeyframes = removeKeyframeUtil(existingKeyframes, time);

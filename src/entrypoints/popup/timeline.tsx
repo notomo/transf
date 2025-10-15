@@ -1,7 +1,11 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/src/lib/tailwind";
-import { findNextKeyframeTime, findPreviousKeyframeTime } from "./keyframe";
-import type { useTransform } from "./transform";
+import {
+  type AnimationKeyframes,
+  type AnimationState,
+  findNextKeyframeTime,
+  findPreviousKeyframeTime,
+} from "./keyframe";
 
 function useAnimation({
   isPlaying,
@@ -72,7 +76,7 @@ function KeyframeNextPrevButton({
   onClick,
 }: {
   direction: "prev" | "next";
-  keyframes: ReturnType<typeof useTransform>["animation"]["keyframes"];
+  keyframes: AnimationKeyframes;
   currentTime: number;
   onClick: (currentTime: number) => void;
 }) {
@@ -182,10 +186,8 @@ export function Timeline({
   animation,
   onUpdateAnimation,
 }: {
-  animation: ReturnType<typeof useTransform>["animation"];
-  onUpdateAnimation: (
-    updates: Partial<ReturnType<typeof useTransform>["animation"]>,
-  ) => void;
+  animation: AnimationState;
+  onUpdateAnimation: (updates: Partial<AnimationState>) => void;
 }) {
   useAnimation({
     isPlaying: animation.isPlaying,

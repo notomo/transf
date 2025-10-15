@@ -3,12 +3,16 @@ export type Keyframe = {
   value: number;
 };
 
-export type AnimationKeyframes = {
-  rotation: Keyframe[];
-  scale: Keyframe[];
-  translateX: Keyframe[];
-  translateY: Keyframe[];
-};
+export const keyframeFieldNames = [
+  "rotation",
+  "scale",
+  "translateX",
+  "translateY",
+] as const;
+
+export type KeyframeFieldName = (typeof keyframeFieldNames)[number];
+
+export type AnimationKeyframes = Record<KeyframeFieldName, Keyframe[]>;
 
 export type AnimationState = {
   keyframes: AnimationKeyframes;

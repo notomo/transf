@@ -1,6 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
+import type { AnimationState } from "./keyframe";
+import {
+  addKeyframe as addKeyframeUtil,
+  interpolateKeyframes,
+  removeKeyframe as removeKeyframeUtil,
+  updateKeyframe,
+} from "./keyframe";
 
 async function applyCSS(style: string) {
   const [tab] = await browser.tabs.query({
@@ -54,23 +61,6 @@ type TransformState = {
   translateY: number;
   flipHorizontal: boolean;
   flipVertical: boolean;
-};
-
-type Keyframe = {
-  time: number;
-  value: number;
-};
-
-type AnimationState = {
-  keyframes: {
-    rotation: Keyframe[];
-    scale: Keyframe[];
-    translateX: Keyframe[];
-    translateY: Keyframe[];
-  };
-  duration: number;
-  isPlaying: boolean;
-  currentTime: number;
 };
 
 type ExtendedState = {
@@ -158,48 +148,6 @@ function useExtendedState() {
   };
 }
 
-function interpolateKeyframes(
-  keyframes: Keyframe[],
-  time: number,
-  defaultValue: number,
-): number {
-  if (keyframes.length === 0) {
-    return defaultValue;
-  }
-
-  const sortedKeyframes = [...keyframes].sort((a, b) => a.time - b.time);
-  const firstKeyframe = sortedKeyframes[0];
-  const lastKeyframe = sortedKeyframes[sortedKeyframes.length - 1];
-
-  if (!firstKeyframe || !lastKeyframe) {
-    return defaultValue;
-  }
-
-  if (time <= firstKeyframe.time) {
-    return firstKeyframe.value;
-  }
-
-  if (time >= lastKeyframe.time) {
-    return lastKeyframe.value;
-  }
-
-  for (let i = 0; i < sortedKeyframes.length - 1; i++) {
-    const current = sortedKeyframes[i];
-    const next = sortedKeyframes[i + 1];
-
-    if (!current || !next) {
-      continue;
-    }
-
-    if (time >= current.time && time <= next.time) {
-      const progress = (time - current.time) / (next.time - current.time);
-      return current.value + (next.value - current.value) * progress;
-    }
-  }
-
-  return defaultValue;
-}
-
 export function useTransform() {
   const { state, setExtendedState } = useExtendedState();
 
@@ -266,7 +214,8 @@ export function useTransform() {
 
           if (existingKeyframeIndex !== -1) {
             // Update the existing keyframe
-            keyframes[existingKeyframeIndex] = { time: currentTime, value };
+            updatedKeyframes[property as keyof typeof updatedKeyframes] =
+              updateKeyframe(keyframes, currentTime, value);
             hasKeyframeUpdates = true;
           }
         }
@@ -317,8 +266,7 @@ export function useTransform() {
     async (property: keyof AnimationState["keyframes"], value: number) => {
       const time = currentState.animation.currentTime;
       const existingKeyframes = currentState.animation.keyframes[property];
-      const newKeyframes = existingKeyframes.filter((kf) => kf.time !== time);
-      newKeyframes.push({ time, value });
+      const newKeyframes = addKeyframeUtil(existingKeyframes, time, value);
 
       await updateAnimation({
         keyframes: {
@@ -334,7 +282,7 @@ export function useTransform() {
     async (property: keyof AnimationState["keyframes"]) => {
       const time = currentState.animation.currentTime;
       const existingKeyframes = currentState.animation.keyframes[property];
-      const newKeyframes = existingKeyframes.filter((kf) => kf.time !== time);
+      const newKeyframes = removeKeyframeUtil(existingKeyframes, time);
 
       await updateAnimation({
         keyframes: {

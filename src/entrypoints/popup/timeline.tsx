@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { cn } from "@/src/lib/tailwind";
+import { findNextKeyframeTime, findPreviousKeyframeTime } from "./keyframe";
 import type { useTransform } from "./transform";
 
 function useAnimation({
@@ -76,24 +77,16 @@ function KeyframeNextPrevButton({
   onClick: (currentTime: number) => void;
 }) {
   const navigateToKeyframe = () => {
-    const times = new Set<number>();
-    Object.values(keyframes).forEach((keyframes) => {
-      for (const kf of keyframes) {
-        times.add(kf.time);
-      }
-    });
-    const allTimes = Array.from(times).sort((a, b) => a - b);
-
     switch (direction) {
       case "prev": {
-        const prevTime = allTimes.filter((t) => t < currentTime).pop();
+        const prevTime = findPreviousKeyframeTime(keyframes, currentTime);
         if (prevTime !== undefined) {
           onClick(prevTime);
         }
         return;
       }
       case "next": {
-        const nextTime = allTimes.find((t) => t > currentTime);
+        const nextTime = findNextKeyframeTime(keyframes, currentTime);
         if (nextTime !== undefined) {
           onClick(nextTime);
         }

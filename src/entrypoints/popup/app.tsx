@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { cn } from "@/src/lib/tailwind";
+import { hasKeyframeAtTime } from "./keyframe";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
 
@@ -288,8 +289,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ rotation: newValue })}
         onAddKeyframe={() => addKeyframe("rotation", transform.rotation)}
         onRemoveKeyframe={() => removeKeyframe("rotation")}
-        hasKeyframe={animation.keyframes.rotation.some(
-          (kf) => kf.time === animation.currentTime,
+        hasKeyframe={hasKeyframeAtTime(
+          animation.keyframes.rotation,
+          animation.currentTime,
         )}
       />
 
@@ -298,8 +300,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ scale: newValue })}
         onAddKeyframe={() => addKeyframe("scale", transform.scale)}
         onRemoveKeyframe={() => removeKeyframe("scale")}
-        hasKeyframe={animation.keyframes.scale.some(
-          (kf) => kf.time === animation.currentTime,
+        hasKeyframe={hasKeyframeAtTime(
+          animation.keyframes.scale,
+          animation.currentTime,
         )}
       />
 
@@ -309,8 +312,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ translateX: newValue })}
         onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
         onRemoveKeyframe={() => removeKeyframe("translateX")}
-        hasKeyframe={animation.keyframes.translateX.some(
-          (kf) => kf.time === animation.currentTime,
+        hasKeyframe={hasKeyframeAtTime(
+          animation.keyframes.translateX,
+          animation.currentTime,
         )}
       />
 
@@ -320,8 +324,9 @@ export function App() {
         onChange={(newValue) => applyTransform({ translateY: newValue })}
         onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
         onRemoveKeyframe={() => removeKeyframe("translateY")}
-        hasKeyframe={animation.keyframes.translateY.some(
-          (kf) => kf.time === animation.currentTime,
+        hasKeyframe={hasKeyframeAtTime(
+          animation.keyframes.translateY,
+          animation.currentTime,
         )}
       />
 

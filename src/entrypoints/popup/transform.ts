@@ -3,10 +3,10 @@ import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
 import type { AnimationState, KeyframeFieldName } from "./keyframe";
 import {
-  addKeyframe as addKeyframeUtil,
+  addKeyframeTo,
   interpolateKeyframes,
   keyframeFieldNames,
-  removeKeyframe as removeKeyframeUtil,
+  removeKeyframeFrom,
   updateKeyframe,
 } from "./keyframe";
 
@@ -271,7 +271,7 @@ export function useTransform() {
     async (property: KeyframeFieldName, value: number) => {
       const time = currentState.animation.currentTime;
       const existingKeyframes = currentState.animation.keyframes[property];
-      const newKeyframes = addKeyframeUtil(existingKeyframes, time, value);
+      const newKeyframes = addKeyframeTo(existingKeyframes, time, value);
 
       await updateAnimation({
         keyframes: {
@@ -287,7 +287,7 @@ export function useTransform() {
     async (property: KeyframeFieldName) => {
       const time = currentState.animation.currentTime;
       const existingKeyframes = currentState.animation.keyframes[property];
-      const newKeyframes = removeKeyframeUtil(existingKeyframes, time);
+      const newKeyframes = removeKeyframeFrom(existingKeyframes, time);
 
       await updateAnimation({
         keyframes: {

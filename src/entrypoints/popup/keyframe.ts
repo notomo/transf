@@ -63,7 +63,7 @@ export function interpolateKeyframes(
   return defaultValue;
 }
 
-export function getAllKeyframeTimes(keyframes: AnimationKeyframes): number[] {
+function getAllKeyframeTimes(keyframes: AnimationKeyframes): number[] {
   const times = new Set<number>();
   Object.values(keyframes).forEach((keyframes) => {
     for (const kf of keyframes) {
@@ -96,7 +96,7 @@ export function hasKeyframeAtTime(
   return keyframes.some((kf) => kf.time === time);
 }
 
-export function addKeyframe(
+export function addKeyframeTo(
   keyframes: Keyframe[],
   time: number,
   value: number,
@@ -106,7 +106,7 @@ export function addKeyframe(
   return newKeyframes;
 }
 
-export function removeKeyframe(
+export function removeKeyframeFrom(
   keyframes: Keyframe[],
   time: number,
 ): Keyframe[] {

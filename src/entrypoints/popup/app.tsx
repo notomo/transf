@@ -35,17 +35,40 @@ function AxisPercentInput({
   label,
   value,
   onChange,
+  onAddKeyframe,
+  onRemoveKeyframe,
+  hasKeyframe,
 }: {
   label: string;
   value: number;
   onChange: (value: number) => void;
+  onAddKeyframe?: () => void;
+  onRemoveKeyframe?: () => void;
+  hasKeyframe?: boolean;
 }) {
   const id = useId();
   return (
     <div>
-      <label htmlFor={id} className="block select-none font-medium text-sm">
-        {label}: {Math.round(value * 10) / 10}%
-      </label>
+      <div className="flex items-center justify-between">
+        <label htmlFor={id} className="block select-none font-medium text-sm">
+          {label}: {Math.round(value * 10) / 10}%
+        </label>
+        {onAddKeyframe && onRemoveKeyframe && hasKeyframe !== undefined && (
+          <button
+            type="button"
+            onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
+            className={cn(
+              "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
+              hasKeyframe
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-green-500 hover:bg-green-600",
+            )}
+            title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+          >
+            {hasKeyframe ? "-" : "+"}
+          </button>
+        )}
+      </div>
       <input
         id={id}
         type="range"
@@ -217,24 +240,47 @@ function FlipCheckbox({
   label,
   checked,
   onChange,
+  onAddKeyframe,
+  onRemoveKeyframe,
+  hasKeyframe,
 }: {
   label: string;
   checked: boolean;
   onChange: (checked: boolean) => void;
+  onAddKeyframe?: () => void;
+  onRemoveKeyframe?: () => void;
+  hasKeyframe?: boolean;
 }) {
   const id = useId();
   return (
-    <div className="flex items-center space-x-2">
-      <input
-        id={id}
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4"
-      />
-      <label htmlFor={id} className="select-none font-medium text-sm">
-        {label}
-      </label>
+    <div className="flex items-center justify-between space-x-2">
+      <div className="flex items-center space-x-2">
+        <input
+          id={id}
+          type="checkbox"
+          checked={checked}
+          onChange={(e) => onChange(e.target.checked)}
+          className="h-4 w-4"
+        />
+        <label htmlFor={id} className="select-none font-medium text-sm">
+          {label}
+        </label>
+      </div>
+      {onAddKeyframe && onRemoveKeyframe && hasKeyframe !== undefined && (
+        <button
+          type="button"
+          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
+          className={cn(
+            "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
+            hasKeyframe
+              ? "bg-red-500 hover:bg-red-600"
+              : "bg-green-500 hover:bg-green-600",
+          )}
+          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+        >
+          {hasKeyframe ? "-" : "+"}
+        </button>
+      )}
     </div>
   );
 }
@@ -276,12 +322,24 @@ export function App() {
         label="Center X"
         value={transform.centerX}
         onChange={(newValue) => applyTransform({ centerX: newValue })}
+        onAddKeyframe={() => addKeyframe("centerX", transform.centerX)}
+        onRemoveKeyframe={() => removeKeyframe("centerX")}
+        hasKeyframe={hasKeyframeAtTime(
+          animation.keyframes.centerX,
+          animation.currentTime,
+        )}
       />
 
       <AxisPercentInput
         label="Center Y"
         value={transform.centerY}
         onChange={(newValue) => applyTransform({ centerY: newValue })}
+        onAddKeyframe={() => addKeyframe("centerY", transform.centerY)}
+        onRemoveKeyframe={() => removeKeyframe("centerY")}
+        hasKeyframe={hasKeyframeAtTime(
+          animation.keyframes.centerY,
+          animation.currentTime,
+        )}
       />
 
       <RotationInput
@@ -335,11 +393,28 @@ export function App() {
           label="Horizontal Flip"
           checked={transform.flipHorizontal}
           onChange={(checked) => applyTransform({ flipHorizontal: checked })}
+          onAddKeyframe={() =>
+            addKeyframe("flipHorizontal", transform.flipHorizontal ? 1 : 0)
+          }
+          onRemoveKeyframe={() => removeKeyframe("flipHorizontal")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.flipHorizontal,
+            animation.currentTime,
+          )}
         />
+
         <FlipCheckbox
           label="Vertical Flip"
           checked={transform.flipVertical}
           onChange={(checked) => applyTransform({ flipVertical: checked })}
+          onAddKeyframe={() =>
+            addKeyframe("flipVertical", transform.flipVertical ? 1 : 0)
+          }
+          onRemoveKeyframe={() => removeKeyframe("flipVertical")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.flipVertical,
+            animation.currentTime,
+          )}
         />
       </div>
 

@@ -86,6 +86,10 @@ const DEFAULT_ANIMATION: AnimationState = {
     scale: [],
     translateX: [],
     translateY: [],
+    centerX: [],
+    centerY: [],
+    flipHorizontal: [],
+    flipVertical: [],
   },
   duration: 5000,
   isPlaying: false,
@@ -183,6 +187,28 @@ export function useTransform() {
           time,
           transform.translateY,
         ),
+        centerX: interpolateKeyframes(
+          animation.keyframes.centerX,
+          time,
+          transform.centerX,
+        ),
+        centerY: interpolateKeyframes(
+          animation.keyframes.centerY,
+          time,
+          transform.centerY,
+        ),
+        flipHorizontal:
+          interpolateKeyframes(
+            animation.keyframes.flipHorizontal,
+            time,
+            transform.flipHorizontal ? 1 : 0,
+          ) > 0.5,
+        flipVertical:
+          interpolateKeyframes(
+            animation.keyframes.flipVertical,
+            time,
+            transform.flipVertical ? 1 : 0,
+          ) > 0.5,
       };
     },
     [currentState],
@@ -204,7 +230,7 @@ export function useTransform() {
       let hasKeyframeUpdates = false;
       for (const field of keyframeFieldNames) {
         const value = updates[field];
-        if (!value) {
+        if (value === undefined) {
           continue;
         }
 
@@ -217,10 +243,12 @@ export function useTransform() {
           (kf) => kf.time === currentTime,
         );
         if (existingKeyframeIndex !== -1) {
+          const numericValue =
+            typeof value === "boolean" ? (value ? 1 : 0) : value;
           updatedKeyframes[field] = updateKeyframe(
             keyframes,
             currentTime,
-            value,
+            numericValue,
           );
           hasKeyframeUpdates = true;
         }

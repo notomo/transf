@@ -8,6 +8,10 @@ export const keyframeFieldNames = [
   "scale",
   "translateX",
   "translateY",
+  "centerX",
+  "centerY",
+  "flipHorizontal",
+  "flipVertical",
 ] as const;
 
 export type KeyframeFieldName = (typeof keyframeFieldNames)[number];

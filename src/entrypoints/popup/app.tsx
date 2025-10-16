@@ -4,6 +4,32 @@ import { hasKeyframeAtTime } from "./keyframe";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
 
+function KeyframeButton({
+  hasKeyframe,
+  onAddKeyframe,
+  onRemoveKeyframe,
+}: {
+  hasKeyframe: boolean;
+  onAddKeyframe: () => void;
+  onRemoveKeyframe: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
+      className={cn(
+        "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
+        hasKeyframe
+          ? "bg-red-500 hover:bg-red-600"
+          : "bg-green-500 hover:bg-green-600",
+      )}
+      title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+    >
+      {hasKeyframe ? "-" : "+"}
+    </button>
+  );
+}
+
 function DurationInput({
   duration,
   onDurationChange,
@@ -54,19 +80,11 @@ function AxisPercentInput({
           {label}: {Math.round(value * 10) / 10}%
         </label>
         {onAddKeyframe && onRemoveKeyframe && hasKeyframe !== undefined && (
-          <button
-            type="button"
-            onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
-            className={cn(
-              "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
-              hasKeyframe
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-green-500 hover:bg-green-600",
-            )}
-            title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
-          >
-            {hasKeyframe ? "-" : "+"}
-          </button>
+          <KeyframeButton
+            hasKeyframe={hasKeyframe}
+            onAddKeyframe={onAddKeyframe}
+            onRemoveKeyframe={onRemoveKeyframe}
+          />
         )}
       </div>
       <input
@@ -105,19 +123,11 @@ function RotationInput({
         <label htmlFor={id} className="block select-none font-medium text-sm">
           Rotation: {Math.round(rotation * 10) / 10}°
         </label>
-        <button
-          type="button"
-          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
-          className={cn(
-            "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
-            hasKeyframe
-              ? "bg-red-500 hover:bg-red-600"
-              : "bg-green-500 hover:bg-green-600",
-          )}
-          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
-        >
-          {hasKeyframe ? "-" : "+"}
-        </button>
+        <KeyframeButton
+          hasKeyframe={hasKeyframe}
+          onAddKeyframe={onAddKeyframe}
+          onRemoveKeyframe={onRemoveKeyframe}
+        />
       </div>
       <input
         id={id}
@@ -155,18 +165,11 @@ function ScaleInput({
         <label htmlFor={id} className="block select-none font-medium text-sm">
           Scale: {Math.round(scale * 100) / 100}x
         </label>
-        <button
-          type="button"
-          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
-          className={`flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs ${
-            hasKeyframe
-              ? "bg-red-500 hover:bg-red-600"
-              : "bg-green-500 hover:bg-green-600"
-          }`}
-          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
-        >
-          {hasKeyframe ? "-" : "+"}
-        </button>
+        <KeyframeButton
+          hasKeyframe={hasKeyframe}
+          onAddKeyframe={onAddKeyframe}
+          onRemoveKeyframe={onRemoveKeyframe}
+        />
       </div>
       <input
         id={id}
@@ -207,18 +210,11 @@ function TranslateInput({
         <label htmlFor={id} className="block select-none font-medium text-sm">
           {label}: {Math.round(value)}px
         </label>
-        <button
-          type="button"
-          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
-          className={`flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs ${
-            hasKeyframe
-              ? "bg-red-500 hover:bg-red-600"
-              : "bg-green-500 hover:bg-green-600"
-          }`}
-          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
-        >
-          {hasKeyframe ? "-" : "+"}
-        </button>
+        <KeyframeButton
+          hasKeyframe={hasKeyframe}
+          onAddKeyframe={onAddKeyframe}
+          onRemoveKeyframe={onRemoveKeyframe}
+        />
       </div>
       <input
         id={id}
@@ -267,19 +263,11 @@ function FlipCheckbox({
         </label>
       </div>
       {onAddKeyframe && onRemoveKeyframe && hasKeyframe !== undefined && (
-        <button
-          type="button"
-          onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
-          className={cn(
-            "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
-            hasKeyframe
-              ? "bg-red-500 hover:bg-red-600"
-              : "bg-green-500 hover:bg-green-600",
-          )}
-          title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
-        >
-          {hasKeyframe ? "-" : "+"}
-        </button>
+        <KeyframeButton
+          hasKeyframe={hasKeyframe}
+          onAddKeyframe={onAddKeyframe}
+          onRemoveKeyframe={onRemoveKeyframe}
+        />
       )}
     </div>
   );

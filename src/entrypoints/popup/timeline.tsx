@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { cn } from "@/src/lib/tailwind";
 import {
   type AnimationKeyframes,
@@ -106,6 +106,7 @@ function KeyframeNextPrevButton({
       type="button"
       onClick={navigateToKeyframe}
       className="flex h-full w-6 items-center justify-center rounded bg-gray-200 px-2 py-1 text-xs hover:bg-gray-300"
+      title={direction === "prev" ? "Previous keyframe" : "Next keyframe"}
     >
       {direction === "prev" ? "←" : "→"}
     </button>
@@ -122,6 +123,7 @@ function TimeIndicator({
   onTimeChange: (time: number) => void;
 }) {
   const currentTimePercent = (currentTime / duration) * 100;
+  const timelineId = useId();
 
   return (
     <div className="relative col-span-1 h-6 rounded bg-gray-100">
@@ -130,13 +132,18 @@ function TimeIndicator({
         style={{ left: `${currentTimePercent}%` }}
       />
       <div className="absolute inset-0 flex items-center px-2">
+        <label htmlFor={timelineId} className="sr-only">
+          Timeline: {currentTime}ms
+        </label>
         <input
+          id={timelineId}
           type="range"
           min="0"
           max={duration}
           value={currentTime}
           onChange={(e) => onTimeChange(Number(e.target.value))}
           className="w-full opacity-50"
+          aria-label="Timeline"
         />
       </div>
     </div>

@@ -281,13 +281,13 @@ export function useTransform() {
         animation: newAnimation,
       };
 
-      if (updates.currentTime !== undefined && newAnimation.isPlaying) {
+      if (updates.currentTime !== undefined) {
         const animatedTransform = getAnimatedTransform(updates.currentTime);
         const finalState = {
           ...newState,
           transform: animatedTransform,
         };
-        await setExtendedState(finalState, true);
+        await setExtendedState(finalState, newAnimation.isPlaying);
       } else {
         await setExtendedState(newState);
       }

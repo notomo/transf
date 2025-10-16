@@ -25,3 +25,37 @@ test("UI displays values correctly with labels", async ({
   await popup.getCenterYSlider().fill("70");
   await expect(page.getByText("Center Y: 70%")).toBeVisible();
 });
+
+test("can add and remove keyframes", async ({ page, extensionId }) => {
+  const popup = await openPopup({ page, extensionId });
+
+  await popup.getAddRotationKeyframeButton().click();
+  await popup.getRemoveRotationKeyframeButton().click();
+});
+
+test("can navigate between keyframes", async ({ page, extensionId }) => {
+  const popup = await openPopup({ page, extensionId });
+
+  await popup.getRotationSlider().fill("45");
+  await popup.getAddRotationKeyframeButton().click();
+
+  await popup.getTimelineSlider().fill("2000");
+  await popup.getRotationSlider().fill("90");
+  await popup.getAddRotationKeyframeButton().click();
+
+  await popup.getTimelineSlider().fill("4000");
+  await popup.getRotationSlider().fill("135");
+  await popup.getAddRotationKeyframeButton().click();
+
+  await popup.getPrevKeyframeButton().click();
+  await expect(popup.getTimelineSlider()).toHaveValue("2000");
+  await expect(popup.getRotationSlider()).toHaveValue("90");
+  await expect(popup.getRemoveRotationKeyframeButton()).toBeVisible();
+  await expect(popup.getAddRotationKeyframeButton()).not.toBeVisible();
+
+  await popup.getNextKeyframeButton().click();
+  await expect(popup.getTimelineSlider()).toHaveValue("4000");
+  await expect(popup.getRotationSlider()).toHaveValue("135");
+  await expect(popup.getRemoveRotationKeyframeButton()).toBeVisible();
+  await expect(popup.getAddRotationKeyframeButton()).not.toBeVisible();
+});

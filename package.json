@@ -18,12 +18,13 @@
     "test:e2e:dev": "npm run build:dev && npm run test:e2e:ci",
     "ls-lint": "ls-lint",
     "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint && npm run test && npm run test:e2e:dev",
+    "setup:e2e-mcp": "playwright init-agents --loop=claude",
     "deploy_for_local": "npm run build && mkdir -p $TRANSF_LOCAL && cp -rf ./.output/chrome-mv3/* $TRANSF_LOCAL"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
     "@ls-lint/ls-lint": "^2.3.1",
-    "@playwright/test": "^1.55.1",
+    "@playwright/test": "^1.56.0",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

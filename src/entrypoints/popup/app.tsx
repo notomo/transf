@@ -8,10 +8,12 @@ function KeyframeButton({
   hasKeyframe,
   onAddKeyframe,
   onRemoveKeyframe,
+  property,
 }: {
   hasKeyframe: boolean;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
+  property: string;
 }) {
   return (
     <button
@@ -23,7 +25,9 @@ function KeyframeButton({
           ? "bg-red-500 hover:bg-red-600"
           : "bg-green-500 hover:bg-green-600",
       )}
-      title={hasKeyframe ? "Remove keyframe" : "Add keyframe"}
+      title={
+        hasKeyframe ? `Remove ${property} keyframe` : `Add ${property} keyframe`
+      }
     >
       {hasKeyframe ? "-" : "+"}
     </button>
@@ -84,6 +88,7 @@ function AxisPercentInput({
             hasKeyframe={hasKeyframe}
             onAddKeyframe={onAddKeyframe}
             onRemoveKeyframe={onRemoveKeyframe}
+            property={label}
           />
         )}
       </div>
@@ -127,6 +132,7 @@ function RotationInput({
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
+          property="Rotation"
         />
       </div>
       <input
@@ -169,6 +175,7 @@ function ScaleInput({
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
+          property="Scale"
         />
       </div>
       <input
@@ -214,6 +221,7 @@ function TranslateInput({
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
+          property={label}
         />
       </div>
       <input
@@ -267,6 +275,7 @@ function FlipCheckbox({
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
+          property={label}
         />
       )}
     </div>

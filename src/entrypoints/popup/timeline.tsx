@@ -192,9 +192,11 @@ function KeyframeLine({
 export function Timeline({
   animation,
   onUpdateAnimation,
+  className,
 }: {
   animation: AnimationState;
   onUpdateAnimation: (updates: Partial<AnimationState>) => void;
+  className?: string;
 }) {
   useAnimation({
     isPlaying: animation.isPlaying,
@@ -204,7 +206,12 @@ export function Timeline({
   });
 
   return (
-    <div className="relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-1">
+    <div
+      className={cn(
+        "relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-1",
+        className,
+      )}
+    >
       <div className="flex gap-2">
         <KeyframeNextPrevButton
           direction="prev"

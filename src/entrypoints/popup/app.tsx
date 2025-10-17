@@ -37,13 +37,15 @@ function KeyframeButton({
 function DurationInput({
   duration,
   onDurationChange,
+  className,
 }: {
   duration: number;
   onDurationChange: (duration: number) => void;
+  className?: string;
 }) {
   const durationId = useId();
   return (
-    <div>
+    <div className={className}>
       <label htmlFor={durationId} className="block font-medium text-sm">
         Duration: {duration}ms
       </label>
@@ -114,16 +116,18 @@ function RotationInput({
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
+  className,
 }: {
   rotation: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
   hasKeyframe: boolean;
+  className?: string;
 }) {
   const id = useId();
   return (
-    <div>
+    <div className={className}>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
           Rotation: {Math.round(rotation * 10) / 10}°
@@ -157,16 +161,18 @@ function ScaleInput({
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
+  className,
 }: {
   scale: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
   hasKeyframe: boolean;
+  className?: string;
 }) {
   const id = useId();
   return (
-    <div>
+    <div className={className}>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
           Scale: {Math.round(scale * 100) / 100}x
@@ -294,10 +300,10 @@ export function App() {
   } = useTransform();
 
   return (
-    <div className="w-128 space-y-2 border border-gray-200 p-4">
-      <div className="relative">
-        <h1 className="text-center font-bold text-lg">Page Transform</h1>
-        <div className="absolute top-0 right-0 flex items-center gap-2">
+    <div className="w-128 border border-gray-200 p-4">
+      <div className="mb-4 flex items-center justify-between">
+        <h1 className="flex-1 text-center font-bold text-xl">Page Transform</h1>
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={resetAll}
@@ -315,77 +321,79 @@ export function App() {
         </div>
       </div>
 
-      <AxisPercentInput
-        label="Center X"
-        value={transform.centerX}
-        onChange={(newValue) => applyTransform({ centerX: newValue })}
-        onAddKeyframe={() => addKeyframe("centerX", transform.centerX)}
-        onRemoveKeyframe={() => removeKeyframe("centerX")}
-        hasKeyframe={hasKeyframeAtTime(
-          animation.keyframes.centerX,
-          animation.currentTime,
-        )}
-      />
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+        <TranslateInput
+          label="Translate X"
+          value={transform.translateX}
+          onChange={(newValue) => applyTransform({ translateX: newValue })}
+          onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
+          onRemoveKeyframe={() => removeKeyframe("translateX")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.translateX,
+            animation.currentTime,
+          )}
+        />
 
-      <AxisPercentInput
-        label="Center Y"
-        value={transform.centerY}
-        onChange={(newValue) => applyTransform({ centerY: newValue })}
-        onAddKeyframe={() => addKeyframe("centerY", transform.centerY)}
-        onRemoveKeyframe={() => removeKeyframe("centerY")}
-        hasKeyframe={hasKeyframeAtTime(
-          animation.keyframes.centerY,
-          animation.currentTime,
-        )}
-      />
+        <TranslateInput
+          label="Translate Y"
+          value={transform.translateY}
+          onChange={(newValue) => applyTransform({ translateY: newValue })}
+          onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
+          onRemoveKeyframe={() => removeKeyframe("translateY")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.translateY,
+            animation.currentTime,
+          )}
+        />
 
-      <RotationInput
-        rotation={transform.rotation}
-        onChange={(newValue) => applyTransform({ rotation: newValue })}
-        onAddKeyframe={() => addKeyframe("rotation", transform.rotation)}
-        onRemoveKeyframe={() => removeKeyframe("rotation")}
-        hasKeyframe={hasKeyframeAtTime(
-          animation.keyframes.rotation,
-          animation.currentTime,
-        )}
-      />
+        <AxisPercentInput
+          label="Center X"
+          value={transform.centerX}
+          onChange={(newValue) => applyTransform({ centerX: newValue })}
+          onAddKeyframe={() => addKeyframe("centerX", transform.centerX)}
+          onRemoveKeyframe={() => removeKeyframe("centerX")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.centerX,
+            animation.currentTime,
+          )}
+        />
 
-      <ScaleInput
-        scale={transform.scale}
-        onChange={(newValue) => applyTransform({ scale: newValue })}
-        onAddKeyframe={() => addKeyframe("scale", transform.scale)}
-        onRemoveKeyframe={() => removeKeyframe("scale")}
-        hasKeyframe={hasKeyframeAtTime(
-          animation.keyframes.scale,
-          animation.currentTime,
-        )}
-      />
+        <AxisPercentInput
+          label="Center Y"
+          value={transform.centerY}
+          onChange={(newValue) => applyTransform({ centerY: newValue })}
+          onAddKeyframe={() => addKeyframe("centerY", transform.centerY)}
+          onRemoveKeyframe={() => removeKeyframe("centerY")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.centerY,
+            animation.currentTime,
+          )}
+        />
 
-      <TranslateInput
-        label="Translate X"
-        value={transform.translateX}
-        onChange={(newValue) => applyTransform({ translateX: newValue })}
-        onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
-        onRemoveKeyframe={() => removeKeyframe("translateX")}
-        hasKeyframe={hasKeyframeAtTime(
-          animation.keyframes.translateX,
-          animation.currentTime,
-        )}
-      />
+        <RotationInput
+          className="col-span-2"
+          rotation={transform.rotation}
+          onChange={(newValue) => applyTransform({ rotation: newValue })}
+          onAddKeyframe={() => addKeyframe("rotation", transform.rotation)}
+          onRemoveKeyframe={() => removeKeyframe("rotation")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.rotation,
+            animation.currentTime,
+          )}
+        />
 
-      <TranslateInput
-        label="Translate Y"
-        value={transform.translateY}
-        onChange={(newValue) => applyTransform({ translateY: newValue })}
-        onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
-        onRemoveKeyframe={() => removeKeyframe("translateY")}
-        hasKeyframe={hasKeyframeAtTime(
-          animation.keyframes.translateY,
-          animation.currentTime,
-        )}
-      />
+        <ScaleInput
+          className="col-span-2"
+          scale={transform.scale}
+          onChange={(newValue) => applyTransform({ scale: newValue })}
+          onAddKeyframe={() => addKeyframe("scale", transform.scale)}
+          onRemoveKeyframe={() => removeKeyframe("scale")}
+          hasKeyframe={hasKeyframeAtTime(
+            animation.keyframes.scale,
+            animation.currentTime,
+          )}
+        />
 
-      <div className="flex space-x-4">
         <FlipCheckbox
           label="Horizontal Flip"
           checked={transform.flipHorizontal}
@@ -413,14 +421,16 @@ export function App() {
             animation.currentTime,
           )}
         />
+
+        <div className="col-span-2 space-y-2 bg-gray-100 px-1 py-2">
+          <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
+
+          <DurationInput
+            duration={animation.duration}
+            onDurationChange={(duration) => updateAnimation({ duration })}
+          />
+        </div>
       </div>
-
-      <DurationInput
-        duration={animation.duration}
-        onDurationChange={(duration) => updateAnimation({ duration })}
-      />
-
-      <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
     </div>
   );
 }

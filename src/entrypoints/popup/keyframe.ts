@@ -16,6 +16,17 @@ export const keyframeFieldNames = [
 
 export type KeyframeFieldName = (typeof keyframeFieldNames)[number];
 
+export const keyframeFieldLabels = {
+  rotation: "Rotation",
+  scale: "Scale",
+  translateX: "Translate X",
+  translateY: "Translate Y",
+  centerX: "Center X",
+  centerY: "Center Y",
+  flipHorizontal: "Horizontal Flip",
+  flipVertical: "Vertical Flip",
+} as const satisfies Record<KeyframeFieldName, string>;
+
 export type AnimationKeyframes = Record<KeyframeFieldName, Keyframe[]>;
 
 export type AnimationState = {

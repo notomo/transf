@@ -1,10 +1,13 @@
 import { useEffect, useId, useRef } from "react";
+import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
 import {
   type AnimationKeyframes,
   type AnimationState,
   findNextKeyframeTime,
   findPreviousKeyframeTime,
+  type KeyframeFieldName,
+  keyframeFieldLabels,
 } from "./keyframe";
 
 function useAnimation({
@@ -156,7 +159,7 @@ function KeyframeLine({
   currentTime,
   duration,
 }: {
-  property: string;
+  property: KeyframeFieldName;
   keyframes: Array<{ time: number; value: number }>;
   currentTime: number;
   duration: number;
@@ -164,7 +167,7 @@ function KeyframeLine({
   return (
     <>
       <span key={`${property}-label`} className="text-xs">
-        {property}
+        {keyframeFieldLabels[property]}
       </span>
       <div
         key={`${property}-timeline`}
@@ -208,7 +211,7 @@ export function Timeline({
   return (
     <div
       className={cn(
-        "relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-1",
+        "relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-2",
         className,
       )}
     >
@@ -244,15 +247,17 @@ export function Timeline({
           onUpdateAnimation({ currentTime, isPlaying: false })
         }
       />
-      {Object.entries(animation.keyframes).map(([property, keyframes]) => (
-        <KeyframeLine
-          key={property}
-          property={property}
-          keyframes={keyframes}
-          currentTime={animation.currentTime}
-          duration={animation.duration}
-        />
-      ))}
+      <div className="col-span-2 grid grid-cols-[auto_1fr] gap-1">
+        {strictEntries(animation.keyframes).map(([property, keyframes]) => (
+          <KeyframeLine
+            key={property}
+            property={property}
+            keyframes={keyframes}
+            currentTime={animation.currentTime}
+            duration={animation.duration}
+          />
+        ))}
+      </div>
     </div>
   );
 }

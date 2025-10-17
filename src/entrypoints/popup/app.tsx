@@ -263,7 +263,7 @@ function FlipCheckbox({
 }) {
   const id = useId();
   return (
-    <div className="flex items-center justify-between space-x-2">
+    <div className="flex items-center space-x-2">
       <div className="flex items-center space-x-2">
         <input
           id={id}

@@ -53,6 +53,7 @@ export async function openPopup({
     getPrevKeyframeButton: () => page.getByTitle("Previous keyframe"),
     getNextKeyframeButton: () => page.getByTitle("Next keyframe"),
     getTimelineSlider: () => page.getByLabel("Timeline"),
+    getDurationSlider: () => page.getByLabel(/Duration/),
     clickReset: async () => {
       const resetButton = popup.getResetButton();
       await resetButton.click();

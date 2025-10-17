@@ -52,7 +52,7 @@ function DurationInput({
         type="range"
         min="50"
         max="10000"
-        step="100"
+        step="50"
         value={duration}
         onChange={(e) => onDurationChange(Number(e.target.value))}
         className="w-full"

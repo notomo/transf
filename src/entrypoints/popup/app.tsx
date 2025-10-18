@@ -1,6 +1,6 @@
 import { useId } from "react";
 import { cn } from "@/src/lib/tailwind";
-import { hasKeyframeAtTime } from "./keyframe";
+import { hasKeyframeAtTime, keyframeFieldLabels } from "./keyframe";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
 
@@ -8,26 +8,24 @@ function KeyframeButton({
   hasKeyframe,
   onAddKeyframe,
   onRemoveKeyframe,
-  property,
+  name,
 }: {
   hasKeyframe: boolean;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
-  property: string;
+  name: string;
 }) {
   return (
     <button
       type="button"
       onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
       className={cn(
-        "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-white text-xs",
+        "flex h-6 w-6 items-center justify-center rounded px-2 py-1 font-bold text-lg text-white",
         hasKeyframe
           ? "bg-red-500 hover:bg-red-600"
           : "bg-green-500 hover:bg-green-600",
       )}
-      title={
-        hasKeyframe ? `Remove ${property} keyframe` : `Add ${property} keyframe`
-      }
+      title={hasKeyframe ? `Remove ${name} keyframe` : `Add ${name} keyframe`}
     >
       {hasKeyframe ? "-" : "+"}
     </button>
@@ -64,35 +62,34 @@ function DurationInput({
 }
 
 function AxisPercentInput({
-  label,
+  fieldName,
   value,
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
 }: {
-  label: string;
+  fieldName: "centerX" | "centerY";
   value: number;
   onChange: (value: number) => void;
-  onAddKeyframe?: () => void;
-  onRemoveKeyframe?: () => void;
-  hasKeyframe?: boolean;
+  onAddKeyframe: () => void;
+  onRemoveKeyframe: () => void;
+  hasKeyframe: boolean;
 }) {
   const id = useId();
+  const label = keyframeFieldLabels[fieldName];
   return (
     <div>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
           {label}: {Math.round(value * 10) / 10}%
         </label>
-        {onAddKeyframe && onRemoveKeyframe && hasKeyframe !== undefined && (
-          <KeyframeButton
-            hasKeyframe={hasKeyframe}
-            onAddKeyframe={onAddKeyframe}
-            onRemoveKeyframe={onRemoveKeyframe}
-            property={label}
-          />
-        )}
+        <KeyframeButton
+          hasKeyframe={hasKeyframe}
+          onAddKeyframe={onAddKeyframe}
+          onRemoveKeyframe={onRemoveKeyframe}
+          name={label}
+        />
       </div>
       <input
         id={id}
@@ -126,17 +123,18 @@ function RotationInput({
   className?: string;
 }) {
   const id = useId();
+  const label = keyframeFieldLabels["rotation"];
   return (
     <div className={className}>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          Rotation: {Math.round(rotation * 10) / 10}°
+          {label}: {Math.round(rotation * 10) / 10}°
         </label>
         <KeyframeButton
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
-          property="Rotation"
+          name={label}
         />
       </div>
       <input
@@ -171,17 +169,18 @@ function ScaleInput({
   className?: string;
 }) {
   const id = useId();
+  const label = keyframeFieldLabels["scale"];
   return (
     <div className={className}>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          Scale: {Math.round(scale * 100) / 100}x
+          {label}: {Math.round(scale * 100) / 100}x
         </label>
         <KeyframeButton
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
-          property="Scale"
+          name={label}
         />
       </div>
       <input
@@ -202,14 +201,14 @@ function ScaleInput({
 }
 
 function TranslateInput({
-  label,
+  fieldName,
   value,
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
 }: {
-  label: string;
+  fieldName: "translateX" | "translateY";
   value: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
@@ -217,6 +216,7 @@ function TranslateInput({
   hasKeyframe: boolean;
 }) {
   const id = useId();
+  const label = keyframeFieldLabels[fieldName];
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -227,7 +227,7 @@ function TranslateInput({
           hasKeyframe={hasKeyframe}
           onAddKeyframe={onAddKeyframe}
           onRemoveKeyframe={onRemoveKeyframe}
-          property={label}
+          name={label}
         />
       </div>
       <input
@@ -247,21 +247,22 @@ function TranslateInput({
 }
 
 function FlipCheckbox({
-  label,
+  fieldName,
   checked,
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
 }: {
-  label: string;
+  fieldName: "flipVertical" | "flipHorizontal";
   checked: boolean;
   onChange: (checked: boolean) => void;
-  onAddKeyframe?: () => void;
-  onRemoveKeyframe?: () => void;
-  hasKeyframe?: boolean;
+  onAddKeyframe: () => void;
+  onRemoveKeyframe: () => void;
+  hasKeyframe: boolean;
 }) {
   const id = useId();
+  const label = keyframeFieldLabels[fieldName];
   return (
     <div className="flex items-center space-x-2">
       <div className="flex items-center space-x-2">
@@ -276,14 +277,12 @@ function FlipCheckbox({
           {label}
         </label>
       </div>
-      {onAddKeyframe && onRemoveKeyframe && hasKeyframe !== undefined && (
-        <KeyframeButton
-          hasKeyframe={hasKeyframe}
-          onAddKeyframe={onAddKeyframe}
-          onRemoveKeyframe={onRemoveKeyframe}
-          property={label}
-        />
-      )}
+      <KeyframeButton
+        hasKeyframe={hasKeyframe}
+        onAddKeyframe={onAddKeyframe}
+        onRemoveKeyframe={onRemoveKeyframe}
+        name={label}
+      />
     </div>
   );
 }
@@ -323,7 +322,7 @@ export function App() {
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <TranslateInput
-          label="Translate X"
+          fieldName="translateX"
           value={transform.translateX}
           onChange={(newValue) => applyTransform({ translateX: newValue })}
           onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
@@ -335,7 +334,7 @@ export function App() {
         />
 
         <TranslateInput
-          label="Translate Y"
+          fieldName="translateY"
           value={transform.translateY}
           onChange={(newValue) => applyTransform({ translateY: newValue })}
           onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
@@ -347,7 +346,7 @@ export function App() {
         />
 
         <AxisPercentInput
-          label="Center X"
+          fieldName="centerX"
           value={transform.centerX}
           onChange={(newValue) => applyTransform({ centerX: newValue })}
           onAddKeyframe={() => addKeyframe("centerX", transform.centerX)}
@@ -359,7 +358,7 @@ export function App() {
         />
 
         <AxisPercentInput
-          label="Center Y"
+          fieldName="centerY"
           value={transform.centerY}
           onChange={(newValue) => applyTransform({ centerY: newValue })}
           onAddKeyframe={() => addKeyframe("centerY", transform.centerY)}
@@ -395,7 +394,7 @@ export function App() {
         />
 
         <FlipCheckbox
-          label="Horizontal Flip"
+          fieldName="flipHorizontal"
           checked={transform.flipHorizontal}
           onChange={(checked) => applyTransform({ flipHorizontal: checked })}
           onAddKeyframe={() =>
@@ -409,7 +408,7 @@ export function App() {
         />
 
         <FlipCheckbox
-          label="Vertical Flip"
+          fieldName="flipVertical"
           checked={transform.flipVertical}
           onChange={(checked) => applyTransform({ flipVertical: checked })}
           onAddKeyframe={() =>

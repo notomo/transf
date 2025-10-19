@@ -287,6 +287,30 @@ function FlipCheckbox({
   );
 }
 
+function ResetButton({ reset }: { reset: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={reset}
+      className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
+    >
+      Reset
+    </button>
+  );
+}
+
+function PopupLink() {
+  return (
+    <a
+      href={`chrome-extension://${browser.runtime.id}/popup.html`}
+      target="_blank"
+      className="rounded border px-4 py-2"
+    >
+      Dev
+    </a>
+  );
+}
+
 export function App() {
   const {
     transform,
@@ -302,21 +326,10 @@ export function App() {
     <div className="w-128 border border-gray-200 p-4">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="flex-1 text-center font-bold text-xl">Page Transform</h1>
+
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={resetAll}
-            className="rounded bg-gray-500 px-4 py-2 font-bold text-white hover:bg-gray-700"
-          >
-            Reset
-          </button>
-          <a
-            href={`chrome-extension://${browser.runtime.id}/popup.html`}
-            target="_blank"
-            className="rounded border px-4 py-2"
-          >
-            Dev
-          </a>
+          <ResetButton reset={resetAll} />
+          <PopupLink />
         </div>
       </div>
 

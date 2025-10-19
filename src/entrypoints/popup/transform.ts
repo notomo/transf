@@ -296,15 +296,15 @@ export function useTransform() {
   );
 
   const addKeyframe = useCallback(
-    async (property: KeyframeFieldName, value: number) => {
+    async (fieldName: KeyframeFieldName, value: number) => {
       const time = currentState.animation.currentTime;
-      const existingKeyframes = currentState.animation.keyframes[property];
+      const existingKeyframes = currentState.animation.keyframes[fieldName];
       const newKeyframes = addKeyframeTo(existingKeyframes, time, value);
 
       await updateAnimation({
         keyframes: {
           ...currentState.animation.keyframes,
-          [property]: newKeyframes,
+          [fieldName]: newKeyframes,
         },
       });
     },
@@ -312,15 +312,15 @@ export function useTransform() {
   );
 
   const removeKeyframe = useCallback(
-    async (property: KeyframeFieldName) => {
+    async (fieldName: KeyframeFieldName) => {
       const time = currentState.animation.currentTime;
-      const existingKeyframes = currentState.animation.keyframes[property];
+      const existingKeyframes = currentState.animation.keyframes[fieldName];
       const newKeyframes = removeKeyframeFrom(existingKeyframes, time);
 
       await updateAnimation({
         keyframes: {
           ...currentState.animation.keyframes,
-          [property]: newKeyframes,
+          [fieldName]: newKeyframes,
         },
       });
     },

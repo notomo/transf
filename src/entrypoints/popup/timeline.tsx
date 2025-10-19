@@ -154,28 +154,28 @@ function TimeIndicator({
 }
 
 function KeyframeLine({
-  property,
+  fieldName,
   keyframes,
   currentTime,
   duration,
 }: {
-  property: KeyframeFieldName;
+  fieldName: KeyframeFieldName;
   keyframes: Array<{ time: number; value: number }>;
   currentTime: number;
   duration: number;
 }) {
   return (
     <>
-      <span key={`${property}-label`} className="text-xs">
-        {keyframeFieldLabels[property]}
+      <span key={`${fieldName}-label`} className="text-xs">
+        {keyframeFieldLabels[fieldName]}
       </span>
       <div
-        key={`${property}-timeline`}
+        key={`${fieldName}-timeline`}
         className="relative h-full border border-gray-400"
       >
         {keyframes.map((kf, i) => (
           <div
-            key={`${property}-${kf.time}-${i}`}
+            key={`${fieldName}-${kf.time}-${i}`}
             className={cn(
               "-translate-x-1/2 absolute h-full w-1.5 transform rounded-full",
               kf.time === currentTime
@@ -209,12 +209,7 @@ export function Timeline({
   });
 
   return (
-    <div
-      className={cn(
-        "relative grid grid-cols-[auto_1fr] gap-x-2 gap-y-2",
-        className,
-      )}
-    >
+    <div className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-2", className)}>
       <div className="flex gap-2">
         <KeyframeNextPrevButton
           direction="prev"
@@ -248,10 +243,10 @@ export function Timeline({
         }
       />
       <div className="col-span-2 grid grid-cols-[auto_1fr] gap-1">
-        {strictEntries(animation.keyframes).map(([property, keyframes]) => (
+        {strictEntries(animation.keyframes).map(([fieldName, keyframes]) => (
           <KeyframeLine
-            key={property}
-            property={property}
+            key={fieldName}
+            fieldName={fieldName}
             keyframes={keyframes}
             currentTime={animation.currentTime}
             duration={animation.duration}

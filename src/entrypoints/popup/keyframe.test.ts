@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   type AnimationKeyframes,
+  type AnimationState,
   addKeyframeTo,
+  DEFAULT_TRANSFORM_VALUES,
+  deriveTransformFromAnimationState,
   findNextKeyframeTime,
   findPreviousKeyframeTime,
   hasKeyframeAtTime,
@@ -179,5 +182,137 @@ describe("updateKeyframe", () => {
     const result = updateKeyframe(keyframes, 0.2, 45);
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({ time: 0.5, value: 90 });
+  });
+});
+
+describe("deriveTransformFromAnimationState", () => {
+  it("returns default values when keyframes are empty", () => {
+    const state: AnimationState = {
+      keyframes: {
+        rotation: [],
+        scale: [],
+        translateX: [],
+        translateY: [],
+        centerX: [],
+        centerY: [],
+        flipHorizontal: [],
+        flipVertical: [],
+      },
+      duration: 5000,
+      isPlaying: false,
+      currentTime: 0.5,
+      baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
+    };
+    const result = deriveTransformFromAnimationState(state);
+    expect(result).toEqual({
+      centerX: 50,
+      centerY: 50,
+      rotation: 0,
+      scale: 1,
+      translateX: 0,
+      translateY: 0,
+      flipHorizontal: false,
+      flipVertical: false,
+    });
+  });
+
+  it("interpolates values from keyframes", () => {
+    const state: AnimationState = {
+      keyframes: {
+        rotation: [
+          { time: 0, value: 0 },
+          { time: 1, value: 90 },
+        ],
+        scale: [
+          { time: 0, value: 1 },
+          { time: 1, value: 2 },
+        ],
+        translateX: [],
+        translateY: [],
+        centerX: [],
+        centerY: [],
+        flipHorizontal: [
+          { time: 0, value: 0 },
+          { time: 0.4, value: 1 },
+        ],
+        flipVertical: [],
+      },
+      duration: 5000,
+      isPlaying: false,
+      currentTime: 0.5,
+      baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
+    };
+    const result = deriveTransformFromAnimationState(state);
+    expect(result).toEqual({
+      centerX: 50,
+      centerY: 50,
+      rotation: 45,
+      scale: 1.5,
+      translateX: 0,
+      translateY: 0,
+      flipHorizontal: true,
+      flipVertical: false,
+    });
+  });
+
+  it("handles boolean flip values correctly", () => {
+    const state: AnimationState = {
+      keyframes: {
+        rotation: [],
+        scale: [],
+        translateX: [],
+        translateY: [],
+        centerX: [],
+        centerY: [],
+        flipHorizontal: [{ time: 0.5, value: 0.6 }],
+        flipVertical: [{ time: 0.5, value: 0.4 }],
+      },
+      duration: 5000,
+      isPlaying: false,
+      currentTime: 0.5,
+      baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
+    };
+    const result = deriveTransformFromAnimationState(state);
+    expect(result.flipHorizontal).toBe(true);
+    expect(result.flipVertical).toBe(false);
+  });
+
+  it("uses base transform values when no keyframes exist", () => {
+    const state: AnimationState = {
+      keyframes: {
+        rotation: [],
+        scale: [],
+        translateX: [],
+        translateY: [],
+        centerX: [],
+        centerY: [],
+        flipHorizontal: [],
+        flipVertical: [],
+      },
+      duration: 5000,
+      isPlaying: false,
+      currentTime: 0.5,
+      baseTransform: {
+        centerX: 25,
+        centerY: 75,
+        rotation: 45,
+        scale: 2,
+        translateX: 100,
+        translateY: -50,
+        flipHorizontal: true,
+        flipVertical: false,
+      },
+    };
+    const result = deriveTransformFromAnimationState(state);
+    expect(result).toEqual({
+      centerX: 25,
+      centerY: 75,
+      rotation: 45,
+      scale: 2,
+      translateX: 100,
+      translateY: -50,
+      flipHorizontal: true,
+      flipVertical: false,
+    });
   });
 });

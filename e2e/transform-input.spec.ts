@@ -41,11 +41,9 @@ test("can navigate between keyframes", async ({ page, extensionId }) => {
 
   await popup.getTimelineSlider().fill("2000");
   await popup.getRotationSlider().fill("90");
-  await popup.getAddRotationKeyframeButton().click();
 
   await popup.getTimelineSlider().fill("4000");
   await popup.getRotationSlider().fill("135");
-  await popup.getAddRotationKeyframeButton().click();
 
   await popup.getPrevKeyframeButton().click();
   await expect(popup.getTimelineSlider()).toHaveValue("2000");

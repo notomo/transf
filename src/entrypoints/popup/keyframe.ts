@@ -34,6 +34,16 @@ export type AnimationState = {
   duration: number;
   isPlaying: boolean;
   currentTime: number;
+  baseTransform: {
+    centerX: number;
+    centerY: number;
+    rotation: number;
+    scale: number;
+    translateX: number;
+    translateY: number;
+    flipHorizontal: boolean;
+    flipVertical: boolean;
+  };
 };
 
 export function interpolateKeyframes(
@@ -51,6 +61,11 @@ export function interpolateKeyframes(
 
   if (!firstKeyframe || !lastKeyframe) {
     return defaultValue;
+  }
+
+  const exactMatch = sortedKeyframes.find((kf) => kf.time === time);
+  if (exactMatch) {
+    return exactMatch.value;
   }
 
   if (time <= firstKeyframe.time) {
@@ -111,6 +126,10 @@ export function hasKeyframeAtTime(
   return keyframes.some((kf) => kf.time === time);
 }
 
+export function hasKeyframesForField(keyframes: Keyframe[]): boolean {
+  return keyframes.length > 0;
+}
+
 export function addKeyframeTo(
   keyframes: Keyframe[],
   time: number,
@@ -141,4 +160,71 @@ export function updateKeyframe(
   const newKeyframes = [...keyframes];
   newKeyframes[keyframeIndex] = { time, value };
   return newKeyframes;
+}
+
+export const DEFAULT_TRANSFORM_VALUES = {
+  centerX: 50,
+  centerY: 50,
+  rotation: 0,
+  scale: 1,
+  translateX: 0,
+  translateY: 0,
+  flipHorizontal: false,
+  flipVertical: false,
+} as const;
+
+export function deriveTransformFromAnimationState(state: AnimationState): {
+  centerX: number;
+  centerY: number;
+  rotation: number;
+  scale: number;
+  translateX: number;
+  translateY: number;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
+} {
+  return {
+    rotation: interpolateKeyframes(
+      state.keyframes.rotation,
+      state.currentTime,
+      state.baseTransform.rotation,
+    ),
+    scale: interpolateKeyframes(
+      state.keyframes.scale,
+      state.currentTime,
+      state.baseTransform.scale,
+    ),
+    translateX: interpolateKeyframes(
+      state.keyframes.translateX,
+      state.currentTime,
+      state.baseTransform.translateX,
+    ),
+    translateY: interpolateKeyframes(
+      state.keyframes.translateY,
+      state.currentTime,
+      state.baseTransform.translateY,
+    ),
+    centerX: interpolateKeyframes(
+      state.keyframes.centerX,
+      state.currentTime,
+      state.baseTransform.centerX,
+    ),
+    centerY: interpolateKeyframes(
+      state.keyframes.centerY,
+      state.currentTime,
+      state.baseTransform.centerY,
+    ),
+    flipHorizontal:
+      interpolateKeyframes(
+        state.keyframes.flipHorizontal,
+        state.currentTime,
+        state.baseTransform.flipHorizontal ? 1 : 0,
+      ) > 0.5,
+    flipVertical:
+      interpolateKeyframes(
+        state.keyframes.flipVertical,
+        state.currentTime,
+        state.baseTransform.flipVertical ? 1 : 0,
+      ) > 0.5,
+  };
 }

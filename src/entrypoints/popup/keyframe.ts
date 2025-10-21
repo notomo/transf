@@ -29,21 +29,23 @@ export const keyframeFieldLabels = {
 
 export type AnimationKeyframes = Record<KeyframeFieldName, Keyframe[]>;
 
+export type TransformState = {
+  centerX: number;
+  centerY: number;
+  rotation: number;
+  scale: number;
+  translateX: number;
+  translateY: number;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
+};
+
 export type AnimationState = {
   keyframes: AnimationKeyframes;
   duration: number;
   isPlaying: boolean;
   currentTime: number;
-  baseTransform: {
-    centerX: number;
-    centerY: number;
-    rotation: number;
-    scale: number;
-    translateX: number;
-    translateY: number;
-    flipHorizontal: boolean;
-    flipVertical: boolean;
-  };
+  baseTransform: TransformState;
 };
 
 export function interpolateKeyframes(
@@ -173,16 +175,26 @@ export const DEFAULT_TRANSFORM_VALUES = {
   flipVertical: false,
 } as const;
 
-export function deriveTransformFromAnimationState(state: AnimationState): {
-  centerX: number;
-  centerY: number;
-  rotation: number;
-  scale: number;
-  translateX: number;
-  translateY: number;
-  flipHorizontal: boolean;
-  flipVertical: boolean;
-} {
+export const DEFAULT_ANIMATION: AnimationState = {
+  keyframes: {
+    rotation: [],
+    scale: [],
+    translateX: [],
+    translateY: [],
+    centerX: [],
+    centerY: [],
+    flipHorizontal: [],
+    flipVertical: [],
+  },
+  duration: 5000,
+  isPlaying: false,
+  currentTime: 0,
+  baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
+};
+
+export function deriveTransformFromAnimationState(
+  state: AnimationState,
+): TransformState {
   return {
     rotation: interpolateKeyframes(
       state.keyframes.rotation,

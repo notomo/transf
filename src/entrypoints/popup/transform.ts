@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
-import type { AnimationState, KeyframeFieldName } from "./keyframe";
+import type {
+  AnimationState,
+  KeyframeFieldName,
+  TransformState,
+} from "./keyframe";
 import {
   addKeyframeTo,
-  DEFAULT_TRANSFORM_VALUES,
+  DEFAULT_ANIMATION,
   deriveTransformFromAnimationState,
   hasKeyframeAtTime,
   hasKeyframesForField,
@@ -12,77 +16,7 @@ import {
   removeKeyframeFrom,
   updateKeyframe,
 } from "./keyframe";
-
-async function applyCSS(style: string) {
-  const [tab] = await browser.tabs.query({
-    active: true,
-    currentWindow: true,
-  });
-  const tabId = tab?.id;
-  if (!tabId) {
-    return;
-  }
-
-  await browser.scripting.executeScript({
-    target: { tabId },
-    args: [
-      {
-        style,
-      },
-    ],
-    func: (args) => {
-      document.documentElement.style.cssText = args.style;
-    },
-  });
-}
-
-async function applyTransformCSS(
-  transform: TransformState | null,
-  animated: boolean = false,
-) {
-  if (transform === null) {
-    applyCSS("");
-    return;
-  }
-
-  const scaleX = transform.flipHorizontal ? -transform.scale : transform.scale;
-  const scaleY = transform.flipVertical ? -transform.scale : transform.scale;
-
-  const style = `
-transform-origin: ${transform.centerX}% ${transform.centerY}%;
-transform: translate(${transform.translateX}px, ${transform.translateY}px) rotate(${transform.rotation}deg) scale(${scaleX}, ${scaleY});
-${animated ? "" : "transition: transform 0.3s ease;"}
-`;
-  await applyCSS(style);
-}
-
-type TransformState = {
-  centerX: number;
-  centerY: number;
-  rotation: number;
-  scale: number;
-  translateX: number;
-  translateY: number;
-  flipHorizontal: boolean;
-  flipVertical: boolean;
-};
-
-const DEFAULT_ANIMATION: AnimationState = {
-  keyframes: {
-    rotation: [],
-    scale: [],
-    translateX: [],
-    translateY: [],
-    centerX: [],
-    centerY: [],
-    flipHorizontal: [],
-    flipVertical: [],
-  },
-  duration: 5000,
-  isPlaying: false,
-  currentTime: 0,
-  baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
-};
+import { applyTransformCSS } from "./style";
 
 const animationStates = storage.defineItem<Record<string, AnimationState>>(
   "local:animationStates",
@@ -110,6 +44,7 @@ function useAnimationState() {
       const stored = await animationStates.getValue();
       const animationState = stored[url] ?? null;
       setState(animationState);
+
       const transform = animationState
         ? deriveTransformFromAnimationState(animationState)
         : null;
@@ -120,6 +55,7 @@ function useAnimationState() {
   const setAnimationState = useCallback(
     async (newState: AnimationState | null, animated: boolean = false) => {
       setState(newState);
+
       const transform = newState
         ? deriveTransformFromAnimationState(newState)
         : null;
@@ -142,7 +78,7 @@ function useAnimationState() {
   );
 
   return {
-    state,
+    state: state ?? DEFAULT_ANIMATION,
     setAnimationState,
   };
 }
@@ -150,20 +86,10 @@ function useAnimationState() {
 export function useTransform() {
   const { state, setAnimationState } = useAnimationState();
 
-  const currentState = state ?? DEFAULT_ANIMATION;
-
-  const getAnimatedTransform = useCallback(
-    (time: number): TransformState => {
-      const tempState = { ...currentState, currentTime: time };
-      return deriveTransformFromAnimationState(tempState);
-    },
-    [currentState],
-  );
-
   const applyTransform = useCallback(
     async (updates: Partial<TransformState>) => {
-      const updatedKeyframes = { ...currentState.keyframes };
-      const currentTime = currentState.currentTime;
+      const updatedKeyframes = { ...state.keyframes };
+      const currentTime = state.currentTime;
 
       for (const field of keyframeFieldNames) {
         const value = updates[field];
@@ -172,8 +98,6 @@ export function useTransform() {
         }
 
         const keyframes = updatedKeyframes[field];
-
-        // Skip if no keyframes exist for this field
         if (!hasKeyframesForField(keyframes)) {
           continue;
         }
@@ -181,7 +105,6 @@ export function useTransform() {
         const numericValue =
           typeof value === "boolean" ? (value ? 1 : 0) : value;
 
-        // If keyframes exist for this field but none at current time, add new keyframe
         if (!hasKeyframeAtTime(keyframes, currentTime)) {
           updatedKeyframes[field] = addKeyframeTo(
             keyframes,
@@ -189,7 +112,6 @@ export function useTransform() {
             numericValue,
           );
         } else {
-          // Update existing keyframe
           updatedKeyframes[field] = updateKeyframe(
             keyframes,
             currentTime,
@@ -199,9 +121,9 @@ export function useTransform() {
       }
 
       const newState = {
-        ...currentState,
+        ...state,
         baseTransform: {
-          ...currentState.baseTransform,
+          ...state.baseTransform,
           ...updates,
         },
         keyframes: updatedKeyframes,
@@ -209,68 +131,64 @@ export function useTransform() {
 
       await setAnimationState(newState);
     },
-    [currentState, setAnimationState],
+    [state, setAnimationState],
   );
 
   const updateAnimation = useCallback(
     async (updates: Partial<AnimationState>) => {
       const newState = {
-        ...currentState,
+        ...state,
         ...updates,
       };
 
       await setAnimationState(newState, newState.isPlaying);
     },
-    [currentState, setAnimationState],
+    [state, setAnimationState],
   );
 
   const addKeyframe = useCallback(
     async (fieldName: KeyframeFieldName, value: number) => {
-      const time = currentState.currentTime;
-      const existingKeyframes = currentState.keyframes[fieldName];
+      const time = state.currentTime;
+      const existingKeyframes = state.keyframes[fieldName];
       const newKeyframes = addKeyframeTo(existingKeyframes, time, value);
 
       await updateAnimation({
         keyframes: {
-          ...currentState.keyframes,
+          ...state.keyframes,
           [fieldName]: newKeyframes,
         },
       });
     },
-    [currentState, updateAnimation],
+    [state, updateAnimation],
   );
 
   const removeKeyframe = useCallback(
     async (fieldName: KeyframeFieldName) => {
-      const time = currentState.currentTime;
-      const existingKeyframes = currentState.keyframes[fieldName];
+      const time = state.currentTime;
+      const existingKeyframes = state.keyframes[fieldName];
       const newKeyframes = removeKeyframeFrom(existingKeyframes, time);
 
       await updateAnimation({
         keyframes: {
-          ...currentState.keyframes,
+          ...state.keyframes,
           [fieldName]: newKeyframes,
         },
       });
     },
-    [currentState, updateAnimation],
+    [state, updateAnimation],
   );
 
   const resetAll = useCallback(async () => {
     await setAnimationState(null);
   }, [setAnimationState]);
 
-  const transform: TransformState =
-    deriveTransformFromAnimationState(currentState);
-
   return {
-    transform,
-    animation: currentState,
+    transform: deriveTransformFromAnimationState(state),
+    animation: state,
     applyTransform,
     updateAnimation,
     addKeyframe,
     removeKeyframe,
     resetAll,
-    getAnimatedTransform,
   };
 }

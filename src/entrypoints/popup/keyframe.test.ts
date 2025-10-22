@@ -11,7 +11,9 @@ import {
   interpolateKeyframes,
   type Keyframe,
   removeKeyframeFrom,
+  type TransformState,
   updateKeyframe,
+  updateKeyframesWithTransform,
 } from "./keyframe";
 
 describe("interpolateKeyframes", () => {
@@ -334,5 +336,155 @@ describe("deriveTransformFromAnimationState", () => {
       flipHorizontal: true,
       flipVertical: false,
     });
+  });
+});
+
+describe("updateKeyframesWithTransform", () => {
+  it("skips fields with no existing keyframes", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const updates: Partial<TransformState> = {
+      rotation: 45,
+      scale: 2,
+    };
+    const result = updateKeyframesWithTransform({
+      keyframes,
+      updates,
+      currentTime: 0.5,
+    });
+    expect(result).toEqual(keyframes);
+  });
+
+  it("adds new keyframes when time doesn't exist", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [{ time: 0, value: 0 }],
+      scale: [{ time: 0, value: 1 }],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const updates: Partial<TransformState> = {
+      rotation: 45,
+      scale: 2,
+    };
+    const result = updateKeyframesWithTransform({
+      keyframes,
+      updates,
+      currentTime: 0.5,
+    });
+    expect(result.rotation).toHaveLength(2);
+    expect(result.rotation).toContainEqual({ time: 0.5, value: 45 });
+    expect(result.scale).toHaveLength(2);
+    expect(result.scale).toContainEqual({ time: 0.5, value: 2 });
+  });
+
+  it("updates existing keyframes when time exists", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [{ time: 0.5, value: 0 }],
+      scale: [{ time: 0.5, value: 1 }],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const updates: Partial<TransformState> = {
+      rotation: 45,
+      scale: 2,
+    };
+    const result = updateKeyframesWithTransform({
+      keyframes,
+      updates,
+      currentTime: 0.5,
+    });
+    expect(result.rotation).toHaveLength(1);
+    expect(result.rotation[0]).toEqual({ time: 0.5, value: 45 });
+    expect(result.scale).toHaveLength(1);
+    expect(result.scale[0]).toEqual({ time: 0.5, value: 2 });
+  });
+
+  it("converts boolean values to numeric", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [{ time: 0, value: 0 }],
+      flipVertical: [{ time: 0, value: 1 }],
+    };
+    const updates: Partial<TransformState> = {
+      flipHorizontal: true,
+      flipVertical: false,
+    };
+    const result = updateKeyframesWithTransform({
+      keyframes,
+      updates,
+      currentTime: 0.5,
+    });
+    expect(result.flipHorizontal).toHaveLength(2);
+    expect(result.flipHorizontal).toContainEqual({ time: 0.5, value: 1 });
+    expect(result.flipVertical).toHaveLength(2);
+    expect(result.flipVertical).toContainEqual({ time: 0.5, value: 0 });
+  });
+
+  it("ignores undefined values", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [{ time: 0, value: 0 }],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const updates: Partial<TransformState> = {
+      rotation: 45,
+      scale: undefined,
+    };
+    const result = updateKeyframesWithTransform({
+      keyframes,
+      updates,
+      currentTime: 0.5,
+    });
+    expect(result.rotation).toHaveLength(2);
+    expect(result.scale).toHaveLength(0);
+  });
+
+  it("preserves other keyframe fields unchanged", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [{ time: 0, value: 0 }],
+      scale: [{ time: 0.2, value: 1.5 }],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const updates: Partial<TransformState> = {
+      rotation: 45,
+    };
+    const result = updateKeyframesWithTransform({
+      keyframes,
+      updates,
+      currentTime: 0.5,
+    });
+    expect(result.scale).toEqual(keyframes.scale);
+    expect(result.translateX).toEqual(keyframes.translateX);
   });
 });

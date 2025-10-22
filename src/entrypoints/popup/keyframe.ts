@@ -141,10 +141,6 @@ export function hasKeyframeAtTime({
   return keyframes.some((kf) => kf.time === time);
 }
 
-export function hasKeyframesForField(keyframes: Keyframe[]): boolean {
-  return keyframes.length > 0;
-}
-
 export function addKeyframeTo({
   keyframes,
   time,
@@ -215,6 +211,45 @@ export const DEFAULT_ANIMATION: AnimationState = {
   currentTime: 0,
   baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
 };
+
+export function updateKeyframesWithTransform({
+  keyframes,
+  updates,
+  currentTime,
+}: {
+  keyframes: AnimationKeyframes;
+  updates: Partial<TransformState>;
+  currentTime: number;
+}): AnimationKeyframes {
+  const updatedKeyframes = { ...keyframes };
+  for (const field of keyframeFieldNames) {
+    const value = updates[field];
+    if (value === undefined) {
+      continue;
+    }
+
+    const fieldKeyframes = updatedKeyframes[field];
+    if (fieldKeyframes.length === 0) {
+      continue;
+    }
+
+    const numericValue = typeof value === "boolean" ? (value ? 1 : 0) : value;
+    if (!hasKeyframeAtTime({ keyframes: fieldKeyframes, time: currentTime })) {
+      updatedKeyframes[field] = addKeyframeTo({
+        keyframes: fieldKeyframes,
+        time: currentTime,
+        value: numericValue,
+      });
+    } else {
+      updatedKeyframes[field] = updateKeyframe({
+        keyframes: fieldKeyframes,
+        time: currentTime,
+        value: numericValue,
+      });
+    }
+  }
+  return updatedKeyframes;
+}
 
 export function deriveTransformFromAnimationState(
   state: AnimationState,

@@ -16,19 +16,31 @@ import {
 
 describe("interpolateKeyframes", () => {
   it("returns default value when keyframes array is empty", () => {
-    const result = interpolateKeyframes([], 0.5, 10);
+    const result = interpolateKeyframes({
+      keyframes: [],
+      time: 0.5,
+      defaultValue: 10,
+    });
     expect(result).toBe(10);
   });
 
   it("returns first keyframe value when time is before first keyframe", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 20 }];
-    const result = interpolateKeyframes(keyframes, 0.2, 10);
+    const result = interpolateKeyframes({
+      keyframes,
+      time: 0.2,
+      defaultValue: 10,
+    });
     expect(result).toBe(20);
   });
 
   it("returns last keyframe value when time is after last keyframe", () => {
     const keyframes: Keyframe[] = [{ time: 0.2, value: 20 }];
-    const result = interpolateKeyframes(keyframes, 0.8, 10);
+    const result = interpolateKeyframes({
+      keyframes,
+      time: 0.8,
+      defaultValue: 10,
+    });
     expect(result).toBe(20);
   });
 
@@ -37,7 +49,11 @@ describe("interpolateKeyframes", () => {
       { time: 0, value: 0 },
       { time: 1, value: 100 },
     ];
-    const result = interpolateKeyframes(keyframes, 0.5, 10);
+    const result = interpolateKeyframes({
+      keyframes,
+      time: 0.5,
+      defaultValue: 10,
+    });
     expect(result).toBe(50);
   });
 
@@ -46,7 +62,11 @@ describe("interpolateKeyframes", () => {
       { time: 1, value: 100 },
       { time: 0, value: 0 },
     ];
-    const result = interpolateKeyframes(keyframes, 0.5, 10);
+    const result = interpolateKeyframes({
+      keyframes,
+      time: 0.5,
+      defaultValue: 10,
+    });
     expect(result).toBe(50);
   });
 });
@@ -63,7 +83,7 @@ describe("findPreviousKeyframeTime", () => {
       flipHorizontal: [],
       flipVertical: [],
     };
-    const result = findPreviousKeyframeTime(keyframes, 0.5);
+    const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBeUndefined();
   });
 
@@ -81,7 +101,7 @@ describe("findPreviousKeyframeTime", () => {
       flipHorizontal: [],
       flipVertical: [],
     };
-    const result = findPreviousKeyframeTime(keyframes, 0.5);
+    const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(0.2);
   });
 });
@@ -98,7 +118,7 @@ describe("findNextKeyframeTime", () => {
       flipHorizontal: [],
       flipVertical: [],
     };
-    const result = findNextKeyframeTime(keyframes, 0.5);
+    const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBeUndefined();
   });
 
@@ -116,7 +136,7 @@ describe("findNextKeyframeTime", () => {
       flipHorizontal: [],
       flipVertical: [],
     };
-    const result = findNextKeyframeTime(keyframes, 0.5);
+    const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(0.8);
   });
 });
@@ -124,13 +144,13 @@ describe("findNextKeyframeTime", () => {
 describe("hasKeyframeAtTime", () => {
   it("returns false when no keyframe exists at the time", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = hasKeyframeAtTime(keyframes, 0.2);
+    const result = hasKeyframeAtTime({ keyframes, time: 0.2 });
     expect(result).toBe(false);
   });
 
   it("returns true when keyframe exists at the time", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = hasKeyframeAtTime(keyframes, 0.5);
+    const result = hasKeyframeAtTime({ keyframes, time: 0.5 });
     expect(result).toBe(true);
   });
 });
@@ -138,14 +158,14 @@ describe("hasKeyframeAtTime", () => {
 describe("addKeyframeTo", () => {
   it("adds a new keyframe", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = addKeyframeTo(keyframes, 0.2, 45);
+    const result = addKeyframeTo({ keyframes, time: 0.2, value: 45 });
     expect(result).toHaveLength(2);
     expect(result).toContainEqual({ time: 0.2, value: 45 });
   });
 
   it("replaces existing keyframe at the same time", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = addKeyframeTo(keyframes, 0.5, 180);
+    const result = addKeyframeTo({ keyframes, time: 0.5, value: 180 });
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({ time: 0.5, value: 180 });
   });
@@ -157,14 +177,14 @@ describe("removeKeyframeFrom", () => {
       { time: 0.2, value: 45 },
       { time: 0.5, value: 90 },
     ];
-    const result = removeKeyframeFrom(keyframes, 0.2);
+    const result = removeKeyframeFrom({ keyframes, time: 0.2 });
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({ time: 0.5, value: 90 });
   });
 
   it("returns unchanged array when keyframe does not exist", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = removeKeyframeFrom(keyframes, 0.2);
+    const result = removeKeyframeFrom({ keyframes, time: 0.2 });
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({ time: 0.5, value: 90 });
   });
@@ -173,13 +193,13 @@ describe("removeKeyframeFrom", () => {
 describe("updateKeyframe", () => {
   it("updates existing keyframe value", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = updateKeyframe(keyframes, 0.5, 180);
+    const result = updateKeyframe({ keyframes, time: 0.5, value: 180 });
     expect(result[0]).toEqual({ time: 0.5, value: 180 });
   });
 
   it("returns unchanged array when keyframe does not exist", () => {
     const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
-    const result = updateKeyframe(keyframes, 0.2, 45);
+    const result = updateKeyframe({ keyframes, time: 0.2, value: 45 });
     expect(result).toHaveLength(1);
     expect(result[0]).toEqual({ time: 0.5, value: 90 });
   });

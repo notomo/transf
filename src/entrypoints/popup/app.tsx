@@ -338,72 +338,90 @@ export function App() {
           fieldName="translateX"
           value={transform.translateX}
           onChange={(newValue) => applyTransform({ translateX: newValue })}
-          onAddKeyframe={() => addKeyframe("translateX", transform.translateX)}
+          onAddKeyframe={() =>
+            addKeyframe({
+              fieldName: "translateX",
+              value: transform.translateX,
+            })
+          }
           onRemoveKeyframe={() => removeKeyframe("translateX")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.translateX,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.translateX,
+            time: animation.currentTime,
+          })}
         />
 
         <TranslateInput
           fieldName="translateY"
           value={transform.translateY}
           onChange={(newValue) => applyTransform({ translateY: newValue })}
-          onAddKeyframe={() => addKeyframe("translateY", transform.translateY)}
+          onAddKeyframe={() =>
+            addKeyframe({
+              fieldName: "translateY",
+              value: transform.translateY,
+            })
+          }
           onRemoveKeyframe={() => removeKeyframe("translateY")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.translateY,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.translateY,
+            time: animation.currentTime,
+          })}
         />
 
         <AxisPercentInput
           fieldName="centerX"
           value={transform.centerX}
           onChange={(newValue) => applyTransform({ centerX: newValue })}
-          onAddKeyframe={() => addKeyframe("centerX", transform.centerX)}
+          onAddKeyframe={() =>
+            addKeyframe({ fieldName: "centerX", value: transform.centerX })
+          }
           onRemoveKeyframe={() => removeKeyframe("centerX")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.centerX,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.centerX,
+            time: animation.currentTime,
+          })}
         />
 
         <AxisPercentInput
           fieldName="centerY"
           value={transform.centerY}
           onChange={(newValue) => applyTransform({ centerY: newValue })}
-          onAddKeyframe={() => addKeyframe("centerY", transform.centerY)}
+          onAddKeyframe={() =>
+            addKeyframe({ fieldName: "centerY", value: transform.centerY })
+          }
           onRemoveKeyframe={() => removeKeyframe("centerY")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.centerY,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.centerY,
+            time: animation.currentTime,
+          })}
         />
 
         <RotationInput
           className="col-span-2"
           rotation={transform.rotation}
           onChange={(newValue) => applyTransform({ rotation: newValue })}
-          onAddKeyframe={() => addKeyframe("rotation", transform.rotation)}
+          onAddKeyframe={() =>
+            addKeyframe({ fieldName: "rotation", value: transform.rotation })
+          }
           onRemoveKeyframe={() => removeKeyframe("rotation")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.rotation,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.rotation,
+            time: animation.currentTime,
+          })}
         />
 
         <ScaleInput
           className="col-span-2"
           scale={transform.scale}
           onChange={(newValue) => applyTransform({ scale: newValue })}
-          onAddKeyframe={() => addKeyframe("scale", transform.scale)}
+          onAddKeyframe={() =>
+            addKeyframe({ fieldName: "scale", value: transform.scale })
+          }
           onRemoveKeyframe={() => removeKeyframe("scale")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.scale,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.scale,
+            time: animation.currentTime,
+          })}
         />
 
         <FlipCheckbox
@@ -411,13 +429,16 @@ export function App() {
           checked={transform.flipHorizontal}
           onChange={(checked) => applyTransform({ flipHorizontal: checked })}
           onAddKeyframe={() =>
-            addKeyframe("flipHorizontal", transform.flipHorizontal ? 1 : 0)
+            addKeyframe({
+              fieldName: "flipHorizontal",
+              value: transform.flipHorizontal ? 1 : 0,
+            })
           }
           onRemoveKeyframe={() => removeKeyframe("flipHorizontal")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.flipHorizontal,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.flipHorizontal,
+            time: animation.currentTime,
+          })}
         />
 
         <FlipCheckbox
@@ -425,13 +446,16 @@ export function App() {
           checked={transform.flipVertical}
           onChange={(checked) => applyTransform({ flipVertical: checked })}
           onAddKeyframe={() =>
-            addKeyframe("flipVertical", transform.flipVertical ? 1 : 0)
+            addKeyframe({
+              fieldName: "flipVertical",
+              value: transform.flipVertical ? 1 : 0,
+            })
           }
           onRemoveKeyframe={() => removeKeyframe("flipVertical")}
-          hasKeyframe={hasKeyframeAtTime(
-            animation.keyframes.flipVertical,
-            animation.currentTime,
-          )}
+          hasKeyframe={hasKeyframeAtTime({
+            keyframes: animation.keyframes.flipVertical,
+            time: animation.currentTime,
+          })}
         />
 
         <div className="col-span-2 space-y-2 bg-gray-100 px-1 py-2">

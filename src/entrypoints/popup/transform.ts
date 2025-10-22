@@ -48,18 +48,24 @@ function useAnimationState() {
       const transform = animationState
         ? deriveTransformFromAnimationState(animationState)
         : null;
-      await applyTransformCSS(transform);
+      await applyTransformCSS({ transform });
     })();
   }, []);
 
   const setAnimationState = useCallback(
-    async (newState: AnimationState | null, animated: boolean = false) => {
+    async ({
+      newState,
+      animated = false,
+    }: {
+      newState: AnimationState | null;
+      animated?: boolean;
+    }) => {
       setState(newState);
 
       const transform = newState
         ? deriveTransformFromAnimationState(newState)
         : null;
-      await applyTransformCSS(transform, animated);
+      await applyTransformCSS({ transform, animated });
 
       const stored = await animationStates.getValue();
       if (newState) {
@@ -105,18 +111,18 @@ export function useTransform() {
         const numericValue =
           typeof value === "boolean" ? (value ? 1 : 0) : value;
 
-        if (!hasKeyframeAtTime(keyframes, currentTime)) {
-          updatedKeyframes[field] = addKeyframeTo(
+        if (!hasKeyframeAtTime({ keyframes, time: currentTime })) {
+          updatedKeyframes[field] = addKeyframeTo({
             keyframes,
-            currentTime,
-            numericValue,
-          );
+            time: currentTime,
+            value: numericValue,
+          });
         } else {
-          updatedKeyframes[field] = updateKeyframe(
+          updatedKeyframes[field] = updateKeyframe({
             keyframes,
-            currentTime,
-            numericValue,
-          );
+            time: currentTime,
+            value: numericValue,
+          });
         }
       }
 
@@ -129,7 +135,7 @@ export function useTransform() {
         keyframes: updatedKeyframes,
       };
 
-      await setAnimationState(newState);
+      await setAnimationState({ newState });
     },
     [state, setAnimationState],
   );
@@ -141,16 +147,26 @@ export function useTransform() {
         ...updates,
       };
 
-      await setAnimationState(newState, newState.isPlaying);
+      await setAnimationState({ newState, animated: newState.isPlaying });
     },
     [state, setAnimationState],
   );
 
   const addKeyframe = useCallback(
-    async (fieldName: KeyframeFieldName, value: number) => {
+    async ({
+      fieldName,
+      value,
+    }: {
+      fieldName: KeyframeFieldName;
+      value: number;
+    }) => {
       const time = state.currentTime;
       const existingKeyframes = state.keyframes[fieldName];
-      const newKeyframes = addKeyframeTo(existingKeyframes, time, value);
+      const newKeyframes = addKeyframeTo({
+        keyframes: existingKeyframes,
+        time,
+        value,
+      });
 
       await updateAnimation({
         keyframes: {
@@ -166,7 +182,10 @@ export function useTransform() {
     async (fieldName: KeyframeFieldName) => {
       const time = state.currentTime;
       const existingKeyframes = state.keyframes[fieldName];
-      const newKeyframes = removeKeyframeFrom(existingKeyframes, time);
+      const newKeyframes = removeKeyframeFrom({
+        keyframes: existingKeyframes,
+        time,
+      });
 
       await updateAnimation({
         keyframes: {
@@ -179,7 +198,7 @@ export function useTransform() {
   );
 
   const resetAll = useCallback(async () => {
-    await setAnimationState(null);
+    await setAnimationState({ newState: null });
   }, [setAnimationState]);
 
   return {

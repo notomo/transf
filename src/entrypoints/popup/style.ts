@@ -23,10 +23,13 @@ async function applyCSS(style: string) {
   });
 }
 
-export async function applyTransformCSS(
-  transform: TransformState | null,
-  animated: boolean = false,
-) {
+export async function applyTransformCSS({
+  transform,
+  animated = false,
+}: {
+  transform: TransformState | null;
+  animated?: boolean;
+}) {
   if (transform === null) {
     applyCSS("");
     return;

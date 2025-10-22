@@ -86,14 +86,14 @@ function KeyframeNextPrevButton({
   const navigateToKeyframe = () => {
     switch (direction) {
       case "prev": {
-        const prevTime = findPreviousKeyframeTime(keyframes, currentTime);
+        const prevTime = findPreviousKeyframeTime({ keyframes, currentTime });
         if (prevTime !== undefined) {
           onClick(prevTime);
         }
         return;
       }
       case "next": {
-        const nextTime = findNextKeyframeTime(keyframes, currentTime);
+        const nextTime = findNextKeyframeTime({ keyframes, currentTime });
         if (nextTime !== undefined) {
           onClick(nextTime);
         }

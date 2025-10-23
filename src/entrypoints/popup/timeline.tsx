@@ -18,7 +18,7 @@ function useAnimation({
 }: {
   isPlaying: boolean;
   duration: number;
-  currentTime: number;
+  currentTime: number; // relative time 0.0-1.0
   onUpdateAnimation: (updates: { currentTime: number }) => void;
 }) {
   const animationFrameRef = useRef<number | undefined>(undefined);
@@ -31,13 +31,17 @@ function useAnimation({
       return;
     }
 
-    const startTime = Date.now() - currentTime;
+    // Convert relative time to absolute for timing calculation
+    const absoluteCurrentTime = currentTime * duration;
+    const startTime = Date.now() - absoluteCurrentTime;
 
     function animate() {
       const elapsed = Date.now() - startTime;
-      const progress = elapsed % duration;
+      const absoluteProgress = elapsed % duration;
+      // Convert back to relative time 0.0-1.0
+      const relativeProgress = absoluteProgress / duration;
 
-      onUpdateAnimation({ currentTime: progress });
+      onUpdateAnimation({ currentTime: relativeProgress });
 
       if (isPlaying) {
         animationFrameRef.current = requestAnimationFrame(animate);
@@ -121,11 +125,11 @@ function TimeIndicator({
   duration,
   onTimeChange,
 }: {
-  currentTime: number;
+  currentTime: number; // relative time 0.0-1.0
   duration: number;
-  onTimeChange: (time: number) => void;
+  onTimeChange: (time: number) => void; // relative time 0.0-1.0
 }) {
-  const currentTimePercent = (currentTime / duration) * 100;
+  const currentTimePercent = currentTime * 100;
   const timelineId = useId();
 
   return (
@@ -136,13 +140,14 @@ function TimeIndicator({
       />
       <div className="absolute inset-0 flex items-center px-2">
         <label htmlFor={timelineId} className="sr-only">
-          Timeline: {currentTime}ms
+          Timeline: {Math.round(currentTime * duration)}ms
         </label>
         <input
           id={timelineId}
           type="range"
           min="0"
-          max={duration}
+          max="1"
+          step="0.001"
           value={currentTime}
           onChange={(e) => onTimeChange(Number(e.target.value))}
           className="w-full opacity-50"
@@ -157,12 +162,10 @@ function KeyframeLine({
   fieldName,
   keyframes,
   currentTime,
-  duration,
 }: {
   fieldName: KeyframeFieldName;
-  keyframes: Array<{ time: number; value: number }>;
-  currentTime: number;
-  duration: number;
+  keyframes: Array<{ time: number; value: number }>; // time is relative 0.0-1.0
+  currentTime: number; // relative time 0.0-1.0
 }) {
   return (
     <>
@@ -183,7 +186,7 @@ function KeyframeLine({
                 : "bg-gray-400",
             )}
             style={{
-              left: `${(kf.time / duration) * 100}%`,
+              left: `${kf.time * 100}%`,
             }}
           />
         ))}
@@ -249,7 +252,6 @@ export function Timeline({
             fieldName={fieldName}
             keyframes={keyframes}
             currentTime={animation.currentTime}
-            duration={animation.duration}
           />
         ))}
       </div>

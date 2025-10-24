@@ -74,9 +74,24 @@ describe("interpolateKeyframes", () => {
 });
 
 describe("findPreviousKeyframeTime", () => {
-  it("returns undefined when no previous keyframes exist", () => {
+  it("wraps around to last keyframe when no previous keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
       rotation: [{ time: 1, value: 90 }],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
+    expect(result).toBe(1);
+  });
+
+  it("returns undefined when no keyframes exist", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [],
       scale: [],
       translateX: [],
       translateY: [],
@@ -109,9 +124,24 @@ describe("findPreviousKeyframeTime", () => {
 });
 
 describe("findNextKeyframeTime", () => {
-  it("returns undefined when no next keyframes exist", () => {
+  it("wraps around to first keyframe when no next keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
       rotation: [{ time: 0.2, value: 90 }],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
+    expect(result).toBe(0.2);
+  });
+
+  it("returns undefined when no keyframes exist", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [],
       scale: [],
       translateX: [],
       translateY: [],

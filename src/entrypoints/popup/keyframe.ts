@@ -117,7 +117,12 @@ export function findPreviousKeyframeTime({
   currentTime: number; // relative time 0.0-1.0
 }): number | undefined {
   const allTimes = getAllKeyframeTimes(keyframes);
-  return allTimes.filter((t) => t < currentTime).pop();
+  const previousTime = allTimes.filter((t) => t < currentTime).pop();
+  if (previousTime !== undefined) {
+    return previousTime;
+  }
+  // Wrap around to the last keyframe if no previous keyframe exists
+  return allTimes[allTimes.length - 1];
 }
 
 export function findNextKeyframeTime({
@@ -128,7 +133,12 @@ export function findNextKeyframeTime({
   currentTime: number; // relative time 0.0-1.0
 }): number | undefined {
   const allTimes = getAllKeyframeTimes(keyframes);
-  return allTimes.find((t) => t > currentTime);
+  const nextTime = allTimes.find((t) => t > currentTime);
+  if (nextTime !== undefined) {
+    return nextTime;
+  }
+  // Wrap around to the first keyframe if no next keyframe exists
+  return allTimes[0];
 }
 
 export function hasKeyframeAtTime({

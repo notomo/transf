@@ -24,7 +24,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.5",
     "@ls-lint/ls-lint": "^2.3.1",
-    "@playwright/test": "^1.56.0",
+    "@playwright/test": "^1.56.1",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.1",

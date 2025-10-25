@@ -8,6 +8,7 @@ import {
   findPreviousKeyframeTime,
   type KeyframeFieldName,
   keyframeFieldLabels,
+  type RelativeTime,
 } from "./keyframe";
 
 function useAnimation({
@@ -18,7 +19,7 @@ function useAnimation({
 }: {
   isPlaying: boolean;
   duration: number;
-  currentTime: number; // relative time 0.0-1.0
+  currentTime: RelativeTime;
   onUpdateAnimation: (updates: { currentTime: number }) => void;
 }) {
   const animationFrameRef = useRef<number | undefined>(undefined);
@@ -125,9 +126,9 @@ function TimeIndicator({
   duration,
   onTimeChange,
 }: {
-  currentTime: number; // relative time 0.0-1.0
+  currentTime: RelativeTime;
   duration: number;
-  onTimeChange: (time: number) => void; // relative time 0.0-1.0
+  onTimeChange: (time: RelativeTime) => void;
 }) {
   const currentTimePercent = currentTime * 100;
   const timelineId = useId();
@@ -164,8 +165,8 @@ function KeyframeLine({
   currentTime,
 }: {
   fieldName: KeyframeFieldName;
-  keyframes: Array<{ time: number; value: number }>; // time is relative 0.0-1.0
-  currentTime: number; // relative time 0.0-1.0
+  keyframes: Array<{ time: RelativeTime; value: number }>;
+  currentTime: RelativeTime;
 }) {
   return (
     <>

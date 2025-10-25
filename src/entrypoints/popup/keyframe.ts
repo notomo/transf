@@ -1,5 +1,7 @@
+export type RelativeTime = number; // 0.0-1.0
+
 export type Keyframe = {
-  time: number; // relative time 0.0-1.0
+  time: RelativeTime;
   value: number;
 };
 
@@ -44,7 +46,7 @@ export type AnimationState = {
   keyframes: AnimationKeyframes;
   duration: number;
   isPlaying: boolean;
-  currentTime: number; // relative time 0.0-1.0
+  currentTime: RelativeTime;
   baseTransform: TransformState;
 };
 
@@ -54,7 +56,7 @@ export function interpolateKeyframes({
   defaultValue,
 }: {
   keyframes: Keyframe[];
-  time: number; // relative time 0.0-1.0
+  time: RelativeTime;
   defaultValue: number;
 }): number {
   if (keyframes.length === 0) {
@@ -114,7 +116,7 @@ export function findPreviousKeyframeTime({
   currentTime,
 }: {
   keyframes: AnimationKeyframes;
-  currentTime: number; // relative time 0.0-1.0
+  currentTime: RelativeTime;
 }): number | undefined {
   const allTimes = getAllKeyframeTimes(keyframes);
   const previousTime = allTimes.filter((t) => t < currentTime).pop();
@@ -130,7 +132,7 @@ export function findNextKeyframeTime({
   currentTime,
 }: {
   keyframes: AnimationKeyframes;
-  currentTime: number; // relative time 0.0-1.0
+  currentTime: RelativeTime;
 }): number | undefined {
   const allTimes = getAllKeyframeTimes(keyframes);
   const nextTime = allTimes.find((t) => t > currentTime);
@@ -146,7 +148,7 @@ export function hasKeyframeAtTime({
   time,
 }: {
   keyframes: Keyframe[];
-  time: number; // relative time 0.0-1.0
+  time: RelativeTime;
 }): boolean {
   return keyframes.some((kf) => kf.time === time);
 }
@@ -157,7 +159,7 @@ export function addKeyframeTo({
   value,
 }: {
   keyframes: Keyframe[];
-  time: number; // relative time 0.0-1.0
+  time: RelativeTime;
   value: number;
 }): Keyframe[] {
   const newKeyframes = keyframes.filter((kf) => kf.time !== time);
@@ -170,7 +172,7 @@ export function removeKeyframeFrom({
   time,
 }: {
   keyframes: Keyframe[];
-  time: number; // relative time 0.0-1.0
+  time: RelativeTime;
 }): Keyframe[] {
   return keyframes.filter((kf) => kf.time !== time);
 }
@@ -181,7 +183,7 @@ export function updateKeyframe({
   value,
 }: {
   keyframes: Keyframe[];
-  time: number; // relative time 0.0-1.0
+  time: RelativeTime;
   value: number;
 }): Keyframe[] {
   const keyframeIndex = keyframes.findIndex((kf) => kf.time === time);
@@ -229,7 +231,7 @@ export function updateKeyframesWithTransform({
 }: {
   keyframes: AnimationKeyframes;
   updates: Partial<TransformState>;
-  currentTime: number; // relative time 0.0-1.0
+  currentTime: RelativeTime;
 }): AnimationKeyframes {
   const updatedKeyframes = { ...keyframes };
   for (const field of keyframeFieldNames) {

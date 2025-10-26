@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
+import {
+  type AnimationStateResponseMessage,
+  createGetAnimationStateMessage,
+  createResetAnimationMessage,
+  createStartAnimationMessage,
+  createUpdateAnimationStateMessage,
+  validateMessage,
+} from "@/src/lib/messages";
 import type {
   AnimationState,
   KeyframeFieldName,
@@ -13,7 +21,6 @@ import {
   removeKeyframeFrom,
   updateKeyframesWithTransform,
 } from "./keyframe";
-import { applyTransformCSS } from "./style";
 
 const animationStates = storage.defineItem<Record<string, AnimationState>>(
   "local:animationStates",
@@ -33,19 +40,32 @@ function useAnimationState() {
         currentWindow: true,
       });
       const url = tab?.url;
-      if (!url) {
+      const tabId = tab?.id;
+      if (!url || !tabId) {
         return;
       }
       setUrl(url);
 
-      const stored = await animationStates.getValue();
-      const animationState = stored[url] ?? null;
-      setState(animationState);
-
-      const transform = animationState
-        ? deriveTransformFromAnimationState(animationState)
-        : null;
-      await applyTransformCSS({ transform });
+      // Get animation state from background script
+      try {
+        const response = await browser.runtime.sendMessage(
+          createGetAnimationStateMessage(),
+        );
+        const validatedResponse = validateMessage(
+          response,
+        ) as AnimationStateResponseMessage;
+        const animationState = validatedResponse.animationState ?? null;
+        setState(animationState);
+      } catch (error) {
+        console.debug(
+          "Could not get animation state from background script:",
+          error,
+        );
+        // Fallback to storage
+        const stored = await animationStates.getValue();
+        const animationState = stored[url] ?? null;
+        setState(animationState);
+      }
     })();
   }, []);
 
@@ -59,11 +79,25 @@ function useAnimationState() {
     }) => {
       setState(newState);
 
-      const transform = newState
-        ? deriveTransformFromAnimationState(newState)
-        : null;
-      await applyTransformCSS({ transform, animated });
+      try {
+        if (newState) {
+          if (animated && newState.isPlaying) {
+            await browser.runtime.sendMessage(
+              createStartAnimationMessage(newState),
+            );
+          } else {
+            await browser.runtime.sendMessage(
+              createUpdateAnimationStateMessage(newState),
+            );
+          }
+        } else {
+          await browser.runtime.sendMessage(createResetAnimationMessage());
+        }
+      } catch (error) {
+        console.debug("Could not send message to background script:", error);
+      }
 
+      // Also save to storage as backup
       const stored = await animationStates.getValue();
       if (newState) {
         await animationStates.setValue({

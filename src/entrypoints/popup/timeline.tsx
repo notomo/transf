@@ -1,5 +1,11 @@
 import { useEffect, useId, useRef } from "react";
+import { browser } from "wxt/browser";
 import { strictEntries } from "@/src/lib/collection";
+import {
+  type AnimationStateResponseMessage,
+  createGetAnimationStateMessage,
+  validateMessage,
+} from "@/src/lib/messages";
 import { cn } from "@/src/lib/tailwind";
 import {
   type AnimationKeyframes,
@@ -13,8 +19,6 @@ import {
 
 function useAnimation({
   isPlaying,
-  duration,
-  currentTime,
   onUpdateAnimation,
 }: {
   isPlaying: boolean;
@@ -22,41 +26,44 @@ function useAnimation({
   currentTime: RelativeTime;
   onUpdateAnimation: (updates: { currentTime: number }) => void;
 }) {
-  const animationFrameRef = useRef<number | undefined>(undefined);
+  const intervalRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (!isPlaying) {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      return;
+    // Clear existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
     }
 
-    // Convert relative time to absolute for timing calculation
-    const absoluteCurrentTime = currentTime * duration;
-    const startTime = Date.now() - absoluteCurrentTime;
+    if (isPlaying) {
+      // Poll background script for current animation state
+      const pollProgress = async () => {
+        try {
+          const response = await browser.runtime.sendMessage(
+            createGetAnimationStateMessage(),
+          );
+          const validatedResponse = validateMessage(
+            response,
+          ) as AnimationStateResponseMessage;
+          if (validatedResponse.animationState) {
+            onUpdateAnimation({
+              currentTime: validatedResponse.animationState.currentTime,
+            });
+          }
+        } catch {
+          // Ignore errors
+        }
+      };
 
-    function animate() {
-      const elapsed = Date.now() - startTime;
-      const absoluteProgress = elapsed % duration;
-      // Convert back to relative time 0.0-1.0
-      const relativeProgress = absoluteProgress / duration;
-
-      onUpdateAnimation({ currentTime: relativeProgress });
-
-      if (isPlaying) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      }
+      // Poll every 100ms when playing
+      intervalRef.current = window.setInterval(pollProgress, 100);
     }
-
-    animationFrameRef.current = requestAnimationFrame(animate);
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
       }
     };
-  }, [isPlaying, duration, onUpdateAnimation, currentTime]);
+  }, [isPlaying, onUpdateAnimation]);
 }
 
 function PlayStopButton({

@@ -9,11 +9,20 @@ export default defineConfig({
     description:
       "A browser extension for page transformation (rotation, scaling, translation)",
     version: "0.0.1",
-    permissions: ["storage", "activeTab", "scripting"],
+    permissions: ["storage", "activeTab", "scripting", "tabs"],
     host_permissions: ["http://*/*", "https://*/*"],
     action: {
       default_popup: "src/entrypoints/popup/index.html",
     },
+    background: {
+      service_worker: "src/entrypoints/background.ts",
+    },
+    content_scripts: [
+      {
+        matches: ["http://*/*", "https://*/*"],
+        js: ["src/entrypoints/content.ts"],
+      },
+    ],
   },
   dev: {
     server: {

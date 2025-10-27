@@ -5,7 +5,7 @@ import {
   generateCSSKeyframes,
   generateStaticTransformCSS,
   hasKeyframes,
-} from "@/src/lib/css-keyframes";
+} from "@/src/feature/css-keyframe";
 import {
   createAnimationProgressMessage,
   createAnimationStateResponseMessage,
@@ -13,7 +13,7 @@ import {
   type StartAnimationMessage,
   type UpdateAnimationStateMessage,
   validateMessage,
-} from "@/src/lib/messages";
+} from "@/src/feature/message";
 
 class AnimationController {
   private styleElement: HTMLStyleElement | null = null;

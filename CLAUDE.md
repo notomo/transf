@@ -60,3 +60,8 @@ npm run check_all
 - Vitest for testing framework
 - ls-lint enforces kebab-case file naming for TypeScript files
 - TailwindCSS for styling with custom configuration
+
+## Directory Structure Guidelines
+
+- **`src/lib/`**: Contains generic utility functions and libraries that are not application-specific. This directory should not contain any business logic specific to the browser extension.
+- **`src/feature/`**: Contains application-specific business logic, feature implementations, and domain-specific utilities that are tailored to the extension's functionality.

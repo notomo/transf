@@ -8,7 +8,7 @@ import {
   type StartAnimationMessage,
   type UpdateAnimationStateMessage,
   validateMessage,
-} from "@/src/lib/messages";
+} from "@/src/feature/message";
 
 // Storage for animation states per tab URL
 const animationStates = storage.defineItem<Record<string, AnimationState>>(

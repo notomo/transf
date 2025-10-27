@@ -1,11 +1,11 @@
 import { useEffect, useId, useRef } from "react";
 import { browser } from "wxt/browser";
-import { strictEntries } from "@/src/lib/collection";
 import {
   type AnimationStateResponseMessage,
   createGetAnimationStateMessage,
   validateMessage,
-} from "@/src/lib/messages";
+} from "@/src/feature/message";
+import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
 import {
   type AnimationKeyframes,

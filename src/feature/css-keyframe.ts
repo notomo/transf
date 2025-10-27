@@ -8,7 +8,7 @@ export interface CSSAnimationConfig {
 }
 
 function generateUniqueAnimationName(): string {
-  return `transf-animation-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  return `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 function formatTransformValue(

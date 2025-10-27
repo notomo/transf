@@ -8,7 +8,7 @@ import {
   createStartAnimationMessage,
   createUpdateAnimationStateMessage,
   validateMessage,
-} from "@/src/lib/messages";
+} from "@/src/feature/message";
 import type {
   AnimationState,
   KeyframeFieldName,

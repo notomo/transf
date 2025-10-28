@@ -190,3 +190,210 @@ export function createResetAnimationMessage(): ResetAnimationMessage {
 export function validateMessage(data: unknown): Message {
   return v.parse(MessageSchema, data);
 }
+
+// Message handlers
+import { browser } from "wxt/browser";
+import { storage } from "wxt/utils/storage";
+
+// Storage for animation states per tab URL
+const animationStates = storage.defineItem<Record<string, AnimationState>>(
+  "local:animationStates",
+  {
+    defaultValue: {},
+  },
+);
+
+// In-memory storage for current tab animation states
+const tabAnimationStates = new Map<number, AnimationState>();
+
+type MessageResponse =
+  | { type: "message"; message: string }
+  | { type: "response"; response: unknown };
+
+export async function handleMessage(
+  rawMessage: unknown,
+): Promise<MessageResponse> {
+  const message = validateMessage(rawMessage);
+
+  const typ = message.type;
+  switch (typ) {
+    case "START_ANIMATION":
+      return await handleStartAnimationMessage(message);
+    case "STOP_ANIMATION":
+      return await handleStopAnimationMessage(message);
+    case "UPDATE_ANIMATION_STATE":
+      return await handleUpdateAnimationStateMessage(message);
+    case "GET_ANIMATION_STATE":
+      return await handleGetAnimationStateMessage(message);
+    case "ANIMATION_PROGRESS":
+      return await handleAnimationProgressMessage(message);
+    case "RESET_ANIMATION":
+      return await handleResetAnimationMessage(message);
+    case "ANIMATION_STATE_RESPONSE":
+      return {
+        type: "message",
+        message: `TODO`,
+      };
+    default:
+      return {
+        type: "message",
+        message: `Unknown message type: ${typ satisfies never}`,
+      };
+  }
+}
+
+async function handleStartAnimationMessage(
+  message: StartAnimationMessage,
+): Promise<MessageResponse> {
+  const { tabId, url } = await getCurrentTabInfo();
+  if (!tabId || !url)
+    return { type: "message", message: "No active tab found" };
+
+  tabAnimationStates.set(tabId, message.animationState);
+  await saveAnimationState(url, message.animationState);
+
+  await sendMessageToTab(tabId, message);
+
+  return { type: "message", message: "Animation started" };
+}
+
+async function handleStopAnimationMessage(
+  message: StopAnimationMessage,
+): Promise<MessageResponse> {
+  const { tabId, url } = await getCurrentTabInfo();
+  if (!tabId || !url)
+    return { type: "message", message: "No active tab found" };
+
+  const currentState = tabAnimationStates.get(tabId);
+  if (currentState) {
+    const updatedState = { ...currentState, isPlaying: false };
+    tabAnimationStates.set(tabId, updatedState);
+    await saveAnimationState(url, updatedState);
+
+    await sendMessageToTab(tabId, message);
+  }
+
+  return { type: "message", message: "Animation stopped" };
+}
+
+async function handleUpdateAnimationStateMessage(
+  message: UpdateAnimationStateMessage,
+): Promise<MessageResponse> {
+  const { tabId, url } = await getCurrentTabInfo();
+  if (!tabId || !url)
+    return { type: "message", message: "No active tab found" };
+
+  tabAnimationStates.set(tabId, message.animationState);
+  await saveAnimationState(url, message.animationState);
+
+  await sendMessageToTab(tabId, message);
+
+  return { type: "message", message: "Animation state updated" };
+}
+
+async function handleGetAnimationStateMessage(
+  _message: GetAnimationStateMessage,
+): Promise<MessageResponse> {
+  const { url } = await getCurrentTabInfo();
+  const state = await getAnimationState(url);
+
+  return {
+    type: "response",
+    response: createAnimationStateResponseMessage(state),
+  };
+}
+
+async function handleAnimationProgressMessage(
+  message: AnimationProgressMessage,
+): Promise<MessageResponse> {
+  const { tabId, url } = await getCurrentTabInfo();
+  if (!tabId || !url)
+    return { type: "message", message: "No active tab found" };
+
+  const currentState = tabAnimationStates.get(tabId);
+  if (currentState) {
+    const updatedState = {
+      ...currentState,
+      currentTime: message.currentTime,
+      isPlaying: message.isPlaying,
+    };
+    tabAnimationStates.set(tabId, updatedState);
+    await saveAnimationState(url, updatedState);
+  }
+
+  return { type: "message", message: "Animation progress updated" };
+}
+
+async function handleResetAnimationMessage(
+  message: ResetAnimationMessage,
+): Promise<MessageResponse> {
+  const { tabId, url } = await getCurrentTabInfo();
+  if (!tabId || !url)
+    return { type: "message", message: "No active tab found" };
+
+  tabAnimationStates.delete(tabId);
+
+  const stored = await animationStates.getValue();
+  const updatedStored = { ...stored };
+  delete updatedStored[url];
+  await animationStates.setValue(updatedStored);
+
+  await sendMessageToTab(tabId, message);
+
+  return { type: "message", message: "Animation reset" };
+}
+
+async function getCurrentTabInfo(): Promise<{ tabId?: number; url?: string }> {
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+  return { tabId: activeTab?.id, url: activeTab?.url };
+}
+
+async function getAnimationState(
+  url?: string,
+): Promise<AnimationState | undefined> {
+  if (!url) return undefined;
+
+  const stored = await animationStates.getValue();
+  return stored[url];
+}
+
+async function saveAnimationState(
+  url: string,
+  state: AnimationState,
+): Promise<void> {
+  const stored = await animationStates.getValue();
+  await animationStates.setValue({
+    ...stored,
+    [url]: state,
+  });
+}
+
+async function sendMessageToTab(
+  tabId: number,
+  message: Message,
+): Promise<void> {
+  await browser.tabs.sendMessage(tabId, message);
+}
+
+export async function restoreAnimationForTab(tabId: number): Promise<void> {
+  const tab = await browser.tabs.get(tabId);
+  if (!tab.url) return;
+
+  const savedState = await getAnimationState(tab.url);
+  if (savedState) {
+    tabAnimationStates.set(tabId, savedState);
+
+    await sendMessageToTab(tabId, {
+      type: "UPDATE_ANIMATION_STATE",
+      timestamp: Date.now(),
+      animationState: savedState,
+    });
+  }
+}
+
+export function cleanupTabAnimation(tabId: number): void {
+  tabAnimationStates.delete(tabId);
+}

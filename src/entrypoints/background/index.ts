@@ -11,13 +11,19 @@ export default defineBackground({
       (rawMessage, _sender, sendResponse) => {
         handleMessage(rawMessage)
           .then((response) => {
-            if (response.type === "message") {
-              console.info(response.message);
-            } else if (response.type === "response") {
-              sendResponse(response.response);
-              return;
+            const typ = response.type;
+            switch (typ) {
+              case "message":
+                console.info(response.message);
+                sendResponse({ success: true });
+                break;
+              case "response":
+                sendResponse(response.response);
+                break;
+              default:
+                typ satisfies never;
+                sendResponse({ success: true });
             }
-            sendResponse({ success: true });
           })
           .catch((error) => {
             console.error("Error handling message:", error);

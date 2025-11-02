@@ -84,14 +84,9 @@ export function useMessageHandler({
       _sender: unknown,
       sendResponse: (response?: unknown) => void,
     ) => {
-      try {
-        const validatedMessage = validateMessage(message);
-        handleMessage(validatedMessage, sendResponse);
-        return true;
-      } catch (error) {
-        console.error("Invalid message received in content script:", error);
-        return false;
-      }
+      const validatedMessage = validateMessage(message);
+      handleMessage(validatedMessage, sendResponse);
+      return true;
     };
 
     browser.runtime.onMessage.addListener(messageListener);

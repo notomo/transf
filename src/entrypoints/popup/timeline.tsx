@@ -37,20 +37,16 @@ function useAnimation({
     if (isPlaying) {
       // Poll background script for current animation state
       const pollProgress = async () => {
-        try {
-          const response = await browser.runtime.sendMessage(
-            createGetAnimationStateMessage(),
-          );
-          const validatedResponse = validateMessage(
-            response,
-          ) as AnimationStateResponseMessage;
-          if (validatedResponse.animationState) {
-            onUpdateAnimation({
-              currentTime: validatedResponse.animationState.currentTime,
-            });
-          }
-        } catch {
-          // Ignore errors
+        const response = await browser.runtime.sendMessage(
+          createGetAnimationStateMessage(),
+        );
+        const validatedResponse = validateMessage(
+          response,
+        ) as AnimationStateResponseMessage;
+        if (validatedResponse.animationState) {
+          onUpdateAnimation({
+            currentTime: validatedResponse.animationState.currentTime,
+          });
         }
       };
 

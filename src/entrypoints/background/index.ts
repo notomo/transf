@@ -9,26 +9,21 @@ export default defineBackground({
     // Setup message listener
     browser.runtime.onMessage.addListener(
       (rawMessage, _sender, sendResponse) => {
-        handleMessage(rawMessage)
-          .then((response) => {
-            const typ = response.type;
-            switch (typ) {
-              case "message":
-                console.info(response.message);
-                sendResponse({ success: true });
-                break;
-              case "response":
-                sendResponse(response.response);
-                break;
-              default:
-                typ satisfies never;
-                sendResponse({ success: true });
-            }
-          })
-          .catch((error) => {
-            console.error("Error handling message:", error);
-            sendResponse({ success: false, error: error.message });
-          });
+        handleMessage(rawMessage).then((response) => {
+          const typ = response.type;
+          switch (typ) {
+            case "message":
+              console.info(response.message);
+              sendResponse({ success: true });
+              break;
+            case "response":
+              sendResponse(response.response);
+              break;
+            default:
+              typ satisfies never;
+              sendResponse({ success: true });
+          }
+        });
         // Return true to indicate async response
         return true;
       },

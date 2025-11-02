@@ -47,25 +47,14 @@ function useAnimationState() {
       setUrl(url);
 
       // Get animation state from background script
-      try {
-        const response = await browser.runtime.sendMessage(
-          createGetAnimationStateMessage(),
-        );
-        const validatedResponse = validateMessage(
-          response,
-        ) as AnimationStateResponseMessage;
-        const animationState = validatedResponse.animationState ?? null;
-        setState(animationState);
-      } catch (error) {
-        console.debug(
-          "Could not get animation state from background script:",
-          error,
-        );
-        // Fallback to storage
-        const stored = await animationStates.getValue();
-        const animationState = stored[url] ?? null;
-        setState(animationState);
-      }
+      const response = await browser.runtime.sendMessage(
+        createGetAnimationStateMessage(),
+      );
+      const validatedResponse = validateMessage(
+        response,
+      ) as AnimationStateResponseMessage;
+      const animationState = validatedResponse.animationState ?? null;
+      setState(animationState);
     })();
   }, []);
 
@@ -79,22 +68,18 @@ function useAnimationState() {
     }) => {
       setState(newState);
 
-      try {
-        if (newState) {
-          if (animated && newState.isPlaying) {
-            await browser.runtime.sendMessage(
-              createStartAnimationMessage(newState),
-            );
-          } else {
-            await browser.runtime.sendMessage(
-              createUpdateAnimationStateMessage(newState),
-            );
-          }
+      if (newState) {
+        if (animated && newState.isPlaying) {
+          await browser.runtime.sendMessage(
+            createStartAnimationMessage(newState),
+          );
         } else {
-          await browser.runtime.sendMessage(createResetAnimationMessage());
+          await browser.runtime.sendMessage(
+            createUpdateAnimationStateMessage(newState),
+          );
         }
-      } catch (error) {
-        console.debug("Could not send message to background script:", error);
+      } else {
+        await browser.runtime.sendMessage(createResetAnimationMessage());
       }
 
       // Also save to storage as backup

@@ -35,16 +35,12 @@ export function useProgressTracking(
         const updatedState = updateCurrentTime(prevState);
         const currentTime = calculateCurrentTime(updatedState);
 
-        browser.runtime
-          .sendMessage(
-            createAnimationProgressMessage(
-              currentTime,
-              updatedState.currentAnimationState?.isPlaying ?? false,
-            ),
-          )
-          .catch((error) => {
-            console.debug("Could not send progress message:", error);
-          });
+        browser.runtime.sendMessage(
+          createAnimationProgressMessage(
+            currentTime,
+            updatedState.currentAnimationState?.isPlaying ?? false,
+          ),
+        );
 
         return updatedState;
       });

@@ -1,8 +1,4 @@
-import {
-  cleanupTabAnimation,
-  handleMessage,
-  restoreAnimationForTab,
-} from "@/src/feature/message";
+import { handleMessage, restoreAnimationForTab } from "@/src/feature/message";
 
 export default defineBackground({
   main() {
@@ -40,11 +36,6 @@ export default defineBackground({
       if (changeInfo.status === "complete" && tab.url) {
         await restoreAnimationForTab(tabId);
       }
-    });
-
-    // Clean up when tab is removed
-    browser.tabs.onRemoved.addListener((tabId) => {
-      cleanupTabAnimation(tabId);
     });
   },
 });

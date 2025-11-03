@@ -162,9 +162,6 @@ const animationStates = storage.defineItem<Record<string, AnimationState>>(
   },
 );
 
-// In-memory storage for current tab animation states
-const tabAnimationStates = new Map<number, AnimationState>();
-
 type MessageResponse =
   | { type: "message"; message: string }
   | { type: "response"; response: unknown };
@@ -208,7 +205,6 @@ async function handleStartAnimationMessage(
   if (!tabId || !url)
     return { type: "message", message: "No active tab found" };
 
-  tabAnimationStates.set(tabId, message.animationState);
   await saveAnimationState(url, message.animationState);
 
   await sendMessageToTab(tabId, message);
@@ -223,10 +219,9 @@ async function handleStopAnimationMessage(
   if (!tabId || !url)
     return { type: "message", message: "No active tab found" };
 
-  const currentState = tabAnimationStates.get(tabId);
+  const currentState = await getAnimationState(url);
   if (currentState) {
     const updatedState = { ...currentState, isPlaying: false };
-    tabAnimationStates.set(tabId, updatedState);
     await saveAnimationState(url, updatedState);
 
     await sendMessageToTab(tabId, message);
@@ -242,7 +237,6 @@ async function handleUpdateAnimationStateMessage(
   if (!tabId || !url)
     return { type: "message", message: "No active tab found" };
 
-  tabAnimationStates.set(tabId, message.animationState);
   await saveAnimationState(url, message.animationState);
 
   await sendMessageToTab(tabId, message);
@@ -269,14 +263,13 @@ async function handleAnimationProgressMessage(
   if (!tabId || !url)
     return { type: "message", message: "No active tab found" };
 
-  const currentState = tabAnimationStates.get(tabId);
+  const currentState = await getAnimationState(url);
   if (currentState) {
     const updatedState = {
       ...currentState,
       currentTime: message.currentTime,
       isPlaying: message.isPlaying,
     };
-    tabAnimationStates.set(tabId, updatedState);
     await saveAnimationState(url, updatedState);
   }
 
@@ -289,8 +282,6 @@ async function handleResetAnimationMessage(
   const { tabId, url } = await getCurrentTabInfo();
   if (!tabId || !url)
     return { type: "message", message: "No active tab found" };
-
-  tabAnimationStates.delete(tabId);
 
   const stored = await animationStates.getValue();
   const updatedStored = { ...stored };
@@ -343,18 +334,12 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
 
   const savedState = await getAnimationState(tab.url);
   if (savedState) {
-    tabAnimationStates.set(tabId, savedState);
-
     await sendMessageToTab(tabId, {
       type: "UPDATE_ANIMATION_STATE",
       timestamp: Date.now(),
       animationState: savedState,
     });
   }
-}
-
-export function cleanupTabAnimation(tabId: number): void {
-  tabAnimationStates.delete(tabId);
 }
 
 export async function sendGetAnimationStateMessage(): Promise<AnimationStateResponseMessage> {

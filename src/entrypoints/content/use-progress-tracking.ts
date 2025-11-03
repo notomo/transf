@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
 import {
@@ -8,78 +8,35 @@ import {
 import { createAnimationProgressMessage } from "@/src/feature/message";
 
 export function useProgressTracking(
-  controllerState: AnimationControllerState,
+  isPlaying: boolean,
   setControllerState: React.Dispatch<
     React.SetStateAction<AnimationControllerState>
   >,
 ) {
-  const progressIntervalRef = useRef<number | null>(null);
+  const trackProgress = useEffectEvent(() => {
+    setControllerState((prevState) => {
+      const updatedState = updateCurrentTime(prevState);
+      const currentTime = calculateCurrentTime(updatedState);
 
-  const startProgressTracking = useCallback(() => {
-    // Stop any existing tracking
-    if (progressIntervalRef.current !== null) {
-      clearTimeout(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
+      browser.runtime.sendMessage(
+        createAnimationProgressMessage(
+          currentTime,
+          updatedState.currentAnimationState?.isPlaying ?? false,
+        ),
+      );
 
-    if (!controllerState.currentAnimationState?.isPlaying) {
+      return updatedState;
+    });
+  });
+
+  useEffect(() => {
+    if (!isPlaying) {
       return;
     }
 
-    const trackProgress = () => {
-      if (!controllerState.currentAnimationState?.isPlaying) {
-        return;
-      }
-
-      setControllerState((prevState) => {
-        const updatedState = updateCurrentTime(prevState);
-        const currentTime = calculateCurrentTime(updatedState);
-
-        browser.runtime.sendMessage(
-          createAnimationProgressMessage(
-            currentTime,
-            updatedState.currentAnimationState?.isPlaying ?? false,
-          ),
-        );
-
-        return updatedState;
-      });
-
-      progressIntervalRef.current = window.setTimeout(trackProgress, 50);
+    const intervalId = window.setInterval(trackProgress, 50);
+    return () => {
+      clearInterval(intervalId);
     };
-
-    progressIntervalRef.current = window.setTimeout(trackProgress, 50);
-  }, [controllerState.currentAnimationState?.isPlaying, setControllerState]);
-
-  const stopProgressTracking = useCallback(() => {
-    if (progressIntervalRef.current !== null) {
-      clearTimeout(progressIntervalRef.current);
-      progressIntervalRef.current = null;
-    }
-  }, []);
-
-  // Effect to handle automatic tracking based on animation state
-  useEffect(() => {
-    if (controllerState.currentAnimationState?.isPlaying) {
-      startProgressTracking();
-    } else {
-      stopProgressTracking();
-    }
-
-    return stopProgressTracking;
-  }, [
-    controllerState.currentAnimationState?.isPlaying,
-    startProgressTracking,
-    stopProgressTracking,
-  ]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return stopProgressTracking;
-  }, [stopProgressTracking]);
-
-  return {
-    startProgressTracking,
-    stopProgressTracking,
-  };
+  }, [isPlaying]);
 }

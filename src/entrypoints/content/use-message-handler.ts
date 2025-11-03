@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
 import {
@@ -22,7 +22,7 @@ export function useMessageHandler({
   onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
   onResetAnimation: () => void;
 }) {
-  const handleMessage = useCallback(
+  const handleMessage = useEffectEvent(
     (message: Message, sendResponse: (response?: unknown) => void) => {
       console.log("Content script received message:", message.type);
 
@@ -69,13 +69,6 @@ export function useMessageHandler({
           sendResponse({ success: false, error: "Unknown message type" });
       }
     },
-    [
-      controllerState,
-      onStartAnimation,
-      onStopAnimation,
-      onUpdateAnimationState,
-      onResetAnimation,
-    ],
   );
 
   useEffect(() => {
@@ -94,5 +87,5 @@ export function useMessageHandler({
     return () => {
       browser.runtime.onMessage.removeListener(messageListener);
     };
-  }, [handleMessage]);
+  }, []);
 }

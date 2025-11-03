@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from "react";
+import { useEffect, useEffectEvent, useId } from "react";
 import { browser } from "wxt/browser";
 import {
   type AnimationStateResponseMessage,
@@ -26,40 +26,30 @@ function useAnimation({
   currentTime: RelativeTime;
   onUpdateAnimation: (updates: { currentTime: number }) => void;
 }) {
-  const intervalRef = useRef<number | undefined>(undefined);
+  const pollProgress = useEffectEvent(async () => {
+    const response = await browser.runtime.sendMessage(
+      createGetAnimationStateMessage(),
+    );
+    const validatedResponse = validateMessage(
+      response,
+    ) as AnimationStateResponseMessage;
+    if (validatedResponse.animationState) {
+      onUpdateAnimation({
+        currentTime: validatedResponse.animationState.currentTime,
+      });
+    }
+  });
 
   useEffect(() => {
-    // Clear existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
+    if (!isPlaying) {
+      return;
     }
 
-    if (isPlaying) {
-      // Poll background script for current animation state
-      const pollProgress = async () => {
-        const response = await browser.runtime.sendMessage(
-          createGetAnimationStateMessage(),
-        );
-        const validatedResponse = validateMessage(
-          response,
-        ) as AnimationStateResponseMessage;
-        if (validatedResponse.animationState) {
-          onUpdateAnimation({
-            currentTime: validatedResponse.animationState.currentTime,
-          });
-        }
-      };
-
-      // Poll every 100ms when playing
-      intervalRef.current = window.setInterval(pollProgress, 100);
-    }
-
+    const intervalId = window.setInterval(pollProgress, 100);
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
+      clearInterval(intervalId);
     };
-  }, [isPlaying, onUpdateAnimation]);
+  }, [isPlaying]);
 }
 
 function PlayStopButton({

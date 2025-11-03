@@ -207,7 +207,7 @@ async function handleStartAnimationMessage(
 
   await saveAnimationState(url, message.animationState);
 
-  await sendMessageToTab(tabId, message);
+  await browser.tabs.sendMessage(tabId, message);
 
   return { type: "message", message: "Animation started" };
 }
@@ -224,7 +224,7 @@ async function handleStopAnimationMessage(
     const updatedState = { ...currentState, isPlaying: false };
     await saveAnimationState(url, updatedState);
 
-    await sendMessageToTab(tabId, message);
+    await browser.tabs.sendMessage(tabId, message);
   }
 
   return { type: "message", message: "Animation stopped" };
@@ -239,7 +239,7 @@ async function handleUpdateAnimationStateMessage(
 
   await saveAnimationState(url, message.animationState);
 
-  await sendMessageToTab(tabId, message);
+  await browser.tabs.sendMessage(tabId, message);
 
   return { type: "message", message: "Animation state updated" };
 }
@@ -288,7 +288,7 @@ async function handleResetAnimationMessage(
   delete updatedStored[url];
   await animationStates.setValue(updatedStored);
 
-  await sendMessageToTab(tabId, message);
+  await browser.tabs.sendMessage(tabId, message);
 
   return { type: "message", message: "Animation reset" };
 }
@@ -321,24 +321,18 @@ async function saveAnimationState(
   });
 }
 
-async function sendMessageToTab(
-  tabId: number,
-  message: Message,
-): Promise<void> {
-  await browser.tabs.sendMessage(tabId, message);
-}
-
 export async function restoreAnimationForTab(tabId: number): Promise<void> {
   const tab = await browser.tabs.get(tabId);
   if (!tab.url) return;
 
   const savedState = await getAnimationState(tab.url);
   if (savedState) {
-    await sendMessageToTab(tabId, {
+    const message: UpdateAnimationStateMessage = {
       type: "UPDATE_ANIMATION_STATE",
       timestamp: Date.now(),
       animationState: savedState,
-    });
+    };
+    await browser.tabs.sendMessage(tabId, message);
   }
 }
 

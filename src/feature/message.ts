@@ -123,40 +123,6 @@ export type ResetAnimationMessage = v.InferOutput<
 export type Message = v.InferOutput<typeof MessageSchema>;
 
 // Message creator functions
-export function createStartAnimationMessage(
-  animationState: AnimationState,
-): StartAnimationMessage {
-  return {
-    type: "START_ANIMATION",
-    timestamp: Date.now(),
-    animationState,
-  };
-}
-
-export function createStopAnimationMessage(): StopAnimationMessage {
-  return {
-    type: "STOP_ANIMATION",
-    timestamp: Date.now(),
-  };
-}
-
-export function createUpdateAnimationStateMessage(
-  animationState: AnimationState,
-): UpdateAnimationStateMessage {
-  return {
-    type: "UPDATE_ANIMATION_STATE",
-    timestamp: Date.now(),
-    animationState,
-  };
-}
-
-export function createGetAnimationStateMessage(): GetAnimationStateMessage {
-  return {
-    type: "GET_ANIMATION_STATE",
-    timestamp: Date.now(),
-  };
-}
-
 export function createAnimationStateResponseMessage(
   animationState?: AnimationState,
 ): AnimationStateResponseMessage {
@@ -176,13 +142,6 @@ export function createAnimationProgressMessage(
     timestamp: Date.now(),
     currentTime,
     isPlaying,
-  };
-}
-
-export function createResetAnimationMessage(): ResetAnimationMessage {
-  return {
-    type: "RESET_ANIMATION",
-    timestamp: Date.now(),
   };
 }
 
@@ -396,4 +355,43 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
 
 export function cleanupTabAnimation(tabId: number): void {
   tabAnimationStates.delete(tabId);
+}
+
+export async function sendGetAnimationStateMessage(): Promise<AnimationStateResponseMessage> {
+  const message: GetAnimationStateMessage = {
+    type: "GET_ANIMATION_STATE",
+    timestamp: Date.now(),
+  };
+  const response = await browser.runtime.sendMessage(message);
+  return v.parse(AnimationStateResponseMessageSchema, response);
+}
+
+export async function sendStartAnimationMessage(
+  animationState: AnimationState,
+): Promise<void> {
+  const message: StartAnimationMessage = {
+    type: "START_ANIMATION",
+    timestamp: Date.now(),
+    animationState,
+  };
+  await browser.runtime.sendMessage(message);
+}
+
+export async function sendUpdateAnimationStateMessage(
+  animationState: AnimationState,
+): Promise<void> {
+  const message: UpdateAnimationStateMessage = {
+    type: "UPDATE_ANIMATION_STATE",
+    timestamp: Date.now(),
+    animationState,
+  };
+  await browser.runtime.sendMessage(message);
+}
+
+export async function sendResetAnimationMessage(): Promise<void> {
+  const message: ResetAnimationMessage = {
+    type: "RESET_ANIMATION",
+    timestamp: Date.now(),
+  };
+  await browser.runtime.sendMessage(message);
 }

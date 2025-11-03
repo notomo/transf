@@ -2,12 +2,10 @@ import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
 import {
-  type AnimationStateResponseMessage,
-  createGetAnimationStateMessage,
-  createResetAnimationMessage,
-  createStartAnimationMessage,
-  createUpdateAnimationStateMessage,
-  validateMessage,
+  sendGetAnimationStateMessage,
+  sendResetAnimationMessage,
+  sendStartAnimationMessage,
+  sendUpdateAnimationStateMessage,
 } from "@/src/feature/message";
 import type {
   AnimationState,
@@ -46,14 +44,8 @@ function useAnimationState() {
       }
       setUrl(url);
 
-      // Get animation state from background script
-      const response = await browser.runtime.sendMessage(
-        createGetAnimationStateMessage(),
-      );
-      const validatedResponse = validateMessage(
-        response,
-      ) as AnimationStateResponseMessage;
-      const animationState = validatedResponse.animationState ?? null;
+      const response = await sendGetAnimationStateMessage();
+      const animationState = response.animationState ?? null;
       setState(animationState);
     })();
   }, []);
@@ -70,16 +62,12 @@ function useAnimationState() {
 
       if (newState) {
         if (animated && newState.isPlaying) {
-          await browser.runtime.sendMessage(
-            createStartAnimationMessage(newState),
-          );
+          await sendStartAnimationMessage(newState);
         } else {
-          await browser.runtime.sendMessage(
-            createUpdateAnimationStateMessage(newState),
-          );
+          await sendUpdateAnimationStateMessage(newState);
         }
       } else {
-        await browser.runtime.sendMessage(createResetAnimationMessage());
+        await sendResetAnimationMessage();
       }
 
       // Also save to storage as backup

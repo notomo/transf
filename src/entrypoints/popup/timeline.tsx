@@ -1,10 +1,5 @@
 import { useEffect, useEffectEvent, useId } from "react";
-import { browser } from "wxt/browser";
-import {
-  type AnimationStateResponseMessage,
-  createGetAnimationStateMessage,
-  validateMessage,
-} from "@/src/feature/message";
+import { sendGetAnimationStateMessage } from "@/src/feature/message";
 import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
 import {
@@ -27,15 +22,10 @@ function useAnimation({
   onUpdateAnimation: (updates: { currentTime: number }) => void;
 }) {
   const pollProgress = useEffectEvent(async () => {
-    const response = await browser.runtime.sendMessage(
-      createGetAnimationStateMessage(),
-    );
-    const validatedResponse = validateMessage(
-      response,
-    ) as AnimationStateResponseMessage;
-    if (validatedResponse.animationState) {
+    const response = await sendGetAnimationStateMessage();
+    if (response.animationState) {
       onUpdateAnimation({
-        currentTime: validatedResponse.animationState.currentTime,
+        currentTime: response.animationState.currentTime,
       });
     }
   });

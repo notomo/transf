@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent, useId } from "react";
-import { sendGetAnimationStateMessage } from "@/src/feature/message";
+import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
 import {

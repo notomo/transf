@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
-import {
-  sendGetAnimationStateMessage,
-  sendResetAnimationMessage,
-  sendStartAnimationMessage,
-  sendUpdateAnimationStateMessage,
-} from "@/src/feature/message";
+import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
+import { sendResetAnimationMessage } from "@/src/feature/message/reset-animation";
+import { sendStartAnimationMessage } from "@/src/feature/message/start-animation";
+import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import type {
   AnimationState,
   KeyframeFieldName,

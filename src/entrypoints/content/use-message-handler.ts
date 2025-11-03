@@ -1,13 +1,10 @@
 import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
-import {
-  createAnimationStateResponseMessage,
-  type Message,
-  type StartAnimationMessage,
-  type UpdateAnimationStateMessage,
-  validateMessage,
-} from "@/src/feature/message";
+import { type Message, validateMessage } from "@/src/feature/message";
+import { createAnimationStateResponseMessage } from "@/src/feature/message/animation-state-response";
+import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
+import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useMessageHandler({
   controllerState,

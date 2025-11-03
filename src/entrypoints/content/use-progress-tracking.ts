@@ -5,7 +5,7 @@ import {
   calculateCurrentTime,
   updateCurrentTime,
 } from "@/src/feature/animation-controller";
-import { createAnimationProgressMessage } from "@/src/feature/message";
+import { createAnimationProgressMessage } from "@/src/feature/message/animation-progress";
 
 export function useProgressTracking(
   isPlaying: boolean,

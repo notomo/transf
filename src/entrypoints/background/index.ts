@@ -1,8 +1,8 @@
-import { handleMessage, restoreAnimationForTab } from "@/src/feature/message";
+import { handleMessage } from "@/src/feature/message";
+import { restoreAnimationForTab } from "@/src/feature/message/update-animation-state";
 
 export default defineBackground({
   main() {
-    // Setup message listener
     browser.runtime.onMessage.addListener(
       (rawMessage, _sender, sendResponse) => {
         handleMessage(rawMessage).then((response) => {

@@ -7,10 +7,8 @@ import {
   stopAnimation,
   updateAnimationState,
 } from "@/src/feature/animation-controller";
-import type {
-  StartAnimationMessage,
-  UpdateAnimationStateMessage,
-} from "@/src/feature/message";
+import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
+import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useAnimationController() {
   const [controllerState, setControllerState] =

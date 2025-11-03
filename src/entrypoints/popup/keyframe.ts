@@ -1,53 +1,31 @@
-export type RelativeTime = number; // 0.0-1.0
+import type {
+  AnimationKeyframes,
+  AnimationState,
+  Keyframe,
+  KeyframeFieldName,
+  RelativeTime,
+  TransformState,
+} from "@/src/feature/animation-state";
+import {
+  DEFAULT_ANIMATION,
+  DEFAULT_TRANSFORM_VALUES,
+  keyframeFieldLabels,
+  keyframeFieldNames,
+} from "@/src/feature/animation-state";
 
-export type Keyframe = {
-  time: RelativeTime;
-  value: number;
+export type {
+  RelativeTime,
+  Keyframe,
+  KeyframeFieldName,
+  AnimationKeyframes,
+  TransformState,
+  AnimationState,
 };
-
-export const keyframeFieldNames = [
-  "rotation",
-  "scale",
-  "translateX",
-  "translateY",
-  "centerX",
-  "centerY",
-  "flipHorizontal",
-  "flipVertical",
-] as const;
-
-export type KeyframeFieldName = (typeof keyframeFieldNames)[number];
-
-export const keyframeFieldLabels = {
-  rotation: "Rotation",
-  scale: "Scale",
-  translateX: "Translate X",
-  translateY: "Translate Y",
-  centerX: "Center X",
-  centerY: "Center Y",
-  flipHorizontal: "Horizontal Flip",
-  flipVertical: "Vertical Flip",
-} as const satisfies Record<KeyframeFieldName, string>;
-
-export type AnimationKeyframes = Record<KeyframeFieldName, Keyframe[]>;
-
-export type TransformState = {
-  centerX: number;
-  centerY: number;
-  rotation: number;
-  scale: number;
-  translateX: number;
-  translateY: number;
-  flipHorizontal: boolean;
-  flipVertical: boolean;
-};
-
-export type AnimationState = {
-  keyframes: AnimationKeyframes;
-  duration: number;
-  isPlaying: boolean;
-  currentTime: RelativeTime;
-  baseTransform: TransformState;
+export {
+  keyframeFieldNames,
+  keyframeFieldLabels,
+  DEFAULT_TRANSFORM_VALUES,
+  DEFAULT_ANIMATION,
 };
 
 export function interpolateKeyframes({
@@ -195,34 +173,6 @@ export function updateKeyframe({
   newKeyframes[keyframeIndex] = { time, value };
   return newKeyframes;
 }
-
-export const DEFAULT_TRANSFORM_VALUES = {
-  centerX: 50,
-  centerY: 50,
-  rotation: 0,
-  scale: 1,
-  translateX: 0,
-  translateY: 0,
-  flipHorizontal: false,
-  flipVertical: false,
-} as const;
-
-export const DEFAULT_ANIMATION: AnimationState = {
-  keyframes: {
-    rotation: [],
-    scale: [],
-    translateX: [],
-    translateY: [],
-    centerX: [],
-    centerY: [],
-    flipHorizontal: [],
-    flipVertical: [],
-  },
-  duration: 5000,
-  isPlaying: false,
-  currentTime: 0.0,
-  baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
-};
 
 export function updateKeyframesWithTransform({
   keyframes,

@@ -1,12 +1,6 @@
 import * as v from "valibot";
 import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 
-// Base message schema
-const BaseMessageSchema = v.object({
-  type: v.string(),
-  timestamp: v.number(),
-});
-
 // Keyframe schema
 const KeyframeSchema = v.object({
   time: v.number(),
@@ -48,42 +42,35 @@ const AnimationStateSchema = v.object({
 
 // Animation control messages
 export const StartAnimationMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("START_ANIMATION"),
   animationState: AnimationStateSchema,
 });
 
 export const StopAnimationMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("STOP_ANIMATION"),
 });
 
 export const UpdateAnimationStateMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("UPDATE_ANIMATION_STATE"),
   animationState: AnimationStateSchema,
 });
 
 export const GetAnimationStateMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("GET_ANIMATION_STATE"),
 });
 
 export const AnimationStateResponseMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("ANIMATION_STATE_RESPONSE"),
   animationState: v.optional(AnimationStateSchema),
 });
 
 export const AnimationProgressMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("ANIMATION_PROGRESS"),
   currentTime: v.number(),
   isPlaying: v.boolean(),
 });
 
 export const ResetAnimationMessageSchema = v.object({
-  ...BaseMessageSchema.entries,
   type: v.literal("RESET_ANIMATION"),
 });
 
@@ -128,7 +115,6 @@ export function createAnimationStateResponseMessage(
 ): AnimationStateResponseMessage {
   return {
     type: "ANIMATION_STATE_RESPONSE",
-    timestamp: Date.now(),
     animationState,
   };
 }
@@ -139,7 +125,6 @@ export function createAnimationProgressMessage(
 ): AnimationProgressMessage {
   return {
     type: "ANIMATION_PROGRESS",
-    timestamp: Date.now(),
     currentTime,
     isPlaying,
   };
@@ -329,7 +314,6 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
   if (savedState) {
     const message: UpdateAnimationStateMessage = {
       type: "UPDATE_ANIMATION_STATE",
-      timestamp: Date.now(),
       animationState: savedState,
     };
     await browser.tabs.sendMessage(tabId, message);
@@ -339,7 +323,6 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
 export async function sendGetAnimationStateMessage(): Promise<AnimationStateResponseMessage> {
   const message: GetAnimationStateMessage = {
     type: "GET_ANIMATION_STATE",
-    timestamp: Date.now(),
   };
   const response = await browser.runtime.sendMessage(message);
   return v.parse(AnimationStateResponseMessageSchema, response);
@@ -350,7 +333,6 @@ export async function sendStartAnimationMessage(
 ): Promise<void> {
   const message: StartAnimationMessage = {
     type: "START_ANIMATION",
-    timestamp: Date.now(),
     animationState,
   };
   await browser.runtime.sendMessage(message);
@@ -361,7 +343,6 @@ export async function sendUpdateAnimationStateMessage(
 ): Promise<void> {
   const message: UpdateAnimationStateMessage = {
     type: "UPDATE_ANIMATION_STATE",
-    timestamp: Date.now(),
     animationState,
   };
   await browser.runtime.sendMessage(message);
@@ -370,7 +351,6 @@ export async function sendUpdateAnimationStateMessage(
 export async function sendResetAnimationMessage(): Promise<void> {
   const message: ResetAnimationMessage = {
     type: "RESET_ANIMATION",
-    timestamp: Date.now(),
   };
   await browser.runtime.sendMessage(message);
 }

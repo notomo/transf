@@ -15,10 +15,7 @@ export function AnimationController() {
 
   const { clearStyles } = useStyleInjection(controllerState);
 
-  useProgressTracking(
-    controllerState.currentAnimationState?.isPlaying ?? false,
-    setControllerState,
-  );
+  useProgressTracking(controllerState, setControllerState);
 
   useMessageHandler({
     controllerState,

@@ -7,24 +7,24 @@ import {
 import { sendAnimationProgressMessage } from "@/src/feature/message/animation-progress";
 
 export function useProgressTracking(
-  isPlaying: boolean,
+  controllerState: AnimationControllerState,
   setControllerState: React.Dispatch<
     React.SetStateAction<AnimationControllerState>
   >,
 ) {
-  const trackProgress = useEffectEvent(() => {
-    setControllerState((prevState) => {
-      const updatedState = updateCurrentTime(prevState);
-      const currentTime = calculateCurrentTime(updatedState);
+  const trackProgress = useEffectEvent(async () => {
+    const updatedState = updateCurrentTime(controllerState);
+    const currentTime = calculateCurrentTime(updatedState);
 
-      sendAnimationProgressMessage(
-        currentTime,
-        updatedState.currentAnimationState?.isPlaying ?? false,
-      );
+    await sendAnimationProgressMessage(
+      currentTime,
+      updatedState.currentAnimationState?.isPlaying ?? false,
+    );
 
-      return updatedState;
-    });
+    setControllerState(updatedState);
   });
+
+  const isPlaying = controllerState.currentAnimationState?.isPlaying ?? false;
 
   useEffect(() => {
     if (!isPlaying) {

@@ -1,11 +1,10 @@
 import { useEffect, useEffectEvent } from "react";
-import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
 import {
   calculateCurrentTime,
   updateCurrentTime,
 } from "@/src/feature/animation-controller";
-import { createAnimationProgressMessage } from "@/src/feature/message/animation-progress";
+import { sendAnimationProgressMessage } from "@/src/feature/message/animation-progress";
 
 export function useProgressTracking(
   isPlaying: boolean,
@@ -18,11 +17,9 @@ export function useProgressTracking(
       const updatedState = updateCurrentTime(prevState);
       const currentTime = calculateCurrentTime(updatedState);
 
-      browser.runtime.sendMessage(
-        createAnimationProgressMessage(
-          currentTime,
-          updatedState.currentAnimationState?.isPlaying ?? false,
-        ),
+      sendAnimationProgressMessage(
+        currentTime,
+        updatedState.currentAnimationState?.isPlaying ?? false,
       );
 
       return updatedState;

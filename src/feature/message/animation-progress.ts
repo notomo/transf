@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { browser } from "wxt/browser";
 import {
   getAnimationState,
   getCurrentTabInfo,
@@ -35,13 +36,14 @@ export async function handleAnimationProgressMessage(
   return { type: "message" as const, message: "Animation progress updated" };
 }
 
-export function createAnimationProgressMessage(
+export async function sendAnimationProgressMessage(
   currentTime: number,
   isPlaying: boolean,
-): AnimationProgressMessage {
-  return {
+): Promise<void> {
+  const message: AnimationProgressMessage = {
     type: "ANIMATION_PROGRESS",
     currentTime,
     isPlaying,
   };
+  await browser.runtime.sendMessage(message);
 }

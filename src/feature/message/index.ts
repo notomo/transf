@@ -41,7 +41,7 @@ const MessageInContentSchema = v.union([
   ResetAnimationMessageSchema,
 ]);
 
-export type MessageInContent = v.InferOutput<typeof MessageInContentSchema>;
+type MessageInContent = v.InferOutput<typeof MessageInContentSchema>;
 
 export function validateMessageInContent(data: unknown): MessageInContent {
   return v.parse(MessageInContentSchema, data);

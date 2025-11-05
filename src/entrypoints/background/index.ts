@@ -11,13 +11,14 @@ export default defineBackground({
             case "message":
               console.info(response.message);
               sendResponse({ success: true });
-              break;
+              return;
             case "response":
               sendResponse(response.response);
-              break;
+              return;
             default:
-              typ satisfies never;
-              sendResponse({ success: true });
+              throw new Error(
+                `unexpected message type: ${typ satisfies never}`,
+              );
           }
         });
         // Return true to indicate async response
@@ -25,13 +26,10 @@ export default defineBackground({
       },
     );
 
-    // Setup tab listeners
-    // When tab is activated, restore animation state
     browser.tabs.onActivated.addListener(async (activeInfo) => {
       await restoreAnimationForTab(activeInfo.tabId);
     });
 
-    // When tab is updated (e.g., navigation), restore animation state
     browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       if (changeInfo.status === "complete" && tab.url) {
         await restoreAnimationForTab(tabId);

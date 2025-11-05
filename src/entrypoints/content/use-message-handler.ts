@@ -1,10 +1,7 @@
 import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
-import {
-  type MessageInContent,
-  validateMessageInContent,
-} from "@/src/feature/message";
+import { validateMessageInContent } from "@/src/feature/message";
 import { createAnimationStateResponseMessage } from "@/src/feature/message/animation-state-response";
 import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
 import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
@@ -22,56 +19,27 @@ export function useMessageHandler({
   onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
   onResetAnimation: () => void;
 }) {
-  const handleMessage = useEffectEvent(
-    (message: MessageInContent, sendResponse: (response?: unknown) => void) => {
-      console.log("Content script received message:", message.type);
-
-      const typ = message.type;
-      switch (typ) {
-        case "START_ANIMATION":
-          onStartAnimation(message);
-          sendResponse({ success: true });
-          break;
-
-        case "STOP_ANIMATION":
-          onStopAnimation();
-          sendResponse({ success: true });
-          break;
-
-        case "UPDATE_ANIMATION_STATE":
-          onUpdateAnimationState(message);
-          sendResponse({ success: true });
-          break;
-
-        case "GET_ANIMATION_STATE":
-          sendResponse(
-            createAnimationStateResponseMessage(
-              controllerState.currentAnimationState || undefined,
-            ),
-          );
-          break;
-
-        case "RESET_ANIMATION":
-          onResetAnimation();
-          sendResponse({ success: true });
-          break;
-
-        default:
-          typ satisfies never;
-          console.warn("Unknown message type:", typ);
-          sendResponse({ success: false, error: "Unknown message type" });
-      }
-    },
-  );
+  const handleMessageEvent = useEffectEvent(async (rawMessage: unknown) => {
+    await handleMessage({
+      rawMessage,
+      controllerState,
+      onStartAnimation,
+      onStopAnimation,
+      onUpdateAnimationState,
+      onResetAnimation,
+    });
+  });
 
   useEffect(() => {
     const messageListener = (
-      message: unknown,
+      rawMessage: unknown,
       _sender: unknown,
       sendResponse: (response?: unknown) => void,
     ) => {
-      const validatedMessage = validateMessageInContent(message);
-      handleMessage(validatedMessage, sendResponse);
+      handleMessageEvent(rawMessage).then((response) => {
+        sendResponse(response);
+      });
+      // Return true to indicate async response
       return true;
     };
 
@@ -81,4 +49,48 @@ export function useMessageHandler({
       browser.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
+}
+
+async function handleMessage({
+  rawMessage,
+  controllerState,
+  onStartAnimation,
+  onStopAnimation,
+  onUpdateAnimationState,
+  onResetAnimation,
+}: {
+  rawMessage: unknown;
+  controllerState: AnimationControllerState;
+  onStartAnimation: (message: StartAnimationMessage) => void;
+  onStopAnimation: () => void;
+  onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
+  onResetAnimation: () => void;
+}) {
+  const message = validateMessageInContent(rawMessage);
+  const typ = message.type;
+  switch (typ) {
+    case "START_ANIMATION":
+      onStartAnimation(message);
+      return;
+
+    case "STOP_ANIMATION":
+      onStopAnimation();
+      return { success: true };
+
+    case "UPDATE_ANIMATION_STATE":
+      onUpdateAnimationState(message);
+      return { success: true };
+
+    case "GET_ANIMATION_STATE":
+      return createAnimationStateResponseMessage(
+        controllerState.currentAnimationState || undefined,
+      );
+
+    case "RESET_ANIMATION":
+      onResetAnimation();
+      return { success: true };
+
+    default:
+      throw new Error(`unexpected message type: ${typ satisfies never}`);
+  }
 }

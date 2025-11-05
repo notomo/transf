@@ -1,7 +1,10 @@
 import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
-import { type Message, validateMessage } from "@/src/feature/message";
+import {
+  type MessageInContent,
+  validateMessageInContent,
+} from "@/src/feature/message";
 import { createAnimationStateResponseMessage } from "@/src/feature/message/animation-state-response";
 import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
 import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
@@ -20,7 +23,7 @@ export function useMessageHandler({
   onResetAnimation: () => void;
 }) {
   const handleMessage = useEffectEvent(
-    (message: Message, sendResponse: (response?: unknown) => void) => {
+    (message: MessageInContent, sendResponse: (response?: unknown) => void) => {
       console.log("Content script received message:", message.type);
 
       const typ = message.type;
@@ -53,13 +56,6 @@ export function useMessageHandler({
           sendResponse({ success: true });
           break;
 
-        case "ANIMATION_STATE_RESPONSE":
-        case "ANIMATION_PROGRESS":
-          // These are response/notification messages, not handled in content script
-          console.warn("Unexpected message type in content script:", typ);
-          sendResponse({ success: false, error: "Unexpected message type" });
-          break;
-
         default:
           typ satisfies never;
           console.warn("Unknown message type:", typ);
@@ -74,7 +70,7 @@ export function useMessageHandler({
       _sender: unknown,
       sendResponse: (response?: unknown) => void,
     ) => {
-      const validatedMessage = validateMessage(message);
+      const validatedMessage = validateMessageInContent(message);
       handleMessage(validatedMessage, sendResponse);
       return true;
     };

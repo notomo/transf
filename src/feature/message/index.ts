@@ -3,7 +3,6 @@ import {
   AnimationProgressMessageSchema,
   handleAnimationProgressMessage,
 } from "@/src/feature/message/animation-progress";
-import { AnimationStateResponseMessageSchema } from "@/src/feature/message/animation-state-response";
 import {
   GetAnimationStateMessageSchema,
   handleGetAnimationStateMessage,
@@ -25,27 +24,31 @@ import {
   UpdateAnimationStateMessageSchema,
 } from "@/src/feature/message/update-animation-state";
 
-export type { AnimationProgressMessage } from "@/src/feature/message/animation-progress";
-export type { AnimationStateResponseMessage } from "@/src/feature/message/animation-state-response";
-
-export const MessageSchema = v.union([
+const MessageInBackgroundSchema = v.union([
   StartAnimationMessageSchema,
   StopAnimationMessageSchema,
   UpdateAnimationStateMessageSchema,
   GetAnimationStateMessageSchema,
-  AnimationStateResponseMessageSchema,
   AnimationProgressMessageSchema,
   ResetAnimationMessageSchema,
 ]);
 
-export type Message = v.InferOutput<typeof MessageSchema>;
+const MessageInContentSchema = v.union([
+  StartAnimationMessageSchema,
+  StopAnimationMessageSchema,
+  UpdateAnimationStateMessageSchema,
+  GetAnimationStateMessageSchema,
+  ResetAnimationMessageSchema,
+]);
 
-export function validateMessage(data: unknown): Message {
-  return v.parse(MessageSchema, data);
+export type MessageInContent = v.InferOutput<typeof MessageInContentSchema>;
+
+export function validateMessageInContent(data: unknown): MessageInContent {
+  return v.parse(MessageInContentSchema, data);
 }
 
-export async function handleMessage(rawMessage: unknown) {
-  const message = validateMessage(rawMessage);
+export async function handleMessageInBackground(rawMessage: unknown) {
+  const message = v.parse(MessageInBackgroundSchema, rawMessage);
 
   const typ = message.type;
   switch (typ) {
@@ -61,11 +64,6 @@ export async function handleMessage(rawMessage: unknown) {
       return await handleAnimationProgressMessage(message);
     case "RESET_ANIMATION":
       return await handleResetAnimationMessage(message);
-    case "ANIMATION_STATE_RESPONSE":
-      return {
-        type: "message" as const,
-        message: `TODO`,
-      };
     default:
       return {
         type: "message" as const,

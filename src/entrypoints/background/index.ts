@@ -1,11 +1,11 @@
-import { handleMessage } from "@/src/feature/message";
+import { handleMessageInBackground } from "@/src/feature/message";
 import { restoreAnimationForTab } from "@/src/feature/message/update-animation-state";
 
 export default defineBackground({
   main() {
     browser.runtime.onMessage.addListener(
       (rawMessage, _sender, sendResponse) => {
-        handleMessage(rawMessage).then((response) => {
+        handleMessageInBackground(rawMessage).then((response) => {
           const typ = response.type;
           switch (typ) {
             case "message":

@@ -141,3 +141,10 @@ export async function saveAnimationState(
     [url]: state,
   });
 }
+
+export async function deleteAnimationState(url: string): Promise<void> {
+  const stored = await animationStates.getValue();
+  const updatedStored = { ...stored };
+  delete updatedStored[url];
+  await animationStates.setValue(updatedStored);
+}

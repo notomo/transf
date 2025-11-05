@@ -7,12 +7,12 @@ import {
   getCurrentTabInfo,
 } from "@/src/feature/animation-state";
 
-export const AnimationStateResponseMessageSchema = v.object({
+const AnimationStateResponseMessageSchema = v.object({
   type: v.literal("ANIMATION_STATE_RESPONSE"),
   animationState: v.optional(AnimationStateSchema),
 });
 
-export type AnimationStateResponseMessage = v.InferOutput<
+type AnimationStateResponseMessage = v.InferOutput<
   typeof AnimationStateResponseMessageSchema
 >;
 

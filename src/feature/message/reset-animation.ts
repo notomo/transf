@@ -1,7 +1,7 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
 import {
-  animationStates,
+  deleteAnimationState,
   getCurrentTabInfo,
 } from "@/src/feature/animation-state";
 
@@ -18,10 +18,7 @@ export async function handleResetAnimationMessage(
   if (!tabId || !url)
     return { type: "message" as const, message: "No active tab found" };
 
-  const stored = await animationStates.getValue();
-  const updatedStored = { ...stored };
-  delete updatedStored[url];
-  await animationStates.setValue(updatedStored);
+  await deleteAnimationState(url);
 
   await browser.tabs.sendMessage(tabId, message);
 

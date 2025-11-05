@@ -2,7 +2,7 @@ import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
 import { validateMessageInContent } from "@/src/feature/message";
-import { createAnimationStateResponseMessage } from "@/src/feature/message/animation-state-response";
+import { createAnimationStateResponseMessage } from "@/src/feature/message/get-animation-state";
 import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
 import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 

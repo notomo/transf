@@ -1,14 +1,29 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
+import type { AnimationState } from "@/src/feature/animation-state";
 import {
+  AnimationStateSchema,
   getAnimationState,
   getCurrentTabInfo,
 } from "@/src/feature/animation-state";
-import {
-  type AnimationStateResponseMessage,
-  AnimationStateResponseMessageSchema,
-  createAnimationStateResponseMessage,
-} from "@/src/feature/message/animation-state-response";
+
+export const AnimationStateResponseMessageSchema = v.object({
+  type: v.literal("ANIMATION_STATE_RESPONSE"),
+  animationState: v.optional(AnimationStateSchema),
+});
+
+export type AnimationStateResponseMessage = v.InferOutput<
+  typeof AnimationStateResponseMessageSchema
+>;
+
+export function createAnimationStateResponseMessage(
+  animationState?: AnimationState,
+): AnimationStateResponseMessage {
+  return {
+    type: "ANIMATION_STATE_RESPONSE",
+    animationState,
+  };
+}
 
 export const GetAnimationStateMessageSchema = v.object({
   type: v.literal("GET_ANIMATION_STATE"),

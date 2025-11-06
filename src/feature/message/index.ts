@@ -37,7 +37,6 @@ const MessageInContentSchema = v.union([
   StartAnimationMessageSchema,
   StopAnimationMessageSchema,
   UpdateAnimationStateMessageSchema,
-  GetAnimationStateMessageSchema,
   ResetAnimationMessageSchema,
 ]);
 

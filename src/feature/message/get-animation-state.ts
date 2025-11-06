@@ -1,6 +1,5 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import type { AnimationState } from "@/src/feature/animation-state";
 import {
   AnimationStateSchema,
   getAnimationState,
@@ -16,15 +15,6 @@ type AnimationStateResponseMessage = v.InferOutput<
   typeof AnimationStateResponseMessageSchema
 >;
 
-export function createAnimationStateResponseMessage(
-  animationState?: AnimationState,
-): AnimationStateResponseMessage {
-  return {
-    type: "ANIMATION_STATE_RESPONSE",
-    animationState,
-  };
-}
-
 export const GetAnimationStateMessageSchema = v.object({
   type: v.literal("GET_ANIMATION_STATE"),
 });
@@ -37,11 +27,16 @@ export async function handleGetAnimationStateMessage(
   _message: GetAnimationStateMessage,
 ) {
   const { url } = await getCurrentTabInfo();
-  const state = await getAnimationState(url);
+  const animationState = await getAnimationState(url);
+
+  const body: AnimationStateResponseMessage = {
+    type: "ANIMATION_STATE_RESPONSE",
+    animationState,
+  };
 
   return {
     type: "response" as const,
-    response: createAnimationStateResponseMessage(state),
+    body,
   };
 }
 

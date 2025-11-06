@@ -13,7 +13,7 @@ export default defineBackground({
               sendResponse({ success: true });
               return;
             case "response":
-              sendResponse(response.response);
+              sendResponse(response.body);
               return;
             default:
               throw new Error(

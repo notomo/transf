@@ -18,7 +18,6 @@ export function AnimationController() {
   useProgressTracking(controllerState, setControllerState);
 
   useMessageHandler({
-    controllerState,
     onStartAnimation: handleStartAnimation,
     onStopAnimation: handleStopAnimation,
     onUpdateAnimationState: handleUpdateAnimationState,

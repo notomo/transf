@@ -1,19 +1,15 @@
 import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
-import type { AnimationControllerState } from "@/src/feature/animation-controller";
 import { validateMessageInContent } from "@/src/feature/message";
-import { createAnimationStateResponseMessage } from "@/src/feature/message/get-animation-state";
 import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
 import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useMessageHandler({
-  controllerState,
   onStartAnimation,
   onStopAnimation,
   onUpdateAnimationState,
   onResetAnimation,
 }: {
-  controllerState: AnimationControllerState;
   onStartAnimation: (message: StartAnimationMessage) => void;
   onStopAnimation: () => void;
   onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
@@ -22,7 +18,6 @@ export function useMessageHandler({
   const handleMessageEvent = useEffectEvent(async (rawMessage: unknown) => {
     await handleMessage({
       rawMessage,
-      controllerState,
       onStartAnimation,
       onStopAnimation,
       onUpdateAnimationState,
@@ -36,8 +31,8 @@ export function useMessageHandler({
       _sender: unknown,
       sendResponse: (response?: unknown) => void,
     ) => {
-      handleMessageEvent(rawMessage).then((response) => {
-        sendResponse(response);
+      handleMessageEvent(rawMessage).then(() => {
+        sendResponse({ success: true });
       });
       // Return true to indicate async response
       return true;
@@ -53,14 +48,12 @@ export function useMessageHandler({
 
 async function handleMessage({
   rawMessage,
-  controllerState,
   onStartAnimation,
   onStopAnimation,
   onUpdateAnimationState,
   onResetAnimation,
 }: {
   rawMessage: unknown;
-  controllerState: AnimationControllerState;
   onStartAnimation: (message: StartAnimationMessage) => void;
   onStopAnimation: () => void;
   onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
@@ -75,20 +68,15 @@ async function handleMessage({
 
     case "STOP_ANIMATION":
       onStopAnimation();
-      return { success: true };
+      return;
 
     case "UPDATE_ANIMATION_STATE":
       onUpdateAnimationState(message);
-      return { success: true };
-
-    case "GET_ANIMATION_STATE":
-      return createAnimationStateResponseMessage(
-        controllerState.currentAnimationState || undefined,
-      );
+      return;
 
     case "RESET_ANIMATION":
       onResetAnimation();
-      return { success: true };
+      return;
 
     default:
       throw new Error(`unexpected message type: ${typ satisfies never}`);

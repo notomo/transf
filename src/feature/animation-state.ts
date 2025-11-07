@@ -104,6 +104,11 @@ export const AnimationStateSchema = v.object({
 
 export type AnimationState = v.InferOutput<typeof AnimationStateSchema>;
 
+export type Tab = {
+  id: number;
+  url: string;
+};
+
 // Storage for animation states per tab URL
 export const animationStates = storage.defineItem<
   Record<string, AnimationState>
@@ -111,10 +116,7 @@ export const animationStates = storage.defineItem<
   defaultValue: {},
 });
 
-export async function getCurrentTabInfo(): Promise<{
-  tabId: number;
-  url: string;
-}> {
+export async function getCurrentTabInfo(): Promise<Tab> {
   const [activeTab] = await browser.tabs.query({
     active: true,
     currentWindow: true,
@@ -124,7 +126,7 @@ export async function getCurrentTabInfo(): Promise<{
     throw new Error("No active tab found");
   }
 
-  return { tabId: activeTab.id, url: activeTab.url };
+  return { id: activeTab.id, url: activeTab.url };
 }
 
 export async function getAnimationState(

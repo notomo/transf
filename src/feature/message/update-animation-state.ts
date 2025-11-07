@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import type { AnimationState } from "@/src/feature/animation-state";
+import type { AnimationState, Tab } from "@/src/feature/animation-state";
 import {
   AnimationStateSchema,
   getAnimationState,
@@ -21,11 +21,11 @@ export async function handleUpdateAnimationStateMessage({
   tab,
 }: {
   message: UpdateAnimationStateMessage;
-  tab: { tabId: number; url: string };
+  tab: Tab;
 }) {
   await saveAnimationState(tab.url, message.animationState);
 
-  await browser.tabs.sendMessage(tab.tabId, message);
+  await browser.tabs.sendMessage(tab.id, message);
 
   return { type: "message" as const, message: "Animation state updated" };
 }

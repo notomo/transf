@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import {
   getAnimationState,
   saveAnimationState,
+  type Tab,
 } from "@/src/feature/animation-state";
 
 export const StopAnimationMessageSchema = v.object({
@@ -16,14 +17,14 @@ export async function handleStopAnimationMessage({
   tab,
 }: {
   message: StopAnimationMessage;
-  tab: { tabId: number; url: string };
+  tab: Tab;
 }) {
   const currentState = await getAnimationState(tab.url);
   if (currentState) {
     const updatedState = { ...currentState, isPlaying: false };
     await saveAnimationState(tab.url, updatedState);
 
-    await browser.tabs.sendMessage(tab.tabId, message);
+    await browser.tabs.sendMessage(tab.id, message);
   }
 
   return { type: "message" as const, message: "Animation stopped" };

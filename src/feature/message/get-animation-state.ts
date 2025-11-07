@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import {
   AnimationStateSchema,
   getAnimationState,
+  type Tab,
 } from "@/src/feature/animation-state";
 
 const AnimationStateResponseMessageSchema = v.object({
@@ -27,7 +28,7 @@ export async function handleGetAnimationStateMessage({
   tab,
 }: {
   message: GetAnimationStateMessage;
-  tab: { tabId: number; url: string };
+  tab: Tab;
 }) {
   const animationState = await getAnimationState(tab.url);
 

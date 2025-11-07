@@ -1,6 +1,6 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import { deleteAnimationState } from "@/src/feature/animation-state";
+import { deleteAnimationState, type Tab } from "@/src/feature/animation-state";
 
 export const ResetAnimationMessageSchema = v.object({
   type: v.literal("RESET_ANIMATION"),
@@ -13,11 +13,11 @@ export async function handleResetAnimationMessage({
   tab,
 }: {
   message: ResetAnimationMessage;
-  tab: { tabId: number; url: string };
+  tab: Tab;
 }) {
   await deleteAnimationState(tab.url);
 
-  await browser.tabs.sendMessage(tab.tabId, message);
+  await browser.tabs.sendMessage(tab.id, message);
 
   return { type: "message" as const, message: "Animation reset" };
 }

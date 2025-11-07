@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import {
   getAnimationState,
   saveAnimationState,
+  type Tab,
 } from "@/src/feature/animation-state";
 
 export const AnimationProgressMessageSchema = v.object({
@@ -20,7 +21,7 @@ export async function handleAnimationProgressMessage({
   tab,
 }: {
   message: AnimationProgressMessage;
-  tab: { tabId: number; url: string };
+  tab: Tab;
 }) {
   const currentState = await getAnimationState(tab.url);
   if (currentState) {

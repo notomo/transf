@@ -4,7 +4,6 @@ import type { AnimationState } from "@/src/feature/animation-state";
 import {
   AnimationStateSchema,
   getAnimationState,
-  getCurrentTabInfo,
   saveAnimationState,
 } from "@/src/feature/animation-state";
 
@@ -17,16 +16,16 @@ export type UpdateAnimationStateMessage = v.InferOutput<
   typeof UpdateAnimationStateMessageSchema
 >;
 
-export async function handleUpdateAnimationStateMessage(
-  message: UpdateAnimationStateMessage,
-) {
-  const { tabId, url } = await getCurrentTabInfo();
-  if (!tabId || !url)
-    return { type: "message" as const, message: "No active tab found" };
+export async function handleUpdateAnimationStateMessage({
+  message,
+  tab,
+}: {
+  message: UpdateAnimationStateMessage;
+  tab: { tabId: number; url: string };
+}) {
+  await saveAnimationState(tab.url, message.animationState);
 
-  await saveAnimationState(url, message.animationState);
-
-  await browser.tabs.sendMessage(tabId, message);
+  await browser.tabs.sendMessage(tab.tabId, message);
 
   return { type: "message" as const, message: "Animation state updated" };
 }

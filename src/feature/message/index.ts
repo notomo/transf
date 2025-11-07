@@ -1,4 +1,5 @@
 import * as v from "valibot";
+import { getCurrentTabInfo } from "@/src/feature/animation-state";
 import {
   AnimationProgressMessageSchema,
   handleAnimationProgressMessage,
@@ -49,20 +50,22 @@ export function validateMessageInContent(data: unknown): MessageInContent {
 export async function handleMessageInBackground(rawMessage: unknown) {
   const message = v.parse(MessageInBackgroundSchema, rawMessage);
 
+  const tab = await getCurrentTabInfo();
+
   const typ = message.type;
   switch (typ) {
     case "START_ANIMATION":
-      return await handleStartAnimationMessage(message);
+      return await handleStartAnimationMessage({ message, tab });
     case "STOP_ANIMATION":
-      return await handleStopAnimationMessage(message);
+      return await handleStopAnimationMessage({ message, tab });
     case "UPDATE_ANIMATION_STATE":
-      return await handleUpdateAnimationStateMessage(message);
+      return await handleUpdateAnimationStateMessage({ message, tab });
     case "GET_ANIMATION_STATE":
-      return await handleGetAnimationStateMessage(message);
+      return await handleGetAnimationStateMessage({ message, tab });
     case "ANIMATION_PROGRESS":
-      return await handleAnimationProgressMessage(message);
+      return await handleAnimationProgressMessage({ message, tab });
     case "RESET_ANIMATION":
-      return await handleResetAnimationMessage(message);
+      return await handleResetAnimationMessage({ message, tab });
     default:
       return {
         type: "message" as const,

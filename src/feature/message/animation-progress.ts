@@ -2,7 +2,6 @@ import * as v from "valibot";
 import { browser } from "wxt/browser";
 import {
   getAnimationState,
-  getCurrentTabInfo,
   saveAnimationState,
 } from "@/src/feature/animation-state";
 
@@ -16,21 +15,21 @@ export type AnimationProgressMessage = v.InferOutput<
   typeof AnimationProgressMessageSchema
 >;
 
-export async function handleAnimationProgressMessage(
-  message: AnimationProgressMessage,
-) {
-  const { tabId, url } = await getCurrentTabInfo();
-  if (!tabId || !url)
-    return { type: "message" as const, message: "No active tab found" };
-
-  const currentState = await getAnimationState(url);
+export async function handleAnimationProgressMessage({
+  message,
+  tab,
+}: {
+  message: AnimationProgressMessage;
+  tab: { tabId: number; url: string };
+}) {
+  const currentState = await getAnimationState(tab.url);
   if (currentState) {
     const updatedState = {
       ...currentState,
       currentTime: message.currentTime,
       isPlaying: message.isPlaying,
     };
-    await saveAnimationState(url, updatedState);
+    await saveAnimationState(tab.url, updatedState);
   }
 
   return { type: "message" as const, message: "Animation progress updated" };

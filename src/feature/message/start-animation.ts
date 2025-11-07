@@ -3,7 +3,6 @@ import { browser } from "wxt/browser";
 import type { AnimationState } from "@/src/feature/animation-state";
 import {
   AnimationStateSchema,
-  getCurrentTabInfo,
   saveAnimationState,
 } from "@/src/feature/animation-state";
 
@@ -16,16 +15,16 @@ export type StartAnimationMessage = v.InferOutput<
   typeof StartAnimationMessageSchema
 >;
 
-export async function handleStartAnimationMessage(
-  message: StartAnimationMessage,
-) {
-  const { tabId, url } = await getCurrentTabInfo();
-  if (!tabId || !url)
-    return { type: "message" as const, message: "No active tab found" };
+export async function handleStartAnimationMessage({
+  message,
+  tab,
+}: {
+  message: StartAnimationMessage;
+  tab: { tabId: number; url: string };
+}) {
+  await saveAnimationState(tab.url, message.animationState);
 
-  await saveAnimationState(url, message.animationState);
-
-  await browser.tabs.sendMessage(tabId, message);
+  await browser.tabs.sendMessage(tab.tabId, message);
 
   return { type: "message" as const, message: "Animation started" };
 }

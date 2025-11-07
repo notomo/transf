@@ -1,9 +1,6 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import {
-  deleteAnimationState,
-  getCurrentTabInfo,
-} from "@/src/feature/animation-state";
+import { deleteAnimationState } from "@/src/feature/animation-state";
 
 export const ResetAnimationMessageSchema = v.object({
   type: v.literal("RESET_ANIMATION"),
@@ -11,16 +8,16 @@ export const ResetAnimationMessageSchema = v.object({
 
 type ResetAnimationMessage = v.InferOutput<typeof ResetAnimationMessageSchema>;
 
-export async function handleResetAnimationMessage(
-  message: ResetAnimationMessage,
-) {
-  const { tabId, url } = await getCurrentTabInfo();
-  if (!tabId || !url)
-    return { type: "message" as const, message: "No active tab found" };
+export async function handleResetAnimationMessage({
+  message,
+  tab,
+}: {
+  message: ResetAnimationMessage;
+  tab: { tabId: number; url: string };
+}) {
+  await deleteAnimationState(tab.url);
 
-  await deleteAnimationState(url);
-
-  await browser.tabs.sendMessage(tabId, message);
+  await browser.tabs.sendMessage(tab.tabId, message);
 
   return { type: "message" as const, message: "Animation reset" };
 }

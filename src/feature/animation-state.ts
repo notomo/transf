@@ -112,21 +112,24 @@ export const animationStates = storage.defineItem<
 });
 
 export async function getCurrentTabInfo(): Promise<{
-  tabId?: number;
-  url?: string;
+  tabId: number;
+  url: string;
 }> {
   const [activeTab] = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });
-  return { tabId: activeTab?.id, url: activeTab?.url };
+
+  if (!activeTab?.id || !activeTab?.url) {
+    throw new Error("No active tab found");
+  }
+
+  return { tabId: activeTab.id, url: activeTab.url };
 }
 
 export async function getAnimationState(
-  url?: string,
+  url: string,
 ): Promise<AnimationState | undefined> {
-  if (!url) return undefined;
-
   const stored = await animationStates.getValue();
   return stored[url];
 }

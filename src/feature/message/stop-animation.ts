@@ -2,7 +2,6 @@ import * as v from "valibot";
 import { browser } from "wxt/browser";
 import {
   getAnimationState,
-  getCurrentTabInfo,
   saveAnimationState,
 } from "@/src/feature/animation-state";
 
@@ -12,19 +11,19 @@ export const StopAnimationMessageSchema = v.object({
 
 type StopAnimationMessage = v.InferOutput<typeof StopAnimationMessageSchema>;
 
-export async function handleStopAnimationMessage(
-  message: StopAnimationMessage,
-) {
-  const { tabId, url } = await getCurrentTabInfo();
-  if (!tabId || !url)
-    return { type: "message" as const, message: "No active tab found" };
-
-  const currentState = await getAnimationState(url);
+export async function handleStopAnimationMessage({
+  message,
+  tab,
+}: {
+  message: StopAnimationMessage;
+  tab: { tabId: number; url: string };
+}) {
+  const currentState = await getAnimationState(tab.url);
   if (currentState) {
     const updatedState = { ...currentState, isPlaying: false };
-    await saveAnimationState(url, updatedState);
+    await saveAnimationState(tab.url, updatedState);
 
-    await browser.tabs.sendMessage(tabId, message);
+    await browser.tabs.sendMessage(tab.tabId, message);
   }
 
   return { type: "message" as const, message: "Animation stopped" };

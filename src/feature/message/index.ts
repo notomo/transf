@@ -51,6 +51,9 @@ export async function handleMessageInBackground(rawMessage: unknown) {
   const message = v.parse(MessageInBackgroundSchema, rawMessage);
 
   const tab = await getCurrentTabInfo();
+  if (tab === null) {
+    return { type: "message" as const, message: "no active tab found" };
+  }
 
   const typ = message.type;
   switch (typ) {
@@ -77,6 +80,7 @@ export async function handleMessageInBackground(rawMessage: unknown) {
     case "GET_ANIMATION_STATE":
       return {
         type: "response" as const,
+        messageType: typ,
         body: await handleGetAnimationStateMessage({ message, tab }),
       };
 

@@ -13,6 +13,7 @@ export default defineBackground({
               sendResponse({ success: true });
               return;
             case "response":
+              console.info(`received response for: ${response.messageType}`);
               sendResponse(response.body);
               return;
             default:

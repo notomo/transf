@@ -116,14 +116,14 @@ export const animationStates = storage.defineItem<
   defaultValue: {},
 });
 
-export async function getCurrentTabInfo(): Promise<Tab> {
+export async function getCurrentTabInfo(): Promise<Tab | null> {
   const [activeTab] = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });
 
   if (!activeTab?.id || !activeTab?.url) {
-    throw new Error("No active tab found");
+    return null;
   }
 
   return { id: activeTab.id, url: activeTab.url };

@@ -26,8 +26,6 @@ export async function handleUpdateAnimationStateMessage({
   await saveAnimationState(tab.url, message.animationState);
 
   await browser.tabs.sendMessage(tab.id, message);
-
-  return { type: "message" as const, message: "Animation state updated" };
 }
 
 export async function sendUpdateAnimationStateMessage(

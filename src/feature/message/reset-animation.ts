@@ -18,8 +18,6 @@ export async function handleResetAnimationMessage({
   await deleteAnimationState(tab.url);
 
   await browser.tabs.sendMessage(tab.id, message);
-
-  return { type: "message" as const, message: "Animation reset" };
 }
 
 export async function sendResetAnimationMessage(): Promise<void> {

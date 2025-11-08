@@ -29,17 +29,11 @@ export async function handleGetAnimationStateMessage({
 }: {
   message: GetAnimationStateMessage;
   tab: Tab;
-}) {
+}): Promise<AnimationStateResponseMessage> {
   const animationState = await getAnimationState(tab.url);
-
-  const body: AnimationStateResponseMessage = {
+  return {
     type: "ANIMATION_STATE_RESPONSE",
     animationState,
-  };
-
-  return {
-    type: "response" as const,
-    body,
   };
 }
 

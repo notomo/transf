@@ -32,8 +32,6 @@ export async function handleAnimationProgressMessage({
     };
     await saveAnimationState(tab.url, updatedState);
   }
-
-  return { type: "message" as const, message: "Animation progress updated" };
 }
 
 export async function sendAnimationProgressMessage(

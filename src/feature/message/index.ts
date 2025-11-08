@@ -55,21 +55,34 @@ export async function handleMessageInBackground(rawMessage: unknown) {
   const typ = message.type;
   switch (typ) {
     case "START_ANIMATION":
-      return await handleStartAnimationMessage({ message, tab });
+      await handleStartAnimationMessage({ message, tab });
+      return { type: "message" as const, message: `handled: ${typ}` };
+
     case "STOP_ANIMATION":
-      return await handleStopAnimationMessage({ message, tab });
+      await handleStopAnimationMessage({ message, tab });
+      return { type: "message" as const, message: `handled: ${typ}` };
+
     case "UPDATE_ANIMATION_STATE":
-      return await handleUpdateAnimationStateMessage({ message, tab });
-    case "GET_ANIMATION_STATE":
-      return await handleGetAnimationStateMessage({ message, tab });
+      await handleUpdateAnimationStateMessage({ message, tab });
+      return { type: "message" as const, message: `handled: ${typ}` };
+
     case "ANIMATION_PROGRESS":
-      return await handleAnimationProgressMessage({ message, tab });
+      await handleAnimationProgressMessage({ message, tab });
+      return { type: "message" as const, message: `handled: ${typ}` };
+
     case "RESET_ANIMATION":
-      return await handleResetAnimationMessage({ message, tab });
-    default:
+      await handleResetAnimationMessage({ message, tab });
+      return { type: "message" as const, message: `handled: ${typ}` };
+
+    case "GET_ANIMATION_STATE":
       return {
-        type: "message" as const,
-        message: `Unknown message type: ${typ satisfies never}`,
+        type: "response" as const,
+        body: await handleGetAnimationStateMessage({ message, tab }),
       };
+
+    default:
+      throw new Error(
+        `unexpected background message type: ${typ satisfies never}`,
+      );
   }
 }

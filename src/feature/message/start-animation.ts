@@ -25,8 +25,6 @@ export async function handleStartAnimationMessage({
   await saveAnimationState(tab.url, message.animationState);
 
   await browser.tabs.sendMessage(tab.id, message);
-
-  return { type: "message" as const, message: "Animation started" };
 }
 
 export async function sendStartAnimationMessage(

@@ -26,6 +26,4 @@ export async function handleStopAnimationMessage({
 
     await browser.tabs.sendMessage(tab.id, message);
   }
-
-  return { type: "message" as const, message: "Animation stopped" };
 }

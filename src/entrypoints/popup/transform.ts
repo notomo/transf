@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { browser } from "wxt/browser";
-import { storage } from "wxt/utils/storage";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { sendResetAnimationMessage } from "@/src/feature/message/reset-animation";
 import { sendStartAnimationMessage } from "@/src/feature/message/start-animation";
@@ -18,30 +16,11 @@ import {
   updateKeyframesWithTransform,
 } from "./keyframe";
 
-const animationStates = storage.defineItem<Record<string, AnimationState>>(
-  "local:animationStates",
-  {
-    defaultValue: {},
-  },
-);
-
 function useAnimationState() {
   const [state, setState] = useState<AnimationState | null>(null);
-  const [url, setUrl] = useState("");
 
   useEffect(() => {
     (async () => {
-      const [tab] = await browser.tabs.query({
-        active: true,
-        currentWindow: true,
-      });
-      const url = tab?.url;
-      const tabId = tab?.id;
-      if (!url || !tabId) {
-        return;
-      }
-      setUrl(url);
-
       const response = await sendGetAnimationStateMessage();
       const animationState = response.animationState ?? null;
       setState(animationState);
@@ -58,31 +37,19 @@ function useAnimationState() {
     }) => {
       setState(newState);
 
-      if (newState) {
-        if (animated && newState.isPlaying) {
-          await sendStartAnimationMessage(newState);
-        } else {
-          await sendUpdateAnimationStateMessage(newState);
-        }
-      } else {
+      if (!newState) {
         await sendResetAnimationMessage();
-      }
-
-      // Also save to storage as backup
-      const stored = await animationStates.getValue();
-      if (newState) {
-        await animationStates.setValue({
-          ...stored,
-          [url]: newState,
-        });
         return;
       }
 
-      const states = { ...stored };
-      delete states[url];
-      await animationStates.setValue(states);
+      if (animated) {
+        await sendStartAnimationMessage(newState);
+        return;
+      }
+
+      await sendUpdateAnimationStateMessage(newState);
     },
-    [url],
+    [],
   );
 
   return {
@@ -116,11 +83,13 @@ export function useTransform() {
 
   const updateAnimation = useCallback(
     async (updates: Partial<AnimationState>) => {
-      const newState = {
-        ...state,
-        ...updates,
-      };
-      await setAnimationState({ newState, animated: newState.isPlaying });
+      await setAnimationState({
+        newState: {
+          ...state,
+          ...updates,
+        },
+        animated: updates.isPlaying,
+      });
     },
     [state, setAnimationState],
   );

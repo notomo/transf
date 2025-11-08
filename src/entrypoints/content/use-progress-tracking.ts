@@ -1,9 +1,6 @@
 import { useEffect, useEffectEvent } from "react";
 import type { AnimationControllerState } from "@/src/feature/animation-controller";
-import {
-  calculateCurrentTime,
-  updateCurrentTime,
-} from "@/src/feature/animation-controller";
+import { updateCurrentTime } from "@/src/feature/animation-controller";
 import { sendAnimationProgressMessage } from "@/src/feature/message/animation-progress";
 
 export function useProgressTracking(
@@ -14,11 +11,14 @@ export function useProgressTracking(
 ) {
   const trackProgress = useEffectEvent(async () => {
     const updatedState = updateCurrentTime(controllerState);
-    const currentTime = calculateCurrentTime(updatedState);
+    const currentTime = updatedState.currentAnimationState?.currentTime ?? 0;
+    const animationName =
+      updatedState.currentAnimationState?.animationName ?? undefined;
 
     await sendAnimationProgressMessage(
       currentTime,
       updatedState.currentAnimationState?.isPlaying ?? false,
+      animationName,
     );
 
     setControllerState(updatedState);

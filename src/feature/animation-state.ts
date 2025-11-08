@@ -62,6 +62,7 @@ export const DEFAULT_ANIMATION: AnimationState = {
   isPlaying: false,
   currentTime: 0.0,
   baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
+  animationName: undefined,
 };
 
 // Validation schemas
@@ -100,6 +101,7 @@ export const AnimationStateSchema = v.object({
   isPlaying: v.boolean(),
   currentTime: v.number(),
   baseTransform: TransformStateSchema,
+  animationName: v.optional(v.string()),
 });
 
 export type AnimationState = v.InferOutput<typeof AnimationStateSchema>;

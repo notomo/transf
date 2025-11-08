@@ -119,10 +119,10 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
 export function generateCSSKeyframes(
   animationState: AnimationState,
 ): CSSAnimationConfig {
-  const animationName = generateUniqueAnimationName();
+  const animationName =
+    animationState.animationName || generateUniqueAnimationName();
   const keyframeSteps = generateKeyframeSteps(animationState);
 
-  // Generate @keyframes rule
   const keyframeRules = keyframeSteps
     .map((step) => {
       const percentage = Math.round(step.time * 100);

@@ -33,7 +33,7 @@ export function useStyleInjection(controllerState: AnimationControllerState) {
       return;
     }
 
-    const styles = generateAnimationStyles(controllerState);
+    const { styles } = generateAnimationStyles(controllerState);
     styleElementRef.current.textContent = styles;
   }, [controllerState]);
 

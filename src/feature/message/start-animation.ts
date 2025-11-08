@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import type { AnimationState, Tab } from "@/src/feature/animation-state";
 import {
   AnimationStateSchema,
+  getAnimationState,
   saveAnimationState,
 } from "@/src/feature/animation-state";
 
@@ -22,9 +23,19 @@ export async function handleStartAnimationMessage({
   message: StartAnimationMessage;
   tab: Tab;
 }) {
-  await saveAnimationState(tab.url, message.animationState);
+  const existingState = await getAnimationState(tab.url);
+  const mergedState: AnimationState = {
+    ...message.animationState,
+    animationName:
+      existingState?.animationName ?? message.animationState.animationName,
+  };
 
-  await browser.tabs.sendMessage(tab.id, message);
+  await saveAnimationState(tab.url, mergedState);
+
+  await browser.tabs.sendMessage(tab.id, {
+    ...message,
+    animationState: mergedState,
+  });
 }
 
 export async function sendStartAnimationMessage(

@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
-import type { AnimationControllerState } from "@/src/feature/animation-controller";
+import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import { generateAnimationStyles } from "@/src/feature/animation-controller";
 
-export function useStyleInjection(controllerState: AnimationControllerState) {
+export function useStyleInjection(animationState: AnimationState | null) {
   const styleElementRef = useRef<HTMLStyleElement | null>(null);
 
   useEffect(() => {
@@ -33,9 +33,9 @@ export function useStyleInjection(controllerState: AnimationControllerState) {
       return;
     }
 
-    const { styles } = generateAnimationStyles(controllerState);
+    const { styles } = generateAnimationStyles(animationState);
     styleElementRef.current.textContent = styles;
-  }, [controllerState]);
+  }, [animationState]);
 
   const clearStyles = () => {
     if (styleElementRef.current) {

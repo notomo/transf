@@ -6,93 +6,64 @@ import {
   hasKeyframes,
 } from "@/src/feature/css-keyframe";
 
-export interface AnimationControllerState {
-  currentAnimationConfig: CSSAnimationConfig | null;
-  currentAnimationState: AnimationState | null;
-  animationStartTime: number;
-}
-
-export function createAnimationControllerState(): AnimationControllerState {
-  return {
-    currentAnimationConfig: null,
-    currentAnimationState: null,
-    animationStartTime: 0,
-  };
-}
-
 export function startAnimation(
-  state: AnimationControllerState,
+  state: AnimationState | null,
   animationState: AnimationState,
-): AnimationControllerState {
+): AnimationState {
   const animationName =
-    state.currentAnimationState?.animationName ||
+    state?.animationName ||
     animationState.animationName ||
     `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
   return {
-    ...state,
-    currentAnimationState: {
-      ...animationState,
-      animationName,
-    },
-    animationStartTime:
-      Date.now() - animationState.currentTime * animationState.duration,
+    ...animationState,
+    animationName,
   };
 }
 
 export function stopAnimation(
-  state: AnimationControllerState,
-): AnimationControllerState {
-  if (!state.currentAnimationState) {
+  state: AnimationState | null,
+): AnimationState | null {
+  if (!state) {
     return state;
   }
 
   return {
     ...state,
-    currentAnimationState: {
-      ...state.currentAnimationState,
-      isPlaying: false,
-    },
+    isPlaying: false,
   };
 }
 
 export function updateAnimationState(
-  state: AnimationControllerState,
+  state: AnimationState | null,
   animationState: AnimationState,
-): AnimationControllerState {
+): AnimationState {
   const animationName =
-    state.currentAnimationState?.animationName ||
+    state?.animationName ||
     animationState.animationName ||
     `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 
   return {
-    ...state,
-    currentAnimationState: {
-      ...animationState,
-      animationName,
-    },
-    animationStartTime:
-      Date.now() - animationState.currentTime * animationState.duration,
+    ...animationState,
+    animationName,
   };
 }
 
-export function resetAnimation(): AnimationControllerState {
-  return createAnimationControllerState();
+export function resetAnimation(): null {
+  return null;
 }
 
-export function generateAnimationStyles(state: AnimationControllerState): {
+export function generateAnimationStyles(state: AnimationState | null): {
   styles: string;
   config: CSSAnimationConfig | null;
 } {
-  if (!state.currentAnimationState) {
+  if (!state) {
     return { styles: "", config: null };
   }
 
-  if (hasKeyframes(state.currentAnimationState)) {
-    const config = generateCSSKeyframes(state.currentAnimationState);
-    const delay =
-      -state.currentAnimationState.currentTime *
-      state.currentAnimationState.duration;
+  if (hasKeyframes(state)) {
+    const config = generateCSSKeyframes(state);
+    const delay = -state.currentTime * state.duration;
 
     const styles = `
       ${config.keyframesRule}
@@ -106,7 +77,7 @@ export function generateAnimationStyles(state: AnimationControllerState): {
     return { styles, config };
   }
 
-  const staticCSS = generateStaticTransformCSS(state.currentAnimationState);
+  const staticCSS = generateStaticTransformCSS(state);
   const styles = `
     html {
       ${staticCSS}
@@ -116,15 +87,15 @@ export function generateAnimationStyles(state: AnimationControllerState): {
   return { styles, config: null };
 }
 
-export function calculateCurrentTime(state: AnimationControllerState): number {
-  if (!state.currentAnimationState?.isPlaying) {
-    return state.currentAnimationState?.currentTime || 0;
+export function calculateCurrentTime(state: AnimationState | null): number {
+  if (!state?.isPlaying) {
+    return state?.currentTime || 0;
   }
 
-  const animationName = state.currentAnimationState.animationName;
+  const animationName = state.animationName;
 
   if (!animationName) {
-    return state.currentAnimationState.currentTime;
+    return state.currentTime;
   }
 
   const animations = document.documentElement.getAnimations();
@@ -142,24 +113,21 @@ export function calculateCurrentTime(state: AnimationControllerState): number {
     throw new Error("Animation currentTime is null or undefined");
   }
 
-  const duration = state.currentAnimationState.duration;
+  const duration = state.duration;
   // Convert to relative time (0.0-1.0) and handle looping
   return ((currentTimeMs as number) % duration) / duration;
 }
 
 export function updateCurrentTime(
-  state: AnimationControllerState,
-): AnimationControllerState {
-  if (!state.currentAnimationState) {
+  state: AnimationState | null,
+): AnimationState | null {
+  if (!state) {
     return state;
   }
 
   const currentTime = calculateCurrentTime(state);
   return {
     ...state,
-    currentAnimationState: {
-      ...state.currentAnimationState,
-      currentTime,
-    },
+    currentTime,
   };
 }

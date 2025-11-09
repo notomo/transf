@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
+import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import {
-  type AnimationControllerState,
-  createAnimationControllerState,
   resetAnimation,
   startAnimation,
   stopAnimation,
@@ -15,17 +14,17 @@ import { useStyleInjection } from "./use-style-injection";
 
 export function AnimationController() {
   const {
-    controllerState,
-    setControllerState,
+    animationState,
+    setAnimationState,
     handleStartAnimation,
     handleStopAnimation,
     handleUpdateAnimationState,
     handleResetAnimation,
   } = useAnimationController();
 
-  const { clearStyles } = useStyleInjection(controllerState);
+  const { clearStyles } = useStyleInjection(animationState);
 
-  useProgressTracking(controllerState, setControllerState);
+  useProgressTracking(animationState, setAnimationState);
 
   useMessageHandler({
     onStartAnimation: handleStartAnimation,
@@ -42,20 +41,21 @@ export function AnimationController() {
 }
 
 function useAnimationController() {
-  const [controllerState, setControllerState] =
-    useState<AnimationControllerState>(createAnimationControllerState);
+  const [animationState, setAnimationState] = useState<AnimationState | null>(
+    null,
+  );
 
   const handleStartAnimation = useCallback((message: StartAnimationMessage) => {
-    setControllerState((prev) => startAnimation(prev, message.animationState));
+    setAnimationState((prev) => startAnimation(prev, message.animationState));
   }, []);
 
   const handleStopAnimation = useCallback(() => {
-    setControllerState((prev) => stopAnimation(prev));
+    setAnimationState((prev) => stopAnimation(prev));
   }, []);
 
   const handleUpdateAnimationState = useCallback(
     (message: UpdateAnimationStateMessage) => {
-      setControllerState((prev) =>
+      setAnimationState((prev) =>
         updateAnimationState(prev, message.animationState),
       );
     },
@@ -63,12 +63,12 @@ function useAnimationController() {
   );
 
   const handleResetAnimation = useCallback(() => {
-    setControllerState(resetAnimation());
+    setAnimationState(resetAnimation());
   }, []);
 
   return {
-    controllerState,
-    setControllerState,
+    animationState,
+    setAnimationState,
     handleStartAnimation,
     handleStopAnimation,
     handleUpdateAnimationState,

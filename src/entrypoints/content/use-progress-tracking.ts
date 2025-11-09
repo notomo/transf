@@ -1,30 +1,29 @@
 import { useEffect, useEffectEvent } from "react";
-import type { AnimationControllerState } from "@/src/feature/animation-controller";
+import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import { updateCurrentTime } from "@/src/feature/animation-controller";
 import { sendAnimationProgressMessage } from "@/src/feature/message/animation-progress";
 
 export function useProgressTracking(
-  controllerState: AnimationControllerState,
-  setControllerState: React.Dispatch<
-    React.SetStateAction<AnimationControllerState>
+  animationState: AnimationState | null,
+  setAnimationState: React.Dispatch<
+    React.SetStateAction<AnimationState | null>
   >,
 ) {
   const trackProgress = useEffectEvent(async () => {
-    const updatedState = updateCurrentTime(controllerState);
-    const currentTime = updatedState.currentAnimationState?.currentTime ?? 0;
-    const animationName =
-      updatedState.currentAnimationState?.animationName ?? undefined;
+    const updatedState = updateCurrentTime(animationState);
+    const currentTime = updatedState?.currentTime ?? 0;
+    const animationName = updatedState?.animationName ?? undefined;
 
     await sendAnimationProgressMessage(
       currentTime,
-      updatedState.currentAnimationState?.isPlaying ?? false,
+      updatedState?.isPlaying ?? false,
       animationName,
     );
 
-    setControllerState(updatedState);
+    setAnimationState(updatedState);
   });
 
-  const isPlaying = controllerState.currentAnimationState?.isPlaying ?? false;
+  const isPlaying = animationState?.isPlaying ?? false;
 
   useEffect(() => {
     if (!isPlaying) {

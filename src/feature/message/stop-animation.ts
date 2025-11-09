@@ -1,28 +1,18 @@
 import * as v from "valibot";
-import { browser } from "wxt/browser";
 import {
   AnimationStateSchema,
   getAnimationState,
   saveAnimationState,
   type Tab,
 } from "@/src/feature/animation-state";
+import { sendToContent } from "@/src/feature/message/update-content-animation-state";
 
 export const StopAnimationMessageSchema = v.object({
   type: v.literal("STOP_ANIMATION"),
   animationState: AnimationStateSchema,
 });
 
-export type StopAnimationMessage = v.InferOutput<
-  typeof StopAnimationMessageSchema
->;
-
-export async function handleStopAnimationMessage({
-  message,
-  tab,
-}: {
-  message: StopAnimationMessage;
-  tab: Tab;
-}) {
+export async function handleStopAnimationMessage({ tab }: { tab: Tab }) {
   const animationState = await getAnimationState(tab.url);
   if (!animationState) {
     return;
@@ -35,8 +25,5 @@ export async function handleStopAnimationMessage({
 
   await saveAnimationState(tab.url, updatedState);
 
-  await browser.tabs.sendMessage(tab.id, {
-    ...message,
-    animationState: updatedState,
-  });
+  await sendToContent(tab.id, updatedState);
 }

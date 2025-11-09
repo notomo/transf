@@ -24,10 +24,8 @@ type GetAnimationStateMessage = v.InferOutput<
 >;
 
 export async function handleGetAnimationStateMessage({
-  message: _message,
   tab,
 }: {
-  message: GetAnimationStateMessage;
   tab: Tab;
 }): Promise<AnimationStateResponseMessage> {
   const animationState = await getAnimationState(tab.url);

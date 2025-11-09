@@ -7,13 +7,14 @@ import {
   getAnimationState,
   saveAnimationState,
 } from "@/src/feature/animation-state";
+import { sendToContent } from "@/src/feature/message/update-content-animation-state";
 
 export const UpdateAnimationStateMessageSchema = v.object({
   type: v.literal("UPDATE_ANIMATION_STATE"),
   animationState: AnimationStateSchema,
 });
 
-export type UpdateAnimationStateMessage = v.InferOutput<
+type UpdateAnimationStateMessage = v.InferOutput<
   typeof UpdateAnimationStateMessageSchema
 >;
 
@@ -37,10 +38,7 @@ export async function handleUpdateAnimationStateMessage({
 
   await saveAnimationState(tab.url, mergedState);
 
-  await browser.tabs.sendMessage(tab.id, {
-    ...message,
-    animationState: mergedState,
-  });
+  await sendToContent(tab.id, mergedState);
 }
 
 export async function sendUpdateAnimationStateMessage(
@@ -64,9 +62,5 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
     return;
   }
 
-  const message: UpdateAnimationStateMessage = {
-    type: "UPDATE_ANIMATION_STATE",
-    animationState,
-  };
-  await browser.tabs.sendMessage(tabId, message);
+  await sendToContent(tabId, animationState);
 }

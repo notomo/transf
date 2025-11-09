@@ -7,15 +7,14 @@ import {
   getAnimationState,
   saveAnimationState,
 } from "@/src/feature/animation-state";
+import { sendToContent } from "@/src/feature/message/update-content-animation-state";
 
 export const StartAnimationMessageSchema = v.object({
   type: v.literal("START_ANIMATION"),
   animationState: AnimationStateSchema,
 });
 
-export type StartAnimationMessage = v.InferOutput<
-  typeof StartAnimationMessageSchema
->;
+type StartAnimationMessage = v.InferOutput<typeof StartAnimationMessageSchema>;
 
 export async function handleStartAnimationMessage({
   message,
@@ -37,10 +36,7 @@ export async function handleStartAnimationMessage({
 
   await saveAnimationState(tab.url, mergedState);
 
-  await browser.tabs.sendMessage(tab.id, {
-    ...message,
-    animationState: mergedState,
-  });
+  await sendToContent(tab.id, mergedState);
 }
 
 export async function sendStartAnimationMessage(

@@ -13,7 +13,7 @@ export const AnimationProgressMessageSchema = v.object({
   animationName: v.optional(v.string()),
 });
 
-export type AnimationProgressMessage = v.InferOutput<
+type AnimationProgressMessage = v.InferOutput<
   typeof AnimationProgressMessageSchema
 >;
 

@@ -24,6 +24,7 @@ import {
   handleUpdateAnimationStateMessage,
   UpdateAnimationStateMessageSchema,
 } from "@/src/feature/message/update-animation-state";
+import { UpdateContentAnimationStateMessageSchema } from "@/src/feature/message/update-content-animation-state";
 
 const MessageInBackgroundSchema = v.union([
   StartAnimationMessageSchema,
@@ -34,17 +35,8 @@ const MessageInBackgroundSchema = v.union([
   ResetAnimationMessageSchema,
 ]);
 
-const MessageInContentSchema = v.union([
-  StartAnimationMessageSchema,
-  StopAnimationMessageSchema,
-  UpdateAnimationStateMessageSchema,
-  ResetAnimationMessageSchema,
-]);
-
-type MessageInContent = v.InferOutput<typeof MessageInContentSchema>;
-
-export function validateMessageInContent(data: unknown): MessageInContent {
-  return v.parse(MessageInContentSchema, data);
+export function validateMessageInContent(data: unknown) {
+  return v.parse(UpdateContentAnimationStateMessageSchema, data);
 }
 
 export async function handleMessageInBackground(rawMessage: unknown) {
@@ -62,7 +54,7 @@ export async function handleMessageInBackground(rawMessage: unknown) {
       return { type: "message" as const, message: `handled: ${typ}` };
 
     case "STOP_ANIMATION":
-      await handleStopAnimationMessage({ message, tab });
+      await handleStopAnimationMessage({ tab });
       return { type: "message" as const, message: `handled: ${typ}` };
 
     case "UPDATE_ANIMATION_STATE":
@@ -74,14 +66,14 @@ export async function handleMessageInBackground(rawMessage: unknown) {
       return { type: "message" as const, message: `handled: ${typ}` };
 
     case "RESET_ANIMATION":
-      await handleResetAnimationMessage({ message, tab });
+      await handleResetAnimationMessage({ tab });
       return { type: "message" as const, message: `handled: ${typ}` };
 
     case "GET_ANIMATION_STATE":
       return {
         type: "response" as const,
         messageType: typ,
-        body: await handleGetAnimationStateMessage({ message, tab }),
+        body: await handleGetAnimationStateMessage({ tab }),
       };
 
     default:

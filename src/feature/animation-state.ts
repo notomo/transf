@@ -2,7 +2,8 @@ import * as v from "valibot";
 import { browser } from "wxt/browser";
 import { storage } from "wxt/utils/storage";
 
-// Type definitions
+export const ANIMATION_NAME = "transf-animation";
+
 export type RelativeTime = number; // 0.0-1.0
 
 export type Keyframe = {
@@ -62,7 +63,6 @@ export const DEFAULT_ANIMATION: AnimationState = {
   isPlaying: false,
   currentTime: 0.0,
   baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
-  animationName: undefined,
 };
 
 // Validation schemas
@@ -101,7 +101,6 @@ export const AnimationStateSchema = v.object({
   isPlaying: v.boolean(),
   currentTime: v.number(),
   baseTransform: TransformStateSchema,
-  animationName: v.optional(v.string()),
 });
 
 export type AnimationState = v.InferOutput<typeof AnimationStateSchema>;
@@ -154,8 +153,4 @@ export async function deleteAnimationState(url: string): Promise<void> {
   const updatedStored = { ...stored };
   delete updatedStored[url];
   await animationStates.setValue(updatedStored);
-}
-
-export function generateAnimationName(): string {
-  return `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }

@@ -12,12 +12,10 @@ export function useProgressTracking(
   const trackProgress = useEffectEvent(async () => {
     const updatedState = updateCurrentTime(animationState);
     const currentTime = updatedState?.currentTime ?? 0;
-    const animationName = updatedState?.animationName ?? undefined;
 
     await sendAnimationProgressMessage(
       currentTime,
       updatedState?.isPlaying ?? false,
-      animationName,
     );
 
     setAnimationState(updatedState);

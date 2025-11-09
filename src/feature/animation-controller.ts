@@ -1,4 +1,5 @@
 import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
+import { ANIMATION_NAME } from "@/src/feature/animation-state";
 import {
   type CSSAnimationConfig,
   generateCSSKeyframes,
@@ -40,25 +41,19 @@ export function generateAnimationStyles(state: AnimationState | null): {
   return { styles, config: null };
 }
 
-export function calculateCurrentTime(state: AnimationState | null): number {
+function calculateCurrentTime(state: AnimationState | null): number {
   if (!state?.isPlaying) {
     return state?.currentTime || 0;
-  }
-
-  const animationName = state.animationName;
-
-  if (!animationName) {
-    return state.currentTime;
   }
 
   const animations = document.documentElement.getAnimations();
   const transformAnimation = animations.find(
     (anim) =>
-      anim instanceof CSSAnimation && anim.animationName === animationName,
+      anim instanceof CSSAnimation && anim.animationName === ANIMATION_NAME,
   );
 
   if (!transformAnimation) {
-    throw new Error(`CSS Animation with name "${animationName}" not found`);
+    throw new Error(`CSS Animation with name "${ANIMATION_NAME}" not found`);
   }
 
   const currentTimeMs = transformAnimation.currentTime;

@@ -1,14 +1,10 @@
 import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import { interpolateKeyframes } from "@/src/entrypoints/popup/keyframe";
+import { ANIMATION_NAME } from "@/src/feature/animation-state";
 
 export interface CSSAnimationConfig {
   keyframesRule: string;
   animationProperty: string;
-  animationName: string;
-}
-
-function generateUniqueAnimationName(): string {
-  return `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
 }
 
 function formatTransformValue(
@@ -119,8 +115,6 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
 export function generateCSSKeyframes(
   animationState: AnimationState,
 ): CSSAnimationConfig {
-  const animationName =
-    animationState.animationName || generateUniqueAnimationName();
   const keyframeSteps = generateKeyframeSteps(animationState);
 
   const keyframeRules = keyframeSteps
@@ -133,19 +127,18 @@ export function generateCSSKeyframes(
     })
     .join("\n");
 
-  const keyframesRule = `@keyframes ${animationName} {
+  const keyframesRule = `@keyframes ${ANIMATION_NAME} {
 ${keyframeRules}
 }`;
 
   // Generate animation property
   const duration = `${animationState.duration}ms`;
   const playState = animationState.isPlaying ? "running" : "paused";
-  const animationProperty = `${animationName} ${duration} linear infinite ${playState}`;
+  const animationProperty = `${ANIMATION_NAME} ${duration} linear infinite ${playState}`;
 
   return {
     keyframesRule,
     animationProperty,
-    animationName,
   };
 }
 

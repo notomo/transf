@@ -1,12 +1,19 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import { deleteAnimationState, type Tab } from "@/src/feature/animation-state";
+import {
+  AnimationStateSchema,
+  deleteAnimationState,
+  type Tab,
+} from "@/src/feature/animation-state";
 
 export const ResetAnimationMessageSchema = v.object({
   type: v.literal("RESET_ANIMATION"),
+  animationState: v.optional(v.nullable(AnimationStateSchema)),
 });
 
-type ResetAnimationMessage = v.InferOutput<typeof ResetAnimationMessageSchema>;
+export type ResetAnimationMessage = v.InferOutput<
+  typeof ResetAnimationMessageSchema
+>;
 
 export async function handleResetAnimationMessage({
   message,
@@ -17,7 +24,10 @@ export async function handleResetAnimationMessage({
 }) {
   await deleteAnimationState(tab.url);
 
-  await browser.tabs.sendMessage(tab.id, message);
+  await browser.tabs.sendMessage(tab.id, {
+    ...message,
+    animationState: null,
+  });
 }
 
 export async function sendResetAnimationMessage(): Promise<void> {

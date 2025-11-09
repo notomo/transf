@@ -1,29 +1,17 @@
 import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
+import type { AnimationState } from "@/src/feature/animation-state";
 import { validateMessageInContent } from "@/src/feature/message";
-import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
-import type { StopAnimationMessage } from "@/src/feature/message/stop-animation";
-import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useMessageHandler({
-  onStartAnimation,
-  onStopAnimation,
-  onUpdateAnimationState,
-  onResetAnimation,
+  onUpdateState,
 }: {
-  onStartAnimation: (message: StartAnimationMessage) => void;
-  onStopAnimation: (message: StopAnimationMessage) => void;
-  onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
-  onResetAnimation: () => void;
+  onUpdateState: (state: AnimationState | null) => void;
 }) {
   const handleMessageEvent = useEffectEvent(async (rawMessage: unknown) => {
-    await handleMessage({
-      rawMessage,
-      onStartAnimation,
-      onStopAnimation,
-      onUpdateAnimationState,
-      onResetAnimation,
-    });
+    const message = validateMessageInContent(rawMessage);
+    const state = message.animationState ?? null;
+    onUpdateState(state);
   });
 
   useEffect(() => {
@@ -45,41 +33,4 @@ export function useMessageHandler({
       browser.runtime.onMessage.removeListener(messageListener);
     };
   }, []);
-}
-
-async function handleMessage({
-  rawMessage,
-  onStartAnimation,
-  onStopAnimation,
-  onUpdateAnimationState,
-  onResetAnimation,
-}: {
-  rawMessage: unknown;
-  onStartAnimation: (message: StartAnimationMessage) => void;
-  onStopAnimation: (message: StopAnimationMessage) => void;
-  onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
-  onResetAnimation: () => void;
-}) {
-  const message = validateMessageInContent(rawMessage);
-  const typ = message.type;
-  switch (typ) {
-    case "START_ANIMATION":
-      onStartAnimation(message);
-      return;
-
-    case "STOP_ANIMATION":
-      onStopAnimation(message);
-      return;
-
-    case "UPDATE_ANIMATION_STATE":
-      onUpdateAnimationState(message);
-      return;
-
-    case "RESET_ANIMATION":
-      onResetAnimation();
-      return;
-
-    default:
-      throw new Error(`unexpected message type: ${typ satisfies never}`);
-  }
 }

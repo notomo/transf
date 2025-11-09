@@ -50,14 +50,18 @@ export async function sendUpdateAnimationStateMessage(
 
 export async function restoreAnimationForTab(tabId: number): Promise<void> {
   const tab = await browser.tabs.get(tabId);
-  if (!tab.url) return;
-
-  const savedState = await getAnimationState(tab.url);
-  if (savedState) {
-    const message: UpdateAnimationStateMessage = {
-      type: "UPDATE_ANIMATION_STATE",
-      animationState: savedState,
-    };
-    await browser.tabs.sendMessage(tabId, message);
+  if (!tab.url) {
+    return;
   }
+
+  const animationState = await getAnimationState(tab.url);
+  if (!animationState) {
+    return;
+  }
+
+  const message: UpdateAnimationStateMessage = {
+    type: "UPDATE_ANIMATION_STATE",
+    animationState,
+  };
+  await browser.tabs.sendMessage(tabId, message);
 }

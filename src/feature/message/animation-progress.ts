@@ -24,16 +24,17 @@ export async function handleAnimationProgressMessage({
   message: AnimationProgressMessage;
   tab: Tab;
 }) {
-  const currentState = await getAnimationState(tab.url);
-  if (currentState) {
-    const updatedState = {
-      ...currentState,
-      currentTime: message.currentTime,
-      isPlaying: message.isPlaying,
-      animationName: message.animationName ?? currentState.animationName,
-    };
-    await saveAnimationState(tab.url, updatedState);
+  const animationState = await getAnimationState(tab.url);
+  if (!animationState) {
+    return;
   }
+
+  await saveAnimationState(tab.url, {
+    ...animationState,
+    currentTime: message.currentTime,
+    isPlaying: message.isPlaying,
+    animationName: message.animationName ?? animationState.animationName,
+  });
 }
 
 export async function sendAnimationProgressMessage(

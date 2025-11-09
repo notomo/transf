@@ -19,11 +19,15 @@ export async function handleStopAnimationMessage({
   message: StopAnimationMessage;
   tab: Tab;
 }) {
-  const currentState = await getAnimationState(tab.url);
-  if (currentState) {
-    const updatedState = { ...currentState, isPlaying: false };
-    await saveAnimationState(tab.url, updatedState);
-
-    await browser.tabs.sendMessage(tab.id, message);
+  const animationState = await getAnimationState(tab.url);
+  if (!animationState) {
+    return;
   }
+
+  await saveAnimationState(tab.url, {
+    ...animationState,
+    isPlaying: false,
+  });
+
+  await browser.tabs.sendMessage(tab.id, message);
 }

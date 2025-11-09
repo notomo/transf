@@ -2,6 +2,7 @@ import { useEffect, useEffectEvent } from "react";
 import { browser } from "wxt/browser";
 import { validateMessageInContent } from "@/src/feature/message";
 import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
+import type { StopAnimationMessage } from "@/src/feature/message/stop-animation";
 import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useMessageHandler({
@@ -11,7 +12,7 @@ export function useMessageHandler({
   onResetAnimation,
 }: {
   onStartAnimation: (message: StartAnimationMessage) => void;
-  onStopAnimation: () => void;
+  onStopAnimation: (message: StopAnimationMessage) => void;
   onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
   onResetAnimation: () => void;
 }) {
@@ -55,7 +56,7 @@ async function handleMessage({
 }: {
   rawMessage: unknown;
   onStartAnimation: (message: StartAnimationMessage) => void;
-  onStopAnimation: () => void;
+  onStopAnimation: (message: StopAnimationMessage) => void;
   onUpdateAnimationState: (message: UpdateAnimationStateMessage) => void;
   onResetAnimation: () => void;
 }) {
@@ -67,7 +68,7 @@ async function handleMessage({
       return;
 
     case "STOP_ANIMATION":
-      onStopAnimation();
+      onStopAnimation(message);
       return;
 
     case "UPDATE_ANIMATION_STATE":

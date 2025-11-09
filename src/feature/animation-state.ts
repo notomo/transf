@@ -155,3 +155,7 @@ export async function deleteAnimationState(url: string): Promise<void> {
   delete updatedStored[url];
   await animationStates.setValue(updatedStored);
 }
+
+export function generateAnimationName(): string {
+  return `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+}

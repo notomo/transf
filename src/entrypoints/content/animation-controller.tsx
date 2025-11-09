@@ -1,12 +1,7 @@
 import { useCallback, useState } from "react";
 import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
-import {
-  resetAnimation,
-  startAnimation,
-  stopAnimation,
-  updateAnimationState,
-} from "@/src/feature/animation-controller";
 import type { StartAnimationMessage } from "@/src/feature/message/start-animation";
+import type { StopAnimationMessage } from "@/src/feature/message/stop-animation";
 import type { UpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import { useMessageHandler } from "./use-message-handler";
 import { useProgressTracking } from "./use-progress-tracking";
@@ -46,24 +41,22 @@ function useAnimationController() {
   );
 
   const handleStartAnimation = useCallback((message: StartAnimationMessage) => {
-    setAnimationState((prev) => startAnimation(prev, message.animationState));
+    setAnimationState(message.animationState);
   }, []);
 
-  const handleStopAnimation = useCallback(() => {
-    setAnimationState((prev) => stopAnimation(prev));
+  const handleStopAnimation = useCallback((message: StopAnimationMessage) => {
+    setAnimationState(message.animationState);
   }, []);
 
   const handleUpdateAnimationState = useCallback(
     (message: UpdateAnimationStateMessage) => {
-      setAnimationState((prev) =>
-        updateAnimationState(prev, message.animationState),
-      );
+      setAnimationState(message.animationState);
     },
     [],
   );
 
   const handleResetAnimation = useCallback(() => {
-    setAnimationState(resetAnimation());
+    setAnimationState(null);
   }, []);
 
   return {

@@ -1,6 +1,7 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
 import {
+  AnimationStateSchema,
   getAnimationState,
   saveAnimationState,
   type Tab,
@@ -8,9 +9,12 @@ import {
 
 export const StopAnimationMessageSchema = v.object({
   type: v.literal("STOP_ANIMATION"),
+  animationState: AnimationStateSchema,
 });
 
-type StopAnimationMessage = v.InferOutput<typeof StopAnimationMessageSchema>;
+export type StopAnimationMessage = v.InferOutput<
+  typeof StopAnimationMessageSchema
+>;
 
 export async function handleStopAnimationMessage({
   message,
@@ -24,10 +28,15 @@ export async function handleStopAnimationMessage({
     return;
   }
 
-  await saveAnimationState(tab.url, {
+  const updatedState = {
     ...animationState,
     isPlaying: false,
-  });
+  };
 
-  await browser.tabs.sendMessage(tab.id, message);
+  await saveAnimationState(tab.url, updatedState);
+
+  await browser.tabs.sendMessage(tab.id, {
+    ...message,
+    animationState: updatedState,
+  });
 }

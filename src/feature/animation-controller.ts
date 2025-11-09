@@ -6,53 +6,6 @@ import {
   hasKeyframes,
 } from "@/src/feature/css-keyframe";
 
-export function startAnimation(
-  state: AnimationState | null,
-  animationState: AnimationState,
-): AnimationState {
-  const animationName =
-    state?.animationName ||
-    animationState.animationName ||
-    `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
-  return {
-    ...animationState,
-    animationName,
-  };
-}
-
-export function stopAnimation(
-  state: AnimationState | null,
-): AnimationState | null {
-  if (!state) {
-    return state;
-  }
-
-  return {
-    ...state,
-    isPlaying: false,
-  };
-}
-
-export function updateAnimationState(
-  state: AnimationState | null,
-  animationState: AnimationState,
-): AnimationState {
-  const animationName =
-    state?.animationName ||
-    animationState.animationName ||
-    `transf-animation-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
-
-  return {
-    ...animationState,
-    animationName,
-  };
-}
-
-export function resetAnimation(): null {
-  return null;
-}
-
 export function generateAnimationStyles(state: AnimationState | null): {
   styles: string;
   config: CSSAnimationConfig | null;

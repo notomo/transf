@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { sendResetAnimationMessage } from "@/src/feature/message/reset-animation";
-import { sendStartAnimationMessage } from "@/src/feature/message/start-animation";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import type {
   AnimationState,
@@ -28,22 +27,11 @@ function useAnimationState() {
   }, []);
 
   const setAnimationState = useCallback(
-    async ({
-      newState,
-      animated = false,
-    }: {
-      newState: AnimationState | null;
-      animated?: boolean;
-    }) => {
+    async ({ newState }: { newState: AnimationState | null }) => {
       setState(newState);
 
       if (!newState) {
         await sendResetAnimationMessage();
-        return;
-      }
-
-      if (animated) {
-        await sendStartAnimationMessage(newState);
         return;
       }
 
@@ -88,7 +76,6 @@ export function useTransform() {
           ...state,
           ...updates,
         },
-        animated: updates.isPlaying,
       });
     },
     [state, setAnimationState],

@@ -13,22 +13,12 @@ import {
   ResetAnimationMessageSchema,
 } from "@/src/feature/message/reset-animation";
 import {
-  handleStartAnimationMessage,
-  StartAnimationMessageSchema,
-} from "@/src/feature/message/start-animation";
-import {
-  handleStopAnimationMessage,
-  StopAnimationMessageSchema,
-} from "@/src/feature/message/stop-animation";
-import {
   handleUpdateAnimationStateMessage,
   UpdateAnimationStateMessageSchema,
 } from "@/src/feature/message/update-animation-state";
 import { UpdateContentAnimationStateMessageSchema } from "@/src/feature/message/update-content-animation-state";
 
 const MessageInBackgroundSchema = v.union([
-  StartAnimationMessageSchema,
-  StopAnimationMessageSchema,
   UpdateAnimationStateMessageSchema,
   GetAnimationStateMessageSchema,
   AnimationProgressMessageSchema,
@@ -49,14 +39,6 @@ export async function handleMessageInBackground(rawMessage: unknown) {
 
   const typ = message.type;
   switch (typ) {
-    case "START_ANIMATION":
-      await handleStartAnimationMessage({ message, tab });
-      return { type: "message" as const, message: `handled: ${typ}` };
-
-    case "STOP_ANIMATION":
-      await handleStopAnimationMessage({ tab });
-      return { type: "message" as const, message: `handled: ${typ}` };
-
     case "UPDATE_ANIMATION_STATE":
       await handleUpdateAnimationStateMessage({ message, tab });
       return { type: "message" as const, message: `handled: ${typ}` };

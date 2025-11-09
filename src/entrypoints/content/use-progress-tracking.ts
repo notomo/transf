@@ -13,10 +13,7 @@ export function useProgressTracking(
     const updatedState = updateCurrentTime(animationState);
     const currentTime = updatedState?.currentTime ?? 0;
 
-    await sendAnimationProgressMessage(
-      currentTime,
-      updatedState?.isPlaying ?? false,
-    );
+    await sendAnimationProgressMessage(currentTime);
 
     setAnimationState(updatedState);
   });

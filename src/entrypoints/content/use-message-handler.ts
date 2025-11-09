@@ -10,8 +10,7 @@ export function useMessageHandler({
 }) {
   const handleMessageEvent = useEffectEvent(async (rawMessage: unknown) => {
     const message = validateMessageInContent(rawMessage);
-    const state = message.animationState;
-    onUpdateState(state);
+    onUpdateState(message.animationState);
   });
 
   useEffect(() => {

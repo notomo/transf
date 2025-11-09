@@ -9,7 +9,6 @@ import {
 export const AnimationProgressMessageSchema = v.object({
   type: v.literal("ANIMATION_PROGRESS"),
   currentTime: v.number(),
-  isPlaying: v.boolean(),
 });
 
 type AnimationProgressMessage = v.InferOutput<
@@ -31,18 +30,15 @@ export async function handleAnimationProgressMessage({
   await saveAnimationState(tab.url, {
     ...animationState,
     currentTime: message.currentTime,
-    isPlaying: message.isPlaying,
   });
 }
 
 export async function sendAnimationProgressMessage(
   currentTime: number,
-  isPlaying: boolean,
 ): Promise<void> {
   const message: AnimationProgressMessage = {
     type: "ANIMATION_PROGRESS",
     currentTime,
-    isPlaying,
   };
   await browser.runtime.sendMessage(message);
 }

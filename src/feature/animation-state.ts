@@ -1,6 +1,4 @@
 import * as v from "valibot";
-import { browser } from "wxt/browser";
-import { storage } from "wxt/utils/storage";
 
 export const ANIMATION_NAME = "transf-animation";
 
@@ -65,7 +63,6 @@ export const DEFAULT_ANIMATION: AnimationState = {
   baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
 };
 
-// Validation schemas
 const KeyframeSchema = v.object({
   time: v.number(),
   value: v.number(),
@@ -104,53 +101,3 @@ export const AnimationStateSchema = v.object({
 });
 
 export type AnimationState = v.InferOutput<typeof AnimationStateSchema>;
-
-export type Tab = {
-  id: number;
-  url: string;
-};
-
-// Storage for animation states per tab URL
-export const animationStates = storage.defineItem<
-  Record<string, AnimationState>
->("local:animationStates", {
-  defaultValue: {},
-});
-
-export async function getCurrentTabInfo(): Promise<Tab | null> {
-  const [activeTab] = await browser.tabs.query({
-    active: true,
-    currentWindow: true,
-  });
-
-  if (!activeTab?.id || !activeTab?.url) {
-    return null;
-  }
-
-  return { id: activeTab.id, url: activeTab.url };
-}
-
-export async function getAnimationState(
-  url: string,
-): Promise<AnimationState | undefined> {
-  const stored = await animationStates.getValue();
-  return stored[url];
-}
-
-export async function saveAnimationState(
-  url: string,
-  state: AnimationState,
-): Promise<void> {
-  const stored = await animationStates.getValue();
-  await animationStates.setValue({
-    ...stored,
-    [url]: state,
-  });
-}
-
-export async function deleteAnimationState(url: string): Promise<void> {
-  const stored = await animationStates.getValue();
-  const updatedStored = { ...stored };
-  delete updatedStored[url];
-  await animationStates.setValue(updatedStored);
-}

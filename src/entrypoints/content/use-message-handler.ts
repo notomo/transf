@@ -8,28 +8,28 @@ export function useMessageHandler({
 }: {
   onUpdateState: (state: AnimationState | null) => void;
 }) {
-  const handleMessageEvent = useEffectEvent(async (rawMessage: unknown) => {
+  const handleMessage = useEffectEvent(async (rawMessage: unknown) => {
     const message = validateMessageInContent(rawMessage);
     onUpdateState(message.animationState);
   });
 
   useEffect(() => {
-    const messageListener = (
+    const handler = (
       rawMessage: unknown,
       _sender: unknown,
       sendResponse: (response?: unknown) => void,
     ) => {
-      handleMessageEvent(rawMessage).then(() => {
+      handleMessage(rawMessage).then(() => {
         sendResponse({ success: true });
       });
       // Return true to indicate async response
       return true;
     };
 
-    browser.runtime.onMessage.addListener(messageListener);
+    browser.runtime.onMessage.addListener(handler);
 
     return () => {
-      browser.runtime.onMessage.removeListener(messageListener);
+      browser.runtime.onMessage.removeListener(handler);
     };
   }, []);
 }

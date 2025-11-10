@@ -1,17 +1,16 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import type { AnimationState, Tab } from "@/src/feature/animation-state";
+import type { AnimationState } from "@/src/feature/animation-state";
+import { AnimationStateSchema } from "@/src/feature/animation-state";
 import {
-  AnimationStateSchema,
   deleteAnimationState,
   getAnimationState,
   saveAnimationState,
-} from "@/src/feature/animation-state";
-import { sendToContent } from "@/src/feature/message/update-content-animation-state";
+} from "./state-storage";
 
 export const UpdateAnimationStateMessageSchema = v.object({
   type: v.literal("UPDATE_ANIMATION_STATE"),
-  animationState: v.union([v.partial(AnimationStateSchema), v.null()]),
+  animationState: v.nullable(v.partial(AnimationStateSchema)),
   syncToContent: v.boolean(),
 });
 
@@ -24,7 +23,7 @@ export async function handleUpdateAnimationStateMessage({
   tab,
 }: {
   message: UpdateAnimationStateMessage;
-  tab: Tab;
+  tab: { id: number; url: string };
 }) {
   if (message.animationState === null) {
     await deleteAnimationState(tab.url);
@@ -70,4 +69,20 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
   }
 
   await sendToContent(tabId, animationState);
+}
+
+export const UpdateContentMessageSchema = v.object({
+  animationState: v.nullable(AnimationStateSchema),
+});
+
+type UpdateContentMessage = v.InferOutput<typeof UpdateContentMessageSchema>;
+
+async function sendToContent(
+  tabId: number,
+  animationState: AnimationState | null,
+): Promise<void> {
+  const message: UpdateContentMessage = {
+    animationState,
+  };
+  await browser.tabs.sendMessage(tabId, message);
 }

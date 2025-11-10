@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import { AnimationController } from "./animation-controller";
+import { App } from "./app";
 
 export default defineContentScript({
   matches: ["<all_urls>"],
@@ -8,8 +8,6 @@ export default defineContentScript({
   cssInjectionMode: "ui",
 
   async main(ctx) {
-    console.log("Content script loaded");
-
     const ui = await createShadowRootUi(ctx, {
       name: "transf-animation-controller",
       position: "inline",
@@ -21,7 +19,7 @@ export default defineContentScript({
         const root = ReactDOM.createRoot(wrapper);
         root.render(
           <StrictMode>
-            <AnimationController />
+            <App />
           </StrictMode>,
         );
         return { wrapper, root };

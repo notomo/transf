@@ -1,18 +1,14 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
-import {
-  AnimationStateSchema,
-  getAnimationState,
-  type Tab,
-} from "@/src/feature/animation-state";
+import { AnimationStateSchema } from "@/src/feature/animation-state";
+import { getAnimationState } from "./state-storage";
 
-const AnimationStateResponseMessageSchema = v.object({
-  type: v.literal("ANIMATION_STATE_RESPONSE"),
+const AnimationStateResponseSchema = v.object({
   animationState: v.optional(AnimationStateSchema),
 });
 
-type AnimationStateResponseMessage = v.InferOutput<
-  typeof AnimationStateResponseMessageSchema
+type AnimationStateResponse = v.InferOutput<
+  typeof AnimationStateResponseSchema
 >;
 
 export const GetAnimationStateMessageSchema = v.object({
@@ -26,19 +22,18 @@ type GetAnimationStateMessage = v.InferOutput<
 export async function handleGetAnimationStateMessage({
   tab,
 }: {
-  tab: Tab;
-}): Promise<AnimationStateResponseMessage> {
+  tab: { url: string };
+}): Promise<AnimationStateResponse> {
   const animationState = await getAnimationState(tab.url);
   return {
-    type: "ANIMATION_STATE_RESPONSE",
     animationState,
   };
 }
 
-export async function sendGetAnimationStateMessage(): Promise<AnimationStateResponseMessage> {
+export async function sendGetAnimationStateMessage(): Promise<AnimationStateResponse> {
   const message: GetAnimationStateMessage = {
     type: "GET_ANIMATION_STATE",
   };
   const response = await browser.runtime.sendMessage(message);
-  return v.parse(AnimationStateResponseMessageSchema, response);
+  return v.parse(AnimationStateResponseSchema, response);
 }

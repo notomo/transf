@@ -1,0 +1,35 @@
+import type { AnimationState } from "../animation-state";
+
+export const animationStates = storage.defineItem<
+  Record<
+    string, // tab url string
+    AnimationState
+  >
+>("local:animationStates", {
+  defaultValue: {},
+});
+
+export async function getAnimationState(
+  url: string,
+): Promise<AnimationState | undefined> {
+  const stored = await animationStates.getValue();
+  return stored[url];
+}
+
+export async function saveAnimationState(
+  url: string,
+  state: AnimationState,
+): Promise<void> {
+  const stored = await animationStates.getValue();
+  await animationStates.setValue({
+    ...stored,
+    [url]: state,
+  });
+}
+
+export async function deleteAnimationState(url: string): Promise<void> {
+  const stored = await animationStates.getValue();
+  const updatedStored = { ...stored };
+  delete updatedStored[url];
+  await animationStates.setValue(updatedStored);
+}

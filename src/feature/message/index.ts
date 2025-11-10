@@ -1,5 +1,4 @@
 import * as v from "valibot";
-import { getCurrentTabInfo } from "@/src/feature/animation-state";
 import {
   GetAnimationStateMessageSchema,
   handleGetAnimationStateMessage,
@@ -7,8 +6,8 @@ import {
 import {
   handleUpdateAnimationStateMessage,
   UpdateAnimationStateMessageSchema,
+  UpdateContentMessageSchema,
 } from "@/src/feature/message/update-animation-state";
-import { UpdateContentAnimationStateMessageSchema } from "@/src/feature/message/update-content-animation-state";
 
 const MessageInBackgroundSchema = v.union([
   UpdateAnimationStateMessageSchema,
@@ -16,16 +15,20 @@ const MessageInBackgroundSchema = v.union([
 ]);
 
 export function validateMessageInContent(data: unknown) {
-  return v.parse(UpdateContentAnimationStateMessageSchema, data);
+  return v.parse(UpdateContentMessageSchema, data);
 }
 
 export async function handleMessageInBackground(rawMessage: unknown) {
   const message = v.parse(MessageInBackgroundSchema, rawMessage);
 
-  const tab = await getCurrentTabInfo();
-  if (tab === null) {
+  const [activeTab] = await browser.tabs.query({
+    active: true,
+    currentWindow: true,
+  });
+  if (!activeTab?.id || !activeTab?.url) {
     return { type: "message" as const, message: "no active tab found" };
   }
+  const tab = { id: activeTab.id, url: activeTab.url };
 
   const typ = message.type;
   switch (typ) {

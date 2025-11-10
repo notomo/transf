@@ -1,17 +1,17 @@
 import { useCallback, useState } from "react";
 import type { AnimationState } from "@/src/feature/animation-state";
+import { useCurrentTimeUpdater } from "./use-current-time-updater";
 import { useMessageHandler } from "./use-message-handler";
-import { useProgressTracking } from "./use-progress-tracking";
 import { useStyleInjection } from "./use-style-injection";
 
-export function AnimationController() {
+export function App() {
   const [animationState, setAnimationState] = useState<AnimationState | null>(
     null,
   );
 
-  const { clearStyles } = useStyleInjection(animationState);
+  useCurrentTimeUpdater(animationState, setAnimationState);
 
-  useProgressTracking(animationState, setAnimationState);
+  const { clearStyles } = useStyleInjection(animationState);
 
   const onUpdateState = useCallback(
     (state: AnimationState | null) => {

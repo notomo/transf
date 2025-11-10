@@ -3,7 +3,7 @@ import { updateCurrentTime } from "@/src/feature/animation-controller";
 import type { AnimationState } from "@/src/feature/animation-state";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
-export function useProgressTracking(
+export function useCurrentTimeUpdater(
   animationState: AnimationState | null,
   setAnimationState: React.Dispatch<
     React.SetStateAction<AnimationState | null>

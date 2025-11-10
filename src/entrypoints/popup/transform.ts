@@ -28,12 +28,6 @@ function useAnimationState() {
   const setAnimationState = useCallback(
     async ({ newState }: { newState: AnimationState | null }) => {
       setState(newState);
-
-      if (!newState) {
-        await sendUpdateAnimationStateMessage(null, true);
-        return;
-      }
-
       await sendUpdateAnimationStateMessage(newState, true);
     },
     [],

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from "react";
-import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
-import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import type {
   AnimationState,
   KeyframeFieldName,
   TransformState,
-} from "./keyframe";
+} from "@/src/feature/animation-state";
+import { DEFAULT_ANIMATION } from "@/src/feature/animation-state";
+import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
+import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import {
   addKeyframeTo,
-  DEFAULT_ANIMATION,
   deriveTransformFromAnimationState,
   removeKeyframeFrom,
   updateKeyframesWithTransform,

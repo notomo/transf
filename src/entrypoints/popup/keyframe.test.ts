@@ -1,17 +1,19 @@
 import { describe, expect, it } from "vitest";
+import type {
+  AnimationKeyframes,
+  AnimationState,
+  Keyframe,
+  TransformState,
+} from "@/src/feature/animation-state";
+import { DEFAULT_TRANSFORM_VALUES } from "@/src/feature/animation-state";
 import {
-  type AnimationKeyframes,
-  type AnimationState,
   addKeyframeTo,
-  DEFAULT_TRANSFORM_VALUES,
   deriveTransformFromAnimationState,
   findNextKeyframeTime,
   findPreviousKeyframeTime,
   hasKeyframeAtTime,
   interpolateKeyframes,
-  type Keyframe,
   removeKeyframeFrom,
-  type TransformState,
   updateKeyframe,
   updateKeyframesWithTransform,
 } from "./keyframe";

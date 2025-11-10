@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
+import type { AnimationState } from "@/src/feature/animation-state";
 import { useMessageHandler } from "./use-message-handler";
 import { useProgressTracking } from "./use-progress-tracking";
 import { useStyleInjection } from "./use-style-injection";

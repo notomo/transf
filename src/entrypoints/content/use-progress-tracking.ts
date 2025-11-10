@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent } from "react";
-import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import { updateCurrentTime } from "@/src/feature/animation-controller";
+import type { AnimationState } from "@/src/feature/animation-state";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useProgressTracking(

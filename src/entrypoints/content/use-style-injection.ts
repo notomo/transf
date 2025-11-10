@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
-import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import { generateAnimationStyles } from "@/src/feature/animation-controller";
+import type { AnimationState } from "@/src/feature/animation-state";
 
 export function useStyleInjection(animationState: AnimationState | null) {
   const styleElementRef = useRef<HTMLStyleElement | null>(null);

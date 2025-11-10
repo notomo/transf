@@ -2,31 +2,10 @@ import type {
   AnimationKeyframes,
   AnimationState,
   Keyframe,
-  KeyframeFieldName,
   RelativeTime,
   TransformState,
 } from "@/src/feature/animation-state";
-import {
-  DEFAULT_ANIMATION,
-  DEFAULT_TRANSFORM_VALUES,
-  keyframeFieldLabels,
-  keyframeFieldNames,
-} from "@/src/feature/animation-state";
-
-export type {
-  RelativeTime,
-  Keyframe,
-  KeyframeFieldName,
-  AnimationKeyframes,
-  TransformState,
-  AnimationState,
-};
-export {
-  keyframeFieldNames,
-  keyframeFieldLabels,
-  DEFAULT_TRANSFORM_VALUES,
-  DEFAULT_ANIMATION,
-};
+import { keyframeFieldNames } from "@/src/feature/animation-state";
 
 export function interpolateKeyframes({
   keyframes,

@@ -1,6 +1,7 @@
 import { useId } from "react";
+import { keyframeFieldLabels } from "@/src/feature/animation-state";
 import { cn } from "@/src/lib/tailwind";
-import { hasKeyframeAtTime, keyframeFieldLabels } from "./keyframe";
+import { hasKeyframeAtTime } from "./keyframe";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
 

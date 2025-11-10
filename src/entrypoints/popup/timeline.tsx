@@ -1,16 +1,15 @@
 import { useEffect, useEffectEvent, useId } from "react";
+import type {
+  AnimationKeyframes,
+  AnimationState,
+  KeyframeFieldName,
+  RelativeTime,
+} from "@/src/feature/animation-state";
+import { keyframeFieldLabels } from "@/src/feature/animation-state";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
-import {
-  type AnimationKeyframes,
-  type AnimationState,
-  findNextKeyframeTime,
-  findPreviousKeyframeTime,
-  type KeyframeFieldName,
-  keyframeFieldLabels,
-  type RelativeTime,
-} from "./keyframe";
+import { findNextKeyframeTime, findPreviousKeyframeTime } from "./keyframe";
 
 function useAnimation({
   isPlaying,

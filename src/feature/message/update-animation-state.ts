@@ -3,6 +3,7 @@ import { browser } from "wxt/browser";
 import type { AnimationState, Tab } from "@/src/feature/animation-state";
 import {
   AnimationStateSchema,
+  deleteAnimationState,
   getAnimationState,
   saveAnimationState,
 } from "@/src/feature/animation-state";
@@ -10,7 +11,8 @@ import { sendToContent } from "@/src/feature/message/update-content-animation-st
 
 export const UpdateAnimationStateMessageSchema = v.object({
   type: v.literal("UPDATE_ANIMATION_STATE"),
-  animationState: AnimationStateSchema,
+  animationState: v.union([v.partial(AnimationStateSchema), v.null()]),
+  syncToContent: v.boolean(),
 });
 
 type UpdateAnimationStateMessage = v.InferOutput<
@@ -24,17 +26,34 @@ export async function handleUpdateAnimationStateMessage({
   message: UpdateAnimationStateMessage;
   tab: Tab;
 }) {
-  await saveAnimationState(tab.url, message.animationState);
+  if (message.animationState === null) {
+    await deleteAnimationState(tab.url);
+    if (message.syncToContent) {
+      await sendToContent(tab.id, null);
+    }
+    return;
+  }
 
-  await sendToContent(tab.id, message.animationState);
+  const existingState = await getAnimationState(tab.url);
+  const mergedState = existingState
+    ? { ...existingState, ...message.animationState }
+    : (message.animationState as AnimationState);
+
+  await saveAnimationState(tab.url, mergedState);
+
+  if (message.syncToContent) {
+    await sendToContent(tab.id, mergedState);
+  }
 }
 
 export async function sendUpdateAnimationStateMessage(
-  animationState: AnimationState,
+  animationState: Partial<AnimationState> | null,
+  syncToContent: boolean,
 ): Promise<void> {
   const message: UpdateAnimationStateMessage = {
     type: "UPDATE_ANIMATION_STATE",
     animationState,
+    syncToContent,
   };
   await browser.runtime.sendMessage(message);
 }

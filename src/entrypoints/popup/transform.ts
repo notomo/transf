@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
-import { sendResetAnimationMessage } from "@/src/feature/message/reset-animation";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import type {
   AnimationState,
@@ -31,11 +30,11 @@ function useAnimationState() {
       setState(newState);
 
       if (!newState) {
-        await sendResetAnimationMessage();
+        await sendUpdateAnimationStateMessage(null, true);
         return;
       }
 
-      await sendUpdateAnimationStateMessage(newState);
+      await sendUpdateAnimationStateMessage(newState, true);
     },
     [],
   );

@@ -1,7 +1,7 @@
 import { useEffect, useEffectEvent } from "react";
 import type { AnimationState } from "@/src/entrypoints/popup/keyframe";
 import { updateCurrentTime } from "@/src/feature/animation-controller";
-import { sendAnimationProgressMessage } from "@/src/feature/message/animation-progress";
+import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useProgressTracking(
   animationState: AnimationState | null,
@@ -13,7 +13,7 @@ export function useProgressTracking(
     const updatedState = updateCurrentTime(animationState);
     const currentTime = updatedState?.currentTime ?? 0;
 
-    await sendAnimationProgressMessage(currentTime);
+    await sendUpdateAnimationStateMessage({ currentTime }, false);
 
     setAnimationState(updatedState);
   });

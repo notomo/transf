@@ -1,5 +1,5 @@
 import { useEffect, useEffectEvent } from "react";
-import { calculateCurrentTime } from "@/src/feature/animation-controller";
+import { calculateCurrentTime } from "@/src/feature/animation-css";
 import type { AnimationState } from "@/src/feature/animation-state";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 

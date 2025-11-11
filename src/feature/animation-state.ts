@@ -1,7 +1,5 @@
 import * as v from "valibot";
 
-export const ANIMATION_NAME = "transf-animation";
-
 export type RelativeTime = number; // 0.0-1.0
 
 export type Keyframe = {
@@ -68,7 +66,7 @@ const KeyframeSchema = v.object({
   value: v.number(),
 });
 
-export const AnimationKeyframesSchema = v.object({
+const AnimationKeyframesSchema = v.object({
   rotation: v.array(KeyframeSchema),
   scale: v.array(KeyframeSchema),
   translateX: v.array(KeyframeSchema),
@@ -79,7 +77,7 @@ export const AnimationKeyframesSchema = v.object({
   flipVertical: v.array(KeyframeSchema),
 });
 
-export const TransformStateSchema = v.object({
+const TransformStateSchema = v.object({
   centerX: v.number(),
   centerY: v.number(),
   rotation: v.number(),

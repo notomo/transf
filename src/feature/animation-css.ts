@@ -1,11 +1,5 @@
 import { interpolateKeyframes } from "@/src/entrypoints/popup/keyframe";
 import type { AnimationState } from "@/src/feature/animation-state";
-import { ANIMATION_NAME } from "@/src/feature/animation-state";
-
-interface CSSAnimationConfig {
-  keyframesRule: string;
-  animationProperty: string;
-}
 
 function formatTransformValue(
   _centerX: number,
@@ -28,7 +22,6 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
   transform: string;
   transformOrigin: string;
 }> {
-  // Collect all unique keyframe times
   const allTimes = new Set<number>();
 
   for (const keyframes of Object.values(animationState.keyframes)) {
@@ -37,14 +30,12 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
     }
   }
 
-  // Always include 0% and 100%
   allTimes.add(0);
   allTimes.add(1);
 
   const sortedTimes = Array.from(allTimes).sort((a, b) => a - b);
 
   return sortedTimes.map((time) => {
-    // Interpolate all transform properties at this time
     const centerX = interpolateKeyframes({
       keyframes: animationState.keyframes.centerX,
       time,
@@ -112,9 +103,9 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
   });
 }
 
-export function generateCSSKeyframes(
-  animationState: AnimationState,
-): CSSAnimationConfig {
+const ANIMATION_NAME = "transf-animation";
+
+function generateCSSKeyframes(animationState: AnimationState) {
   const keyframeSteps = generateKeyframeSteps(animationState);
 
   const keyframeRules = keyframeSteps
@@ -131,7 +122,6 @@ export function generateCSSKeyframes(
 ${keyframeRules}
 }`;
 
-  // Generate animation property
   const duration = `${animationState.duration}ms`;
   const playState = animationState.isPlaying ? "running" : "paused";
   const animationProperty = `${ANIMATION_NAME} ${duration} linear infinite ${playState}`;
@@ -142,10 +132,7 @@ ${keyframeRules}
   };
 }
 
-export function generateStaticTransformCSS(
-  animationState: AnimationState,
-): string {
-  // For non-animated (static) transforms, just apply current state
+function generateStaticTransformCSS(animationState: AnimationState): string {
   const currentTransform = formatTransformValue(
     animationState.baseTransform.centerX,
     animationState.baseTransform.centerY,
@@ -164,8 +151,50 @@ transition: transform 0.3s ease;
 `;
 }
 
-export function hasKeyframes(animationState: AnimationState): boolean {
+function hasKeyframes(animationState: AnimationState): boolean {
   return Object.values(animationState.keyframes).some(
     (keyframes) => keyframes.length > 0,
   );
+}
+
+export function generateAnimationStyles(state: AnimationState | null): string {
+  if (!state) {
+    return "";
+  }
+
+  if (hasKeyframes(state)) {
+    const config = generateCSSKeyframes(state);
+    const delay = -state.currentTime * state.duration;
+
+    return `
+      ${config.keyframesRule}
+
+      html {
+        animation: ${config.animationProperty} !important;
+        animation-delay: ${delay}ms !important;
+      }
+    `;
+  }
+
+  const staticCSS = generateStaticTransformCSS(state);
+  return `
+    html {
+      ${staticCSS}
+    }
+  `;
+}
+
+export function calculateCurrentTime(duration: number): number {
+  const animation = document.documentElement
+    .getAnimations()
+    .find(
+      (x) => x instanceof CSSAnimation && x.animationName === ANIMATION_NAME,
+    );
+  if (!animation) {
+    throw new Error(`CSS Animation with name "${ANIMATION_NAME}" not found`);
+  }
+
+  const ms = Number(animation.currentTime ?? 0);
+
+  return (ms % duration) / duration;
 }

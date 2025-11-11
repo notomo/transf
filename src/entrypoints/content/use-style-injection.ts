@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { generateAnimationStyles } from "@/src/feature/animation-controller";
+import { generateAnimationStyles } from "@/src/feature/animation-css";
 import type { AnimationState } from "@/src/feature/animation-state";
 
 export function useStyleInjection(animationState: AnimationState | null) {

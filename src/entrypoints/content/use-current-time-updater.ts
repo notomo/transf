@@ -1,21 +1,24 @@
 import { useEffect, useEffectEvent } from "react";
-import { updateCurrentTime } from "@/src/feature/animation-controller";
+import { calculateCurrentTime } from "@/src/feature/animation-controller";
 import type { AnimationState } from "@/src/feature/animation-state";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 export function useCurrentTimeUpdater(
   animationState: AnimationState | null,
-  setAnimationState: React.Dispatch<
-    React.SetStateAction<AnimationState | null>
-  >,
+  setAnimationState: (state: AnimationState) => void,
 ) {
-  const trackProgress = useEffectEvent(async () => {
-    const updatedState = updateCurrentTime(animationState);
-    const currentTime = updatedState?.currentTime ?? 0;
+  const update = useEffectEvent(async () => {
+    if (!animationState) {
+      return;
+    }
+    const currentTime = calculateCurrentTime(animationState.duration);
 
     await sendUpdateAnimationStateMessage({ currentTime }, false);
 
-    setAnimationState(updatedState);
+    setAnimationState({
+      ...animationState,
+      currentTime,
+    });
   });
 
   const isPlaying = animationState?.isPlaying ?? false;
@@ -25,7 +28,7 @@ export function useCurrentTimeUpdater(
       return;
     }
 
-    const intervalId = window.setInterval(trackProgress, 50);
+    const intervalId = window.setInterval(update, 50);
     return () => {
       clearInterval(intervalId);
     };

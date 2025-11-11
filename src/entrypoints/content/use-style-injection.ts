@@ -3,23 +3,20 @@ import { generateAnimationStyles } from "@/src/feature/animation-controller";
 import type { AnimationState } from "@/src/feature/animation-state";
 
 export function useStyleInjection(animationState: AnimationState | null) {
-  const styleElementRef = useRef<HTMLStyleElement | null>(null);
+  const ref = useRef<HTMLStyleElement | null>(null);
 
   useEffect(() => {
-    // Initialize style element
     const styleElement = document.createElement("style");
     styleElement.id = "transf-animation-styles";
     document.head.appendChild(styleElement);
-    styleElementRef.current = styleElement;
+    ref.current = styleElement;
 
     return () => {
-      // Cleanup: remove style element and clear document styles
-      if (styleElementRef.current) {
-        styleElementRef.current.remove();
-        styleElementRef.current = null;
+      if (ref.current) {
+        ref.current.remove();
+        ref.current = null;
       }
 
-      // Clear any remaining styles from document
       document.documentElement.style.removeProperty("animation");
       document.documentElement.style.removeProperty("animation-delay");
       document.documentElement.style.removeProperty("transform");
@@ -29,17 +26,16 @@ export function useStyleInjection(animationState: AnimationState | null) {
   }, []);
 
   useEffect(() => {
-    if (!styleElementRef.current) {
+    if (!ref.current) {
       return;
     }
 
-    const { styles } = generateAnimationStyles(animationState);
-    styleElementRef.current.textContent = styles;
+    ref.current.textContent = generateAnimationStyles(animationState);
   }, [animationState]);
 
   const clearStyles = () => {
-    if (styleElementRef.current) {
-      styleElementRef.current.textContent = "";
+    if (ref.current) {
+      ref.current.textContent = "";
     }
     document.documentElement.style.removeProperty("animation");
     document.documentElement.style.removeProperty("animation-delay");

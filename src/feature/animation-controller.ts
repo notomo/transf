@@ -1,25 +1,21 @@
 import type { AnimationState } from "@/src/feature/animation-state";
 import { ANIMATION_NAME } from "@/src/feature/animation-state";
 import {
-  type CSSAnimationConfig,
   generateCSSKeyframes,
   generateStaticTransformCSS,
   hasKeyframes,
 } from "@/src/feature/css-keyframe";
 
-export function generateAnimationStyles(state: AnimationState | null): {
-  styles: string;
-  config: CSSAnimationConfig | null;
-} {
+export function generateAnimationStyles(state: AnimationState | null): string {
   if (!state) {
-    return { styles: "", config: null };
+    return "";
   }
 
   if (hasKeyframes(state)) {
     const config = generateCSSKeyframes(state);
     const delay = -state.currentTime * state.duration;
 
-    const styles = `
+    return `
       ${config.keyframesRule}
 
       html {
@@ -27,55 +23,28 @@ export function generateAnimationStyles(state: AnimationState | null): {
         animation-delay: ${delay}ms !important;
       }
     `;
-
-    return { styles, config };
   }
 
   const staticCSS = generateStaticTransformCSS(state);
-  const styles = `
+  return `
     html {
       ${staticCSS}
     }
   `;
-
-  return { styles, config: null };
 }
 
-function calculateCurrentTime(state: AnimationState | null): number {
-  if (!state?.isPlaying) {
-    return state?.currentTime || 0;
-  }
-
-  const animations = document.documentElement.getAnimations();
-  const transformAnimation = animations.find(
-    (anim) =>
-      anim instanceof CSSAnimation && anim.animationName === ANIMATION_NAME,
-  );
-
-  if (!transformAnimation) {
+export function calculateCurrentTime(duration: number): number {
+  const animation = document.documentElement
+    .getAnimations()
+    .find(
+      (x) => x instanceof CSSAnimation && x.animationName === ANIMATION_NAME,
+    );
+  if (!animation) {
     throw new Error(`CSS Animation with name "${ANIMATION_NAME}" not found`);
   }
 
-  const currentTimeMs = transformAnimation.currentTime;
-  if (currentTimeMs === null || currentTimeMs === undefined) {
-    throw new Error("Animation currentTime is null or undefined");
-  }
+  const ms = Number(animation.currentTime ?? 0);
 
-  const duration = state.duration;
   // Convert to relative time (0.0-1.0) and handle looping
-  return ((currentTimeMs as number) % duration) / duration;
-}
-
-export function updateCurrentTime(
-  state: AnimationState | null,
-): AnimationState | null {
-  if (!state) {
-    return state;
-  }
-
-  const currentTime = calculateCurrentTime(state);
-  return {
-    ...state,
-    currentTime,
-  };
+  return (ms % duration) / duration;
 }

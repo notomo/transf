@@ -2,7 +2,7 @@ import { interpolateKeyframes } from "@/src/entrypoints/popup/keyframe";
 import type { AnimationState } from "@/src/feature/animation-state";
 import { ANIMATION_NAME } from "@/src/feature/animation-state";
 
-export interface CSSAnimationConfig {
+interface CSSAnimationConfig {
   keyframesRule: string;
   animationProperty: string;
 }

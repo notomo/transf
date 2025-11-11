@@ -27,6 +27,5 @@ export function App() {
     onUpdateState,
   });
 
-  // This component doesn't render anything visible
   return null;
 }

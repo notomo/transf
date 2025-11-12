@@ -118,7 +118,7 @@ export function useTransform() {
   }, [setAnimationState]);
 
   return {
-    transform: deriveTransformFromAnimationState(state),
+    transform: deriveTransformFromAnimationState({ state }),
     animation: state,
     applyTransform,
     updateAnimation,

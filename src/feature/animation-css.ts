@@ -1,19 +1,23 @@
-import type { AnimationState } from "@/src/feature/animation-state";
-import { interpolateKeyframes } from "@/src/feature/keyframe";
+import type {
+  AnimationState,
+  TransformState,
+} from "@/src/feature/animation-state";
+import {
+  deriveTransformFromAnimationState,
+  getAllKeyframeTimeSet,
+  hasKeyframes,
+} from "@/src/feature/keyframe";
 
-function formatTransformValue(
-  _centerX: number,
-  _centerY: number,
-  rotation: number,
-  scale: number,
-  translateX: number,
-  translateY: number,
-  flipHorizontal: boolean,
-  flipVertical: boolean,
-): string {
+function formatTransform({
+  rotation,
+  scale,
+  translateX,
+  translateY,
+  flipHorizontal,
+  flipVertical,
+}: TransformState): string {
   const scaleX = flipHorizontal ? -scale : scale;
   const scaleY = flipVertical ? -scale : scale;
-
   return `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;
 }
 
@@ -22,83 +26,19 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
   transform: string;
   transformOrigin: string;
 }> {
-  const allTimes = new Set<number>();
-
-  for (const keyframes of Object.values(animationState.keyframes)) {
-    for (const kf of keyframes) {
-      allTimes.add(kf.time);
-    }
-  }
-
-  allTimes.add(0);
-  allTimes.add(1);
-
-  const sortedTimes = Array.from(allTimes).sort((a, b) => a - b);
-
-  return sortedTimes.map((time) => {
-    const centerX = interpolateKeyframes({
-      keyframes: animationState.keyframes.centerX,
-      time,
-      defaultValue: animationState.baseTransform.centerX,
+  const timeSet = getAllKeyframeTimeSet(animationState.keyframes);
+  timeSet.add(0);
+  timeSet.add(1);
+  const allTimes = Array.from(timeSet).sort((a, b) => a - b);
+  return allTimes.map((time) => {
+    const transformState = deriveTransformFromAnimationState({
+      state: animationState,
+      specifiedTime: time,
     });
-
-    const centerY = interpolateKeyframes({
-      keyframes: animationState.keyframes.centerY,
-      time,
-      defaultValue: animationState.baseTransform.centerY,
-    });
-
-    const rotation = interpolateKeyframes({
-      keyframes: animationState.keyframes.rotation,
-      time,
-      defaultValue: animationState.baseTransform.rotation,
-    });
-
-    const scale = interpolateKeyframes({
-      keyframes: animationState.keyframes.scale,
-      time,
-      defaultValue: animationState.baseTransform.scale,
-    });
-
-    const translateX = interpolateKeyframes({
-      keyframes: animationState.keyframes.translateX,
-      time,
-      defaultValue: animationState.baseTransform.translateX,
-    });
-
-    const translateY = interpolateKeyframes({
-      keyframes: animationState.keyframes.translateY,
-      time,
-      defaultValue: animationState.baseTransform.translateY,
-    });
-
-    const flipHorizontal =
-      interpolateKeyframes({
-        keyframes: animationState.keyframes.flipHorizontal,
-        time,
-        defaultValue: animationState.baseTransform.flipHorizontal ? 1 : 0,
-      }) > 0.5;
-
-    const flipVertical =
-      interpolateKeyframes({
-        keyframes: animationState.keyframes.flipVertical,
-        time,
-        defaultValue: animationState.baseTransform.flipVertical ? 1 : 0,
-      }) > 0.5;
-
     return {
       time,
-      transform: formatTransformValue(
-        centerX,
-        centerY,
-        rotation,
-        scale,
-        translateX,
-        translateY,
-        flipHorizontal,
-        flipVertical,
-      ),
-      transformOrigin: `${centerX}% ${centerY}%`,
+      transform: formatTransform(transformState),
+      transformOrigin: `${transformState.centerX}% ${transformState.centerY}%`,
     };
   });
 }
@@ -106,9 +46,7 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
 const ANIMATION_NAME = "transf-animation";
 
 function generateCSSKeyframes(animationState: AnimationState) {
-  const keyframeSteps = generateKeyframeSteps(animationState);
-
-  const keyframeRules = keyframeSteps
+  const keyframeRules = generateKeyframeSteps(animationState)
     .map((step) => {
       const percentage = Math.round(step.time * 100);
       return `  ${percentage}% {
@@ -118,43 +56,20 @@ function generateCSSKeyframes(animationState: AnimationState) {
     })
     .join("\n");
 
-  const keyframesRule = `@keyframes ${ANIMATION_NAME} {
-${keyframeRules}
-}`;
-
-  const duration = `${animationState.duration}ms`;
-  const playState = animationState.isPlaying ? "running" : "paused";
-  const animationProperty = `${ANIMATION_NAME} ${duration} linear infinite ${playState}`;
-
   return {
-    keyframesRule,
-    animationProperty,
+    keyframesRule: `@keyframes ${ANIMATION_NAME} {
+${keyframeRules}
+}`,
+    animationProperty: `${ANIMATION_NAME} ${animationState.duration}ms linear infinite ${animationState.isPlaying ? "running" : "paused"}`,
   };
 }
 
 function generateStaticTransformCSS(animationState: AnimationState): string {
-  const currentTransform = formatTransformValue(
-    animationState.baseTransform.centerX,
-    animationState.baseTransform.centerY,
-    animationState.baseTransform.rotation,
-    animationState.baseTransform.scale,
-    animationState.baseTransform.translateX,
-    animationState.baseTransform.translateY,
-    animationState.baseTransform.flipHorizontal,
-    animationState.baseTransform.flipVertical,
-  );
-
   return `
 transform-origin: ${animationState.baseTransform.centerX}% ${animationState.baseTransform.centerY}%;
-transform: ${currentTransform};
+transform: ${formatTransform(animationState.baseTransform)};
 transition: transform 0.3s ease;
 `;
-}
-
-function hasKeyframes(animationState: AnimationState): boolean {
-  return Object.values(animationState.keyframes).some(
-    (keyframes) => keyframes.length > 0,
-  );
 }
 
 export function generateAnimationStyles(state: AnimationState | null): string {
@@ -162,7 +77,7 @@ export function generateAnimationStyles(state: AnimationState | null): string {
     return "";
   }
 
-  if (hasKeyframes(state)) {
+  if (hasKeyframes(state.keyframes)) {
     const config = generateCSSKeyframes(state);
     const delay = -state.currentTime * state.duration;
 

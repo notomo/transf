@@ -58,14 +58,20 @@ export function interpolateKeyframes({
   return defaultValue;
 }
 
-function getAllKeyframeTimes(keyframes: AnimationKeyframes): number[] {
+export function getAllKeyframeTimeSet(
+  keyframes: AnimationKeyframes,
+): Set<number> {
   const times = new Set<number>();
-  Object.values(keyframes).forEach((keyframes) => {
-    for (const kf of keyframes) {
+  for (const kfs of Object.values(keyframes)) {
+    for (const kf of kfs) {
       times.add(kf.time);
     }
-  });
-  return Array.from(times).sort((a, b) => a - b);
+  }
+  return times;
+}
+
+function getAllKeyframeTimes(keyframes: AnimationKeyframes): number[] {
+  return Array.from(getAllKeyframeTimeSet(keyframes)).sort((a, b) => a - b);
 }
 
 export function findPreviousKeyframeTime({
@@ -192,51 +198,60 @@ export function updateKeyframesWithTransform({
   return updatedKeyframes;
 }
 
-export function deriveTransformFromAnimationState(
-  state: AnimationState,
-): TransformState {
+export function deriveTransformFromAnimationState({
+  state,
+  specifiedTime,
+}: {
+  state: AnimationState;
+  specifiedTime?: number;
+}): TransformState {
+  const time = specifiedTime ?? state.currentTime;
   return {
     rotation: interpolateKeyframes({
       keyframes: state.keyframes.rotation,
-      time: state.currentTime,
+      time,
       defaultValue: state.baseTransform.rotation,
     }),
     scale: interpolateKeyframes({
       keyframes: state.keyframes.scale,
-      time: state.currentTime,
+      time,
       defaultValue: state.baseTransform.scale,
     }),
     translateX: interpolateKeyframes({
       keyframes: state.keyframes.translateX,
-      time: state.currentTime,
+      time,
       defaultValue: state.baseTransform.translateX,
     }),
     translateY: interpolateKeyframes({
       keyframes: state.keyframes.translateY,
-      time: state.currentTime,
+      time,
       defaultValue: state.baseTransform.translateY,
     }),
     centerX: interpolateKeyframes({
       keyframes: state.keyframes.centerX,
-      time: state.currentTime,
+      time,
       defaultValue: state.baseTransform.centerX,
     }),
     centerY: interpolateKeyframes({
       keyframes: state.keyframes.centerY,
-      time: state.currentTime,
+      time,
       defaultValue: state.baseTransform.centerY,
     }),
     flipHorizontal:
       interpolateKeyframes({
         keyframes: state.keyframes.flipHorizontal,
-        time: state.currentTime,
+        time,
         defaultValue: state.baseTransform.flipHorizontal ? 1 : 0,
       }) > 0.5,
     flipVertical:
       interpolateKeyframes({
         keyframes: state.keyframes.flipVertical,
-        time: state.currentTime,
+        time,
         defaultValue: state.baseTransform.flipVertical ? 1 : 0,
       }) > 0.5,
   };
+}
+
+export function hasKeyframes(keyframes: AnimationKeyframes): boolean {
+  return Object.values(keyframes).some((keyframes) => keyframes.length > 0);
 }

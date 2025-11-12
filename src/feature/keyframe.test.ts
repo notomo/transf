@@ -257,7 +257,7 @@ describe("deriveTransformFromAnimationState", () => {
       currentTime: 0.5,
       baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
     };
-    const result = deriveTransformFromAnimationState(state);
+    const result = deriveTransformFromAnimationState({ state });
     expect(result).toEqual({
       centerX: 50,
       centerY: 50,
@@ -296,7 +296,7 @@ describe("deriveTransformFromAnimationState", () => {
       currentTime: 0.5,
       baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
     };
-    const result = deriveTransformFromAnimationState(state);
+    const result = deriveTransformFromAnimationState({ state });
     expect(result).toEqual({
       centerX: 50,
       centerY: 50,
@@ -326,7 +326,7 @@ describe("deriveTransformFromAnimationState", () => {
       currentTime: 0.5,
       baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
     };
-    const result = deriveTransformFromAnimationState(state);
+    const result = deriveTransformFromAnimationState({ state });
     expect(result.flipHorizontal).toBe(true);
     expect(result.flipVertical).toBe(false);
   });
@@ -357,7 +357,7 @@ describe("deriveTransformFromAnimationState", () => {
         flipVertical: false,
       },
     };
-    const result = deriveTransformFromAnimationState(state);
+    const result = deriveTransformFromAnimationState({ state });
     expect(result).toEqual({
       centerX: 25,
       centerY: 75,

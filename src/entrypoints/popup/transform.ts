@@ -5,14 +5,14 @@ import type {
   TransformState,
 } from "@/src/feature/animation-state";
 import { DEFAULT_ANIMATION } from "@/src/feature/animation-state";
-import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
-import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import {
   addKeyframeTo,
   deriveTransformFromAnimationState,
   removeKeyframeFrom,
   updateKeyframesWithTransform,
-} from "./keyframe";
+} from "@/src/feature/keyframe";
+import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
+import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
 function useAnimationState() {
   const [state, setState] = useState<AnimationState | null>(null);

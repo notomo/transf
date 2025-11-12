@@ -6,10 +6,13 @@ import type {
   RelativeTime,
 } from "@/src/feature/animation-state";
 import { keyframeFieldLabels } from "@/src/feature/animation-state";
+import {
+  findNextKeyframeTime,
+  findPreviousKeyframeTime,
+} from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
-import { findNextKeyframeTime, findPreviousKeyframeTime } from "./keyframe";
 
 function useAnimation({
   isPlaying,

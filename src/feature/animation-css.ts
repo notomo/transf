@@ -1,5 +1,5 @@
-import { interpolateKeyframes } from "@/src/entrypoints/popup/keyframe";
 import type { AnimationState } from "@/src/feature/animation-state";
+import { interpolateKeyframes } from "@/src/feature/keyframe";
 
 function formatTransformValue(
   _centerX: number,

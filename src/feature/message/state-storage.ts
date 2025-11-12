@@ -1,6 +1,6 @@
 import type { AnimationState } from "../animation-state";
 
-export const animationStates = storage.defineItem<
+const animationStates = storage.defineItem<
   Record<
     string, // tab url string
     AnimationState

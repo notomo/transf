@@ -28,7 +28,7 @@ export async function handleUpdateAnimationStateMessage({
   if (message.animationState === null) {
     await deleteAnimationState(tab.url);
     if (message.syncToContent) {
-      await sendToContent(tab.id, null);
+      await sendToContent({ tabId: tab.id, animationState: null });
     }
     return;
   }
@@ -38,17 +38,20 @@ export async function handleUpdateAnimationStateMessage({
     ? { ...existingState, ...message.animationState }
     : (message.animationState as AnimationState);
 
-  await saveAnimationState(tab.url, mergedState);
+  await saveAnimationState({ url: tab.url, state: mergedState });
 
   if (message.syncToContent) {
-    await sendToContent(tab.id, mergedState);
+    await sendToContent({ tabId: tab.id, animationState: mergedState });
   }
 }
 
-export async function sendUpdateAnimationStateMessage(
-  animationState: Partial<AnimationState> | null,
-  syncToContent: boolean,
-): Promise<void> {
+export async function sendUpdateAnimationStateMessage({
+  animationState,
+  syncToContent,
+}: {
+  animationState: Partial<AnimationState> | null;
+  syncToContent: boolean;
+}): Promise<void> {
   const message: UpdateAnimationStateMessage = {
     type: "UPDATE_ANIMATION_STATE",
     animationState,
@@ -68,7 +71,7 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
     return;
   }
 
-  await sendToContent(tabId, animationState);
+  await sendToContent({ tabId, animationState });
 }
 
 export const UpdateContentMessageSchema = v.object({
@@ -77,10 +80,13 @@ export const UpdateContentMessageSchema = v.object({
 
 type UpdateContentMessage = v.InferOutput<typeof UpdateContentMessageSchema>;
 
-async function sendToContent(
-  tabId: number,
-  animationState: AnimationState | null,
-): Promise<void> {
+async function sendToContent({
+  tabId,
+  animationState,
+}: {
+  tabId: number;
+  animationState: AnimationState | null;
+}): Promise<void> {
   const message: UpdateContentMessage = {
     animationState,
   };

@@ -16,10 +16,13 @@ export async function getAnimationState(
   return stored[url];
 }
 
-export async function saveAnimationState(
-  url: string,
-  state: AnimationState,
-): Promise<void> {
+export async function saveAnimationState({
+  url,
+  state,
+}: {
+  url: string;
+  state: AnimationState;
+}): Promise<void> {
   const stored = await animationStates.getValue();
   await animationStates.setValue({
     ...stored,

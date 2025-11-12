@@ -3,17 +3,23 @@ import { calculateCurrentTime } from "@/src/feature/animation-css";
 import type { AnimationState } from "@/src/feature/animation-state";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 
-export function useCurrentTimeUpdater(
-  animationState: AnimationState | null,
-  setAnimationState: (state: AnimationState) => void,
-) {
+export function useCurrentTimeUpdater({
+  animationState,
+  setAnimationState,
+}: {
+  animationState: AnimationState | null;
+  setAnimationState: (state: AnimationState) => void;
+}) {
   const update = useEffectEvent(async () => {
     if (!animationState) {
       return;
     }
     const currentTime = calculateCurrentTime(animationState.duration);
 
-    await sendUpdateAnimationStateMessage({ currentTime }, false);
+    await sendUpdateAnimationStateMessage({
+      animationState: { currentTime },
+      syncToContent: false,
+    });
 
     setAnimationState({
       ...animationState,

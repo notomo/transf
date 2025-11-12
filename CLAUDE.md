@@ -61,6 +61,39 @@ npm run check_all
 - ls-lint enforces kebab-case file naming for TypeScript files
 - TailwindCSS for styling with custom configuration
 
+## Code Style Guidelines
+
+- **Function Parameters**: When a function takes multiple parameters (2 or more), use a single object parameter with inline type definition instead. Single-parameter functions should keep their simple parameter style.
+
+  ```typescript
+  // Good: Multiple parameters as object
+  export function interpolateKeyframes({
+    keyframes,
+    time,
+    defaultValue,
+  }: {
+    keyframes: Keyframe[];
+    time: RelativeTime;
+    defaultValue: number;
+  }): number {
+    // ...
+  }
+
+  // Good: Single parameter stays simple
+  export function getAnimationState(url: string): Promise<AnimationState | undefined> {
+    // ...
+  }
+
+  // Bad: Multiple parameters without object
+  export function interpolateKeyframes(
+    keyframes: Keyframe[],
+    time: RelativeTime,
+    defaultValue: number,
+  ): number {
+    // ...
+  }
+  ```
+
 ## Directory Structure Guidelines
 
 - **`src/lib/`**: Contains generic utility functions and libraries that are not application-specific. This directory should not contain any business logic specific to the browser extension.

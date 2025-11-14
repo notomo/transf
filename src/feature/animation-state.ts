@@ -59,7 +59,7 @@ export const DEFAULT_ANIMATION: AnimationState = {
     flipHorizontal: [],
     flipVertical: [],
   },
-  duration: 5000,
+  duration: 500,
   isPlaying: false,
   currentTime: 0.0,
   baseTransform: { ...DEFAULT_TRANSFORM_VALUES },

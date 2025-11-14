@@ -29,7 +29,7 @@ test("Reset button resets all transform values to defaults", async ({
   await expect(popup.getScaleSlider()).toHaveValue("1");
   await expect(popup.getTranslateXSlider()).toHaveValue("0");
   await expect(popup.getTranslateYSlider()).toHaveValue("0");
-  await expect(popup.getDurationSlider()).toHaveValue("5000");
+  await expect(popup.getDurationSlider()).toHaveValue("500");
   await expect(popup.getHorizontalFlipCheckbox()).not.toBeChecked();
   await expect(popup.getVerticalFlipCheckbox()).not.toBeChecked();
 

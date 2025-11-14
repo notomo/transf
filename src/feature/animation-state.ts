@@ -1,11 +1,15 @@
 import * as v from "valibot";
 
-export type RelativeTime = number; // 0.0-1.0
+const RelativeTimeSchema = v.pipe(v.number(), v.minValue(0), v.maxValue(1));
 
-export type Keyframe = {
-  time: RelativeTime;
-  value: number;
-};
+export type RelativeTime = v.InferOutput<typeof RelativeTimeSchema>;
+
+const KeyframeSchema = v.object({
+  time: RelativeTimeSchema,
+  value: v.number(),
+});
+
+export type Keyframe = v.InferOutput<typeof KeyframeSchema>;
 
 export const keyframeFieldNames = [
   "rotation",
@@ -60,11 +64,6 @@ export const DEFAULT_ANIMATION: AnimationState = {
   currentTime: 0.0,
   baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
 };
-
-const KeyframeSchema = v.object({
-  time: v.number(),
-  value: v.number(),
-});
 
 const AnimationKeyframesSchema = v.object({
   rotation: v.array(KeyframeSchema),

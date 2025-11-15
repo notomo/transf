@@ -1,7 +1,10 @@
 import * as v from "valibot";
 import { browser } from "wxt/browser";
 import type { AnimationState } from "@/src/feature/animation-state";
-import { AnimationStateSchema } from "@/src/feature/animation-state";
+import {
+  AnimationStateSchema,
+  DEFAULT_ANIMATION,
+} from "@/src/feature/animation-state";
 import {
   deleteAnimationState,
   getAnimationState,
@@ -30,13 +33,15 @@ export async function handleUpdateAnimationStateMessage({
     return;
   }
 
-  const existingState = await getAnimationState(tab.url);
-  const mergedState = existingState
-    ? { ...existingState, ...message.animationState }
-    : (message.animationState as AnimationState);
+  const existed = await getAnimationState(tab.url);
+  const merged = {
+    ...DEFAULT_ANIMATION,
+    ...existed,
+    ...message.animationState,
+  };
 
-  await saveAnimationState({ url: tab.url, state: mergedState });
-  await sendToContent({ tabId: tab.id, animationState: mergedState });
+  await saveAnimationState({ url: tab.url, state: merged });
+  await sendToContent({ tabId: tab.id, animationState: merged });
 }
 
 export async function sendUpdateAnimationStateMessage({

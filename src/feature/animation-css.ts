@@ -57,10 +57,10 @@ function generateCSSKeyframes(animationState: AnimationState) {
     .join("\n");
 
   return {
-    keyframesRule: `@keyframes ${ANIMATION_NAME} {
+    keyframes: `@keyframes ${ANIMATION_NAME} {
 ${keyframeRules}
 }`,
-    animationProperty: `${ANIMATION_NAME} ${animationState.duration}ms linear infinite ${animationState.isPlaying ? "running" : "paused"}`,
+    animation: `${ANIMATION_NAME} ${animationState.duration}ms linear infinite ${animationState.isPlaying ? "running" : "paused"}`,
   };
 }
 
@@ -70,9 +70,9 @@ export function generateAnimationStyles(state: AnimationState): string {
     const delay = -state.currentTime * state.duration;
 
     return `
-${config.keyframesRule}
+${config.keyframes}
 html {
-  animation: ${config.animationProperty} !important;
+  animation: ${config.animation} !important;
   animation-delay: ${delay}ms !important;
 }`;
   }

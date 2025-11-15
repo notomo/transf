@@ -6,22 +6,17 @@ export function useStyleInjection(animationState: AnimationState | null) {
   const ref = useRef<HTMLStyleElement | null>(null);
 
   useEffect(() => {
-    const styleElement = document.createElement("style");
-    styleElement.id = "transf-animation-styles";
-    document.head.appendChild(styleElement);
-    ref.current = styleElement;
+    const style = document.createElement("style");
+    style.id = "transf-animation-styles";
+    document.head.appendChild(style);
+    ref.current = style;
 
     return () => {
-      if (ref.current) {
-        ref.current.remove();
-        ref.current = null;
+      if (!ref.current) {
+        return;
       }
-
-      document.documentElement.style.removeProperty("animation");
-      document.documentElement.style.removeProperty("animation-delay");
-      document.documentElement.style.removeProperty("transform");
-      document.documentElement.style.removeProperty("transform-origin");
-      document.documentElement.style.removeProperty("transition");
+      ref.current.remove();
+      ref.current = null;
     };
   }, []);
 
@@ -29,19 +24,14 @@ export function useStyleInjection(animationState: AnimationState | null) {
     if (!ref.current) {
       return;
     }
-
     ref.current.textContent = generateAnimationStyles(animationState);
   }, [animationState]);
 
   const clearStyles = () => {
-    if (ref.current) {
-      ref.current.textContent = "";
+    if (!ref.current) {
+      return;
     }
-    document.documentElement.style.removeProperty("animation");
-    document.documentElement.style.removeProperty("animation-delay");
-    document.documentElement.style.removeProperty("transform");
-    document.documentElement.style.removeProperty("transform-origin");
-    document.documentElement.style.removeProperty("transition");
+    ref.current.textContent = "";
   };
 
   return { clearStyles };

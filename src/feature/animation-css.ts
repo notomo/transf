@@ -64,39 +64,25 @@ ${keyframeRules}
   };
 }
 
-function generateStaticTransformCSS(animationState: AnimationState): string {
-  return `
-transform-origin: ${animationState.baseTransform.centerX}% ${animationState.baseTransform.centerY}%;
-transform: ${formatTransform(animationState.baseTransform)};
-transition: transform 0.3s ease;
-`;
-}
-
-export function generateAnimationStyles(state: AnimationState | null): string {
-  if (!state) {
-    return "";
-  }
-
+export function generateAnimationStyles(state: AnimationState): string {
   if (hasKeyframes(state.keyframes)) {
     const config = generateCSSKeyframes(state);
     const delay = -state.currentTime * state.duration;
 
     return `
-      ${config.keyframesRule}
-
-      html {
-        animation: ${config.animationProperty} !important;
-        animation-delay: ${delay}ms !important;
-      }
-    `;
+${config.keyframesRule}
+html {
+  animation: ${config.animationProperty} !important;
+  animation-delay: ${delay}ms !important;
+}`;
   }
 
-  const staticCSS = generateStaticTransformCSS(state);
   return `
-    html {
-      ${staticCSS}
-    }
-  `;
+html {
+  transform-origin: ${state.baseTransform.centerX}% ${state.baseTransform.centerY}%;
+  transform: ${formatTransform(state.baseTransform)};
+  transition: transform 0.3s ease;
+}`;
 }
 
 export function calculateCurrentTime(duration: number): number {

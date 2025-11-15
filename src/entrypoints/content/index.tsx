@@ -9,24 +9,20 @@ export default defineContentScript({
 
   async main(ctx) {
     const ui = await createShadowRootUi(ctx, {
-      name: "transf-animation-controller",
+      name: "transf-app",
       position: "inline",
       anchor: "body",
       onMount: (container) => {
-        const wrapper = document.createElement("div");
-        container.append(wrapper);
-
-        const root = ReactDOM.createRoot(wrapper);
+        const root = ReactDOM.createRoot(container);
         root.render(
           <StrictMode>
             <App />
           </StrictMode>,
         );
-        return { wrapper, root };
+        return { root };
       },
       onRemove: (elements) => {
         elements?.root.unmount();
-        elements?.wrapper.remove();
       },
     });
 

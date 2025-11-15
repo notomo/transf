@@ -20,8 +20,7 @@ function useAnimationState() {
   useEffect(() => {
     (async () => {
       const response = await sendGetAnimationStateMessage();
-      const animationState = response.animationState ?? null;
-      setState(animationState);
+      setState(response.animationState);
     })();
   }, []);
 

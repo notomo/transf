@@ -4,7 +4,7 @@ import { AnimationStateSchema } from "@/src/feature/animation-state";
 import { getAnimationState } from "./state-storage";
 
 const AnimationStateResponseSchema = v.object({
-  animationState: v.optional(AnimationStateSchema),
+  animationState: v.nullable(AnimationStateSchema),
 });
 
 type AnimationStateResponse = v.InferOutput<

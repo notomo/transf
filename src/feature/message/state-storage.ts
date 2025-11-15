@@ -11,9 +11,9 @@ const animationStates = storage.defineItem<
 
 export async function getAnimationState(
   url: string,
-): Promise<AnimationState | undefined> {
+): Promise<AnimationState | null> {
   const stored = await animationStates.getValue();
-  return stored[url];
+  return stored[url] ?? null;
 }
 
 export async function saveAnimationState({

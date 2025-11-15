@@ -4,13 +4,13 @@ import type { AnimationState } from "@/src/feature/animation-state";
 import { validateMessageInContent } from "@/src/feature/message";
 
 export function useMessageHandler({
-  onUpdateState,
+  setAnimationState,
 }: {
-  onUpdateState: (state: AnimationState | null) => void;
+  setAnimationState: (state: AnimationState | null) => void;
 }) {
   const handleMessage = useEffectEvent(async (rawMessage: unknown) => {
     const message = validateMessageInContent(rawMessage);
-    onUpdateState(message.animationState);
+    setAnimationState(message.animationState);
   });
 
   useEffect(() => {

@@ -11,7 +11,7 @@ export function App() {
 
   useCurrentTimeUpdater({ animationState, setAnimationState });
 
-  useMessageHandler({ onUpdateState: setAnimationState });
+  useMessageHandler({ setAnimationState });
 
   return <HeadStyle animationState={animationState} />;
 }

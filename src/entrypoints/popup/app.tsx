@@ -1,6 +1,5 @@
 import { useId } from "react";
 import { keyframeFieldLabels } from "@/src/feature/animation-state";
-import { hasKeyframeAtTime } from "@/src/feature/keyframe";
 import { cn } from "@/src/lib/tailwind";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
@@ -21,7 +20,7 @@ function KeyframeButton({
       type="button"
       onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
       className={cn(
-        "flex h-6 w-6 items-center justify-center rounded px-2 py-1 font-bold text-lg text-white",
+        "flex h-6 w-6 select-none items-center justify-center rounded px-2 py-1 font-bold text-lg text-white",
         hasKeyframe
           ? "bg-red-500 hover:bg-red-600"
           : "bg-green-500 hover:bg-green-600",
@@ -109,14 +108,14 @@ function AxisPercentInput({
 }
 
 function RotationInput({
-  rotation,
+  value,
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
   className,
 }: {
-  rotation: number;
+  value: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
@@ -129,7 +128,7 @@ function RotationInput({
     <div className={className}>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          {label}: {Math.round(rotation * 10) / 10}°
+          {label}: {Math.round(value * 10) / 10}°
         </label>
         <KeyframeButton
           hasKeyframe={hasKeyframe}
@@ -143,7 +142,7 @@ function RotationInput({
         type="range"
         min="-180"
         max="180"
-        value={rotation}
+        value={value}
         onChange={(e) => {
           const newValue = Number(e.target.value);
           onChange(newValue);
@@ -155,14 +154,14 @@ function RotationInput({
 }
 
 function ScaleInput({
-  scale,
+  value,
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
   className,
 }: {
-  scale: number;
+  value: number;
   onChange: (value: number) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
@@ -175,7 +174,7 @@ function ScaleInput({
     <div className={className}>
       <div className="flex items-center justify-between">
         <label htmlFor={id} className="block select-none font-medium text-sm">
-          {label}: {Math.round(scale * 100) / 100}x
+          {label}: {Math.round(value * 100) / 100}x
         </label>
         <KeyframeButton
           hasKeyframe={hasKeyframe}
@@ -190,7 +189,7 @@ function ScaleInput({
         min="0.1"
         max="5"
         step="0.1"
-        value={scale}
+        value={value}
         onChange={(e) => {
           const newValue = Number(e.target.value);
           onChange(newValue);
@@ -249,15 +248,15 @@ function TranslateInput({
 
 function FlipCheckbox({
   fieldName,
-  checked,
+  value,
   onChange,
   onAddKeyframe,
   onRemoveKeyframe,
   hasKeyframe,
 }: {
   fieldName: "flipVertical" | "flipHorizontal";
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  value: boolean;
+  onChange: (value: boolean) => void;
   onAddKeyframe: () => void;
   onRemoveKeyframe: () => void;
   hasKeyframe: boolean;
@@ -270,7 +269,7 @@ function FlipCheckbox({
         <input
           id={id}
           type="checkbox"
-          checked={checked}
+          checked={value}
           onChange={(e) => onChange(e.target.checked)}
           className="h-4 w-4"
         />
@@ -313,15 +312,8 @@ function PopupLink() {
 }
 
 export function App() {
-  const {
-    transform,
-    animation,
-    applyTransform,
-    updateAnimation,
-    addKeyframe,
-    removeKeyframe,
-    resetAll,
-  } = useTransform();
+  const { animationState, setAnimationState, getKeyframeProps, reset } =
+    useTransform();
 
   return (
     <div className="w-128 border border-gray-200 p-4">
@@ -329,142 +321,33 @@ export function App() {
         <h1 className="flex-1 text-center font-bold text-xl">Page Transform</h1>
 
         <div className="flex items-center gap-2">
-          <ResetButton reset={resetAll} />
+          <ResetButton reset={reset} />
           <PopupLink />
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        <TranslateInput
-          fieldName="translateX"
-          value={transform.translateX}
-          onChange={(newValue) => applyTransform({ translateX: newValue })}
-          onAddKeyframe={() =>
-            addKeyframe({
-              fieldName: "translateX",
-              value: transform.translateX,
-            })
-          }
-          onRemoveKeyframe={() => removeKeyframe("translateX")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.translateX,
-            time: animation.currentTime,
-          })}
-        />
-
-        <TranslateInput
-          fieldName="translateY"
-          value={transform.translateY}
-          onChange={(newValue) => applyTransform({ translateY: newValue })}
-          onAddKeyframe={() =>
-            addKeyframe({
-              fieldName: "translateY",
-              value: transform.translateY,
-            })
-          }
-          onRemoveKeyframe={() => removeKeyframe("translateY")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.translateY,
-            time: animation.currentTime,
-          })}
-        />
-
-        <AxisPercentInput
-          fieldName="centerX"
-          value={transform.centerX}
-          onChange={(newValue) => applyTransform({ centerX: newValue })}
-          onAddKeyframe={() =>
-            addKeyframe({ fieldName: "centerX", value: transform.centerX })
-          }
-          onRemoveKeyframe={() => removeKeyframe("centerX")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.centerX,
-            time: animation.currentTime,
-          })}
-        />
-
-        <AxisPercentInput
-          fieldName="centerY"
-          value={transform.centerY}
-          onChange={(newValue) => applyTransform({ centerY: newValue })}
-          onAddKeyframe={() =>
-            addKeyframe({ fieldName: "centerY", value: transform.centerY })
-          }
-          onRemoveKeyframe={() => removeKeyframe("centerY")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.centerY,
-            time: animation.currentTime,
-          })}
-        />
-
+        <TranslateInput {...getKeyframeProps("translateX")} />
+        <TranslateInput {...getKeyframeProps("translateY")} />
+        <AxisPercentInput {...getKeyframeProps("centerX")} />
+        <AxisPercentInput {...getKeyframeProps("centerY")} />
         <RotationInput
           className="col-span-2"
-          rotation={transform.rotation}
-          onChange={(newValue) => applyTransform({ rotation: newValue })}
-          onAddKeyframe={() =>
-            addKeyframe({ fieldName: "rotation", value: transform.rotation })
-          }
-          onRemoveKeyframe={() => removeKeyframe("rotation")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.rotation,
-            time: animation.currentTime,
-          })}
+          {...getKeyframeProps("rotation")}
         />
-
-        <ScaleInput
-          className="col-span-2"
-          scale={transform.scale}
-          onChange={(newValue) => applyTransform({ scale: newValue })}
-          onAddKeyframe={() =>
-            addKeyframe({ fieldName: "scale", value: transform.scale })
-          }
-          onRemoveKeyframe={() => removeKeyframe("scale")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.scale,
-            time: animation.currentTime,
-          })}
-        />
-
-        <FlipCheckbox
-          fieldName="flipHorizontal"
-          checked={transform.flipHorizontal}
-          onChange={(checked) => applyTransform({ flipHorizontal: checked })}
-          onAddKeyframe={() =>
-            addKeyframe({
-              fieldName: "flipHorizontal",
-              value: transform.flipHorizontal ? 1 : 0,
-            })
-          }
-          onRemoveKeyframe={() => removeKeyframe("flipHorizontal")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.flipHorizontal,
-            time: animation.currentTime,
-          })}
-        />
-
-        <FlipCheckbox
-          fieldName="flipVertical"
-          checked={transform.flipVertical}
-          onChange={(checked) => applyTransform({ flipVertical: checked })}
-          onAddKeyframe={() =>
-            addKeyframe({
-              fieldName: "flipVertical",
-              value: transform.flipVertical ? 1 : 0,
-            })
-          }
-          onRemoveKeyframe={() => removeKeyframe("flipVertical")}
-          hasKeyframe={hasKeyframeAtTime({
-            keyframes: animation.keyframes.flipVertical,
-            time: animation.currentTime,
-          })}
-        />
+        <ScaleInput className="col-span-2" {...getKeyframeProps("scale")} />
+        <FlipCheckbox {...getKeyframeProps("flipHorizontal")} />
+        <FlipCheckbox {...getKeyframeProps("flipVertical")} />
 
         <div className="col-span-2 space-y-2 bg-gray-100 px-1 py-2">
-          <Timeline animation={animation} onUpdateAnimation={updateAnimation} />
+          <Timeline
+            animation={animationState}
+            onUpdateAnimation={setAnimationState}
+          />
 
           <DurationInput
-            duration={animation.duration}
-            onDurationChange={(duration) => updateAnimation({ duration })}
+            duration={animationState.duration}
+            onDurationChange={(duration) => setAnimationState({ duration })}
           />
         </div>
       </div>

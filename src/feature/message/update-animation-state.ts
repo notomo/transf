@@ -11,7 +11,6 @@ import {
 export const UpdateAnimationStateMessageSchema = v.object({
   type: v.literal("UPDATE_ANIMATION_STATE"),
   animationState: v.nullable(v.partial(AnimationStateSchema)),
-  syncToContent: v.boolean(),
 });
 
 type UpdateAnimationStateMessage = v.InferOutput<
@@ -27,9 +26,7 @@ export async function handleUpdateAnimationStateMessage({
 }) {
   if (message.animationState === null) {
     await deleteAnimationState(tab.url);
-    if (message.syncToContent) {
-      await sendToContent({ tabId: tab.id, animationState: null });
-    }
+    await sendToContent({ tabId: tab.id, animationState: null });
     return;
   }
 
@@ -39,23 +36,17 @@ export async function handleUpdateAnimationStateMessage({
     : (message.animationState as AnimationState);
 
   await saveAnimationState({ url: tab.url, state: mergedState });
-
-  if (message.syncToContent) {
-    await sendToContent({ tabId: tab.id, animationState: mergedState });
-  }
+  await sendToContent({ tabId: tab.id, animationState: mergedState });
 }
 
 export async function sendUpdateAnimationStateMessage({
   animationState,
-  syncToContent,
 }: {
   animationState: Partial<AnimationState> | null;
-  syncToContent: boolean;
 }): Promise<void> {
   const message: UpdateAnimationStateMessage = {
     type: "UPDATE_ANIMATION_STATE",
     animationState,
-    syncToContent,
   };
   await browser.runtime.sendMessage(message);
 }

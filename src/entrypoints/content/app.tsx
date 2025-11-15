@@ -9,7 +9,7 @@ export function App() {
     null,
   );
 
-  useCurrentTimeUpdater({ animationState, setAnimationState });
+  useCurrentTimeUpdater({ animationState });
 
   useMessageHandler({ setAnimationState });
 

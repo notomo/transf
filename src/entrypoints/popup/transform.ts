@@ -29,7 +29,6 @@ function useAnimationState() {
       setState(newState);
       await sendUpdateAnimationStateMessage({
         animationState: newState,
-        syncToContent: true,
       });
     },
     [],

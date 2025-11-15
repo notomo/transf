@@ -5,25 +5,17 @@ import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-an
 
 export function useCurrentTimeUpdater({
   animationState,
-  setAnimationState,
 }: {
   animationState: AnimationState | null;
-  setAnimationState: (state: AnimationState) => void;
 }) {
   const update = useEffectEvent(async () => {
     if (!animationState) {
       return;
     }
-    const currentTime = calculateCurrentTime(animationState.duration);
 
+    const currentTime = calculateCurrentTime(animationState.duration);
     await sendUpdateAnimationStateMessage({
       animationState: { currentTime },
-      syncToContent: false,
-    });
-
-    setAnimationState({
-      ...animationState,
-      currentTime,
     });
   });
 

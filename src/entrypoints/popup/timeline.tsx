@@ -14,19 +14,19 @@ import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animatio
 import { strictEntries } from "@/src/lib/collection";
 import { cn } from "@/src/lib/tailwind";
 
-function useAnimation({
+function useCurrentTimePolling({
   isPlaying,
-  onUpdateAnimation,
+  setAnimationState,
 }: {
   isPlaying: boolean;
   duration: number;
   currentTime: RelativeTime;
-  onUpdateAnimation: (updates: { currentTime: number }) => void;
+  setAnimationState: (updates: { currentTime: number }) => void;
 }) {
-  const pollProgress = useEffectEvent(async () => {
+  const getCurrentTime = useEffectEvent(async () => {
     const response = await sendGetAnimationStateMessage();
     if (response.animationState) {
-      onUpdateAnimation({
+      setAnimationState({
         currentTime: response.animationState.currentTime,
       });
     }
@@ -37,7 +37,7 @@ function useAnimation({
       return;
     }
 
-    const intervalId = window.setInterval(pollProgress, 100);
+    const intervalId = window.setInterval(getCurrentTime, 100);
     return () => {
       clearInterval(intervalId);
     };
@@ -182,19 +182,19 @@ function KeyframeLine({
 }
 
 export function Timeline({
-  animation,
-  onUpdateAnimation,
+  animationState,
+  setAnimationState,
   className,
 }: {
-  animation: AnimationState;
-  onUpdateAnimation: (updates: Partial<AnimationState>) => void;
+  animationState: AnimationState;
+  setAnimationState: (updates: Partial<AnimationState>) => void;
   className?: string;
 }) {
-  useAnimation({
-    isPlaying: animation.isPlaying,
-    duration: animation.duration,
-    currentTime: animation.currentTime,
-    onUpdateAnimation: ({ currentTime }) => onUpdateAnimation({ currentTime }),
+  useCurrentTimePolling({
+    isPlaying: animationState.isPlaying,
+    duration: animationState.duration,
+    currentTime: animationState.currentTime,
+    setAnimationState,
   });
 
   return (
@@ -202,44 +202,46 @@ export function Timeline({
       <div className="flex gap-2">
         <KeyframeNextPrevButton
           direction="prev"
-          keyframes={animation.keyframes}
-          currentTime={animation.currentTime}
+          keyframes={animationState.keyframes}
+          currentTime={animationState.currentTime}
           onClick={(currentTime) =>
-            onUpdateAnimation({ currentTime, isPlaying: false })
+            setAnimationState({ currentTime, isPlaying: false })
           }
         />
         <PlayStopButton
-          isPlaying={animation.isPlaying}
+          isPlaying={animationState.isPlaying}
           onTogglePlay={() =>
-            onUpdateAnimation({ isPlaying: !animation.isPlaying })
+            setAnimationState({ isPlaying: !animationState.isPlaying })
           }
         />
         <KeyframeNextPrevButton
           direction="next"
-          keyframes={animation.keyframes}
-          currentTime={animation.currentTime}
+          keyframes={animationState.keyframes}
+          currentTime={animationState.currentTime}
           onClick={(currentTime) =>
-            onUpdateAnimation({ currentTime, isPlaying: false })
+            setAnimationState({ currentTime, isPlaying: false })
           }
         />
       </div>
 
       <TimeIndicator
-        currentTime={animation.currentTime}
-        duration={animation.duration}
+        currentTime={animationState.currentTime}
+        duration={animationState.duration}
         onTimeChange={(currentTime) =>
-          onUpdateAnimation({ currentTime, isPlaying: false })
+          setAnimationState({ currentTime, isPlaying: false })
         }
       />
       <div className="col-span-2 grid grid-cols-[auto_1fr] gap-1">
-        {strictEntries(animation.keyframes).map(([fieldName, keyframes]) => (
-          <KeyframeLine
-            key={fieldName}
-            fieldName={fieldName}
-            keyframes={keyframes}
-            currentTime={animation.currentTime}
-          />
-        ))}
+        {strictEntries(animationState.keyframes).map(
+          ([fieldName, keyframes]) => (
+            <KeyframeLine
+              key={fieldName}
+              fieldName={fieldName}
+              keyframes={keyframes}
+              currentTime={animationState.currentTime}
+            />
+          ),
+        )}
       </div>
     </div>
   );

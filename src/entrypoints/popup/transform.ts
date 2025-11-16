@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type {
   AnimationState,
   KeyframeFieldName,
+  KeyframeValue,
   TransformState,
 } from "@/src/feature/animation-state";
 import { DEFAULT_ANIMATION } from "@/src/feature/animation-state";
@@ -76,7 +77,7 @@ export function useTransform() {
       value,
     }: {
       fieldName: KeyframeFieldName;
-      value: number;
+      value: KeyframeValue;
     }) => {
       const newKeyframes = addKeyframeTo({
         keyframes: animationState.keyframes[fieldName],
@@ -115,14 +116,12 @@ export function useTransform() {
   const getKeyframeProps = useCallback(
     <T extends KeyframeFieldName>(fieldName: T) => {
       const value = transform[fieldName];
-      const numericValue =
-        typeof value === "boolean" ? (value ? 1 : 0) : Number(value);
       return {
         fieldName,
         value,
         onChange: (newValue: number | boolean) =>
           applyTransform({ [fieldName]: newValue }),
-        onAddKeyframe: () => addKeyframe({ fieldName, value: numericValue }),
+        onAddKeyframe: () => addKeyframe({ fieldName, value }),
         onRemoveKeyframe: () => removeKeyframe(fieldName),
         hasKeyframe: hasKeyframeAtTime({
           keyframes: animationState.keyframes[fieldName],

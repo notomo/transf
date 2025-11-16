@@ -34,11 +34,11 @@ function KeyframeButton({
 
 function DurationInput({
   duration,
-  onDurationChange,
+  setAnimationState,
   className,
 }: {
   duration: number;
-  onDurationChange: (duration: number) => void;
+  setAnimationState: (update: { duration: number }) => void;
   className?: string;
 }) {
   const durationId = useId();
@@ -54,7 +54,9 @@ function DurationInput({
         max="10000"
         step="50"
         value={duration}
-        onChange={(e) => onDurationChange(Number(e.target.value))}
+        onChange={(e) =>
+          setAnimationState({ duration: Number(e.target.value) })
+        }
         className="w-full"
       />
     </div>
@@ -341,13 +343,13 @@ export function App() {
 
         <div className="col-span-2 space-y-2 bg-gray-100 px-1 py-2">
           <Timeline
-            animation={animationState}
-            onUpdateAnimation={setAnimationState}
+            animationState={animationState}
+            setAnimationState={setAnimationState}
           />
 
           <DurationInput
             duration={animationState.duration}
-            onDurationChange={(duration) => setAnimationState({ duration })}
+            setAnimationState={setAnimationState}
           />
         </div>
       </div>

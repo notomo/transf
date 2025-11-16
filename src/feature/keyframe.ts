@@ -2,10 +2,15 @@ import type {
   AnimationKeyframes,
   AnimationState,
   Keyframe,
+  KeyframeValue,
   RelativeTime,
   TransformState,
 } from "@/src/feature/animation-state";
 import { keyframeFieldNames } from "@/src/feature/animation-state";
+
+function toNumericValue(value: KeyframeValue) {
+  return typeof value === "boolean" ? (value ? 1 : 0) : value;
+}
 
 export function interpolateKeyframes({
   keyframes,
@@ -14,10 +19,10 @@ export function interpolateKeyframes({
 }: {
   keyframes: Keyframe[];
   time: RelativeTime;
-  defaultValue: number;
+  defaultValue: KeyframeValue;
 }): number {
   if (keyframes.length === 0) {
-    return defaultValue;
+    return toNumericValue(defaultValue);
   }
 
   const sortedKeyframes = [...keyframes].sort((a, b) => a.time - b.time);
@@ -25,7 +30,7 @@ export function interpolateKeyframes({
   const lastKeyframe = sortedKeyframes[sortedKeyframes.length - 1];
 
   if (!firstKeyframe || !lastKeyframe) {
-    return defaultValue;
+    return toNumericValue(defaultValue);
   }
 
   const exactMatch = sortedKeyframes.find((kf) => kf.time === time);
@@ -55,7 +60,7 @@ export function interpolateKeyframes({
     }
   }
 
-  return defaultValue;
+  return toNumericValue(defaultValue);
 }
 
 export function getAllKeyframeTimeSet(
@@ -123,10 +128,10 @@ export function addKeyframeTo({
 }: {
   keyframes: Keyframe[];
   time: RelativeTime;
-  value: number;
+  value: KeyframeValue;
 }): Keyframe[] {
   const newKeyframes = keyframes.filter((kf) => kf.time !== time);
-  newKeyframes.push({ time, value });
+  newKeyframes.push({ time, value: toNumericValue(value) });
   return newKeyframes;
 }
 
@@ -147,7 +152,7 @@ export function updateKeyframe({
 }: {
   keyframes: Keyframe[];
   time: RelativeTime;
-  value: number;
+  value: KeyframeValue;
 }): Keyframe[] {
   const keyframeIndex = keyframes.findIndex((kf) => kf.time === time);
   if (keyframeIndex === -1) {
@@ -155,7 +160,7 @@ export function updateKeyframe({
   }
 
   const newKeyframes = [...keyframes];
-  newKeyframes[keyframeIndex] = { time, value };
+  newKeyframes[keyframeIndex] = { time, value: toNumericValue(value) };
   return newKeyframes;
 }
 
@@ -180,18 +185,17 @@ export function updateKeyframesWithTransform({
       continue;
     }
 
-    const numericValue = typeof value === "boolean" ? (value ? 1 : 0) : value;
     if (!hasKeyframeAtTime({ keyframes: fieldKeyframes, time: currentTime })) {
       updatedKeyframes[field] = addKeyframeTo({
         keyframes: fieldKeyframes,
         time: currentTime,
-        value: numericValue,
+        value,
       });
     } else {
       updatedKeyframes[field] = updateKeyframe({
         keyframes: fieldKeyframes,
         time: currentTime,
-        value: numericValue,
+        value,
       });
     }
   }
@@ -241,13 +245,13 @@ export function deriveTransformFromAnimationState({
       interpolateKeyframes({
         keyframes: state.keyframes.flipHorizontal,
         time,
-        defaultValue: state.baseTransform.flipHorizontal ? 1 : 0,
+        defaultValue: state.baseTransform.flipHorizontal,
       }) > 0.5,
     flipVertical:
       interpolateKeyframes({
         keyframes: state.keyframes.flipVertical,
         time,
-        defaultValue: state.baseTransform.flipVertical ? 1 : 0,
+        defaultValue: state.baseTransform.flipVertical,
       }) > 0.5,
   };
 }

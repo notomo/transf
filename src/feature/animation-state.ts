@@ -89,11 +89,13 @@ const TransformStateSchema = v.object({
 
 export type TransformState = v.InferOutput<typeof TransformStateSchema>;
 
+export type KeyframeValue = TransformState[KeyframeFieldName];
+
 export const AnimationStateSchema = v.object({
   keyframes: AnimationKeyframesSchema,
-  duration: v.number(),
+  duration: v.pipe(v.number(), v.minValue(1)),
   isPlaying: v.boolean(),
-  currentTime: v.number(),
+  currentTime: RelativeTimeSchema,
   baseTransform: TransformStateSchema,
 });
 

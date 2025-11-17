@@ -171,10 +171,12 @@ function KeyframeLine({
   fieldName,
   keyframes,
   currentTime,
+  onKeyframeClick,
 }: {
   fieldName: KeyframeFieldName;
   keyframes: Array<{ time: RelativeTime; value: number }>;
   currentTime: RelativeTime;
+  onKeyframeClick: (time: RelativeTime) => void;
 }) {
   return (
     <>
@@ -186,10 +188,11 @@ function KeyframeLine({
         className="relative h-full border border-gray-400"
       >
         {keyframes.map((kf, i) => (
-          <div
+          <button
             key={`${fieldName}-${kf.time}-${i}`}
+            type="button"
             className={cn(
-              "-translate-x-1/2 absolute h-full w-1.5 transform rounded-full",
+              "-translate-x-1/2 absolute h-full w-1.5 transform cursor-pointer rounded-full transition-transform hover:scale-110",
               kf.time === currentTime
                 ? "border border-blue-500 bg-blue-300"
                 : "bg-gray-400",
@@ -197,6 +200,8 @@ function KeyframeLine({
             style={{
               left: `${kf.time * 100}%`,
             }}
+            onClick={() => onKeyframeClick(kf.time)}
+            aria-label={`Jump to keyframe at ${Math.round(kf.time * 100)}%`}
           />
         ))}
       </div>
@@ -262,6 +267,9 @@ export function Timeline({
               fieldName={fieldName}
               keyframes={keyframes}
               currentTime={animationState.currentTime}
+              onKeyframeClick={(currentTime) =>
+                setAnimationState({ currentTime, isPlaying: false })
+              }
             />
           ),
         )}

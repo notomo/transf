@@ -52,8 +52,16 @@ export async function openPopup({
       page.getByTitle("Remove Vertical Flip keyframe"),
     getPrevKeyframeButton: () => page.getByTitle("Previous keyframe"),
     getNextKeyframeButton: () => page.getByTitle("Next keyframe"),
-    getTimelineSlider: () => page.getByLabel("Timeline"),
+    getTimelineSlider: () => page.getByLabel(/Timeline/),
     getDurationSlider: () => page.getByLabel(/Duration/),
+    setTimelineValue: async (value: number) => {
+      const slider = page.getByLabel(/Timeline/);
+      const box = await slider.boundingBox();
+      if (!box) throw new Error("Timeline slider not found");
+      const x = box.x + box.width * value;
+      const y = box.y + box.height / 2;
+      await page.mouse.click(x, y);
+    },
     clickReset: async () => {
       const resetButton = popup.getResetButton();
       await resetButton.click();

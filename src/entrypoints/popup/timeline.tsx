@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useId } from "react";
+import { useEffect, useEffectEvent, useRef } from "react";
 import type {
   AnimationKeyframes,
   AnimationState,
@@ -116,30 +116,53 @@ function TimeIndicator({
   onTimeChange: (time: RelativeTime) => void;
 }) {
   const currentTimePercent = currentTime * 100;
-  const timelineId = useId();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const calculateTimeFromPosition = (clientX: number): RelativeTime => {
+    const container = containerRef.current;
+    if (!container) return currentTime;
+
+    const rect = container.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    const newTime = Math.max(0, Math.min(1, relativeX / rect.width));
+    return newTime;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const newTime = calculateTimeFromPosition(e.clientX);
+    onTimeChange(newTime);
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const updatedTime = calculateTimeFromPosition(moveEvent.clientX);
+      onTimeChange(updatedTime);
+    };
+
+    const handleMouseUp = () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
 
   return (
-    <div className="relative col-span-1 h-6 rounded bg-gray-100">
+    <div
+      ref={containerRef}
+      className="relative col-span-1 h-6 cursor-pointer rounded bg-gray-100"
+      onMouseDown={handleMouseDown}
+      role="slider"
+      aria-label={`Timeline: ${Math.round(currentTime * duration)}ms`}
+      aria-valuemin={0}
+      aria-valuemax={1}
+      aria-valuenow={currentTime}
+      tabIndex={0}
+    >
       <div
-        className="absolute top-0 z-10 h-full w-0.5 bg-red-500"
+        className="-translate-x-1/2 absolute top-0 h-full w-3 rounded bg-blue-500 hover:bg-blue-600"
         style={{ left: `${currentTimePercent}%` }}
       />
-      <div className="absolute inset-0 flex items-center px-2">
-        <label htmlFor={timelineId} className="sr-only">
-          Timeline: {Math.round(currentTime * duration)}ms
-        </label>
-        <input
-          id={timelineId}
-          type="range"
-          min="0"
-          max="1"
-          step="0.001"
-          value={currentTime}
-          onChange={(e) => onTimeChange(Number(e.target.value))}
-          className="w-full opacity-50"
-          aria-label="Timeline"
-        />
-      </div>
     </div>
   );
 }

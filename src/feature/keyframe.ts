@@ -259,3 +259,83 @@ export function deriveTransformFromAnimationState({
 export function hasKeyframes(keyframes: AnimationKeyframes): boolean {
   return Object.values(keyframes).some((keyframes) => keyframes.length > 0);
 }
+
+const MIN_KEYFRAME_DISTANCE = 0.02;
+
+function findNearestKeyframeTime({
+  keyframes,
+  time,
+  excludeTime,
+}: {
+  keyframes: Keyframe[];
+  time: RelativeTime;
+  excludeTime?: RelativeTime;
+}): number | undefined {
+  let nearestTime: number | undefined;
+  let minDistance = Number.POSITIVE_INFINITY;
+
+  for (const kf of keyframes) {
+    if (excludeTime !== undefined && kf.time === excludeTime) {
+      continue;
+    }
+
+    const distance = Math.abs(kf.time - time);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestTime = kf.time;
+    }
+  }
+
+  return nearestTime;
+}
+
+function canMoveKeyframeTo({
+  keyframes,
+  fromTime,
+  toTime,
+}: {
+  keyframes: Keyframe[];
+  fromTime: RelativeTime;
+  toTime: RelativeTime;
+}): boolean {
+  if (toTime < 0 || toTime > 1) {
+    return false;
+  }
+
+  const nearestTime = findNearestKeyframeTime({
+    keyframes,
+    time: toTime,
+    excludeTime: fromTime,
+  });
+
+  if (nearestTime !== undefined) {
+    const distance = Math.abs(toTime - nearestTime);
+    if (distance < MIN_KEYFRAME_DISTANCE) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+export function moveKeyframe({
+  keyframes,
+  fromTime,
+  toTime,
+}: {
+  keyframes: Keyframe[];
+  fromTime: RelativeTime;
+  toTime: RelativeTime;
+}): Keyframe[] {
+  const keyframe = keyframes.find((kf) => kf.time === fromTime);
+  if (!keyframe) {
+    return keyframes;
+  }
+
+  if (!canMoveKeyframeTo({ keyframes, fromTime, toTime })) {
+    return keyframes;
+  }
+
+  const withoutOld = keyframes.filter((kf) => kf.time !== fromTime);
+  return [...withoutOld, { time: toTime, value: keyframe.value }];
+}

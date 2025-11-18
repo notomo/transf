@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import type {
   AnimationKeyframes,
   AnimationState,
@@ -9,6 +9,7 @@ import { keyframeFieldLabels } from "@/src/feature/animation-state";
 import {
   findNextKeyframeTime,
   findPreviousKeyframeTime,
+  moveKeyframe,
 } from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { strictEntries } from "@/src/lib/collection";
@@ -172,18 +173,72 @@ function KeyframeLine({
   keyframes,
   currentTime,
   onKeyframeClick,
+  onKeyframeTimeChange,
 }: {
   fieldName: KeyframeFieldName;
   keyframes: Array<{ time: RelativeTime; value: number }>;
   currentTime: RelativeTime;
   onKeyframeClick: (time: RelativeTime) => void;
+  onKeyframeTimeChange: ({
+    fieldName,
+    fromTime,
+    toTime,
+  }: {
+    fieldName: KeyframeFieldName;
+    fromTime: RelativeTime;
+    toTime: RelativeTime;
+  }) => void;
 }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [draggingKeyframeTime, setDraggingKeyframeTime] = useState<
+    number | null
+  >(null);
+
+  const calculateTimeFromPosition = (clientX: number): RelativeTime => {
+    const container = containerRef.current;
+    if (!container) return 0;
+
+    const rect = container.getBoundingClientRect();
+    const relativeX = clientX - rect.left;
+    const newTime = Math.max(0, Math.min(1, relativeX / rect.width));
+    return newTime;
+  };
+
+  const handleKeyframeMouseDown = (
+    e: React.MouseEvent,
+    keyframeTime: RelativeTime,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    setDraggingKeyframeTime(keyframeTime);
+
+    const handleMouseMove = (moveEvent: MouseEvent) => {
+      const newTime = calculateTimeFromPosition(moveEvent.clientX);
+      onKeyframeTimeChange({
+        fieldName,
+        fromTime: keyframeTime,
+        toTime: newTime,
+      });
+    };
+
+    const handleMouseUp = () => {
+      setDraggingKeyframeTime(null);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
   return (
     <>
       <span key={`${fieldName}-label`} className="text-xs">
         {keyframeFieldLabels[fieldName]}
       </span>
       <div
+        ref={containerRef}
         key={`${fieldName}-timeline`}
         className="relative h-full border border-gray-400"
       >
@@ -196,11 +251,18 @@ function KeyframeLine({
               kf.time === currentTime
                 ? "border border-blue-500 bg-blue-300"
                 : "bg-gray-400",
+              draggingKeyframeTime === kf.time && "cursor-grabbing opacity-70",
             )}
             style={{
               left: `${kf.time * 100}%`,
             }}
-            onClick={() => onKeyframeClick(kf.time)}
+            onClick={(_e) => {
+              // Only handle click if not dragging
+              if (draggingKeyframeTime === null) {
+                onKeyframeClick(kf.time);
+              }
+            }}
+            onMouseDown={(e) => handleKeyframeMouseDown(e, kf.time)}
             aria-label={`Jump to keyframe at ${Math.round(kf.time * 100)}%`}
           />
         ))}
@@ -224,6 +286,33 @@ export function Timeline({
     currentTime: animationState.currentTime,
     setAnimationState,
   });
+
+  const handleKeyframeTimeChange = ({
+    fieldName,
+    fromTime,
+    toTime,
+  }: {
+    fieldName: KeyframeFieldName;
+    fromTime: RelativeTime;
+    toTime: RelativeTime;
+  }) => {
+    const fieldKeyframes = animationState.keyframes[fieldName];
+    const updatedKeyframes = moveKeyframe({
+      keyframes: fieldKeyframes,
+      fromTime,
+      toTime,
+    });
+
+    if (updatedKeyframes !== fieldKeyframes) {
+      setAnimationState({
+        keyframes: {
+          ...animationState.keyframes,
+          [fieldName]: updatedKeyframes,
+        },
+        isPlaying: false,
+      });
+    }
+  };
 
   return (
     <div className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-2", className)}>
@@ -270,6 +359,7 @@ export function Timeline({
               onKeyframeClick={(currentTime) =>
                 setAnimationState({ currentTime, isPlaying: false })
               }
+              onKeyframeTimeChange={handleKeyframeTimeChange}
             />
           ),
         )}

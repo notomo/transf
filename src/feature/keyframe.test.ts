@@ -11,8 +11,11 @@ import {
   deriveTransformFromAnimationState,
   findNextKeyframeTime,
   findPreviousKeyframeTime,
+  getAllKeyframeTimeSet,
   hasKeyframeAtTime,
+  hasKeyframes,
   interpolateKeyframes,
+  moveKeyframe,
   removeKeyframeFrom,
   updateKeyframe,
   updateKeyframesWithTransform,
@@ -518,5 +521,123 @@ describe("updateKeyframesWithTransform", () => {
     });
     expect(result.scale).toEqual(keyframes.scale);
     expect(result.translateX).toEqual(keyframes.translateX);
+  });
+});
+
+describe("hasKeyframes", () => {
+  it("returns true when any field has keyframes", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [{ time: 0.5, value: 90 }],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const result = hasKeyframes(keyframes);
+    expect(result).toBe(true);
+  });
+
+  it("returns false when all fields are empty", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const result = hasKeyframes(keyframes);
+    expect(result).toBe(false);
+  });
+});
+
+describe("moveKeyframe", () => {
+  it("successfully moves a keyframe to a new time", () => {
+    const keyframes: Keyframe[] = [
+      { time: 0.2, value: 45 },
+      { time: 0.5, value: 90 },
+    ];
+    const result = moveKeyframe({ keyframes, fromTime: 0.2, toTime: 0.8 });
+    expect(result).toHaveLength(2);
+    expect(result).toContainEqual({ time: 0.8, value: 45 });
+    expect(result).not.toContainEqual({ time: 0.2, value: 45 });
+  });
+
+  it("returns unchanged array when source keyframe doesn't exist", () => {
+    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const result = moveKeyframe({ keyframes, fromTime: 0.2, toTime: 0.8 });
+    expect(result).toEqual(keyframes);
+  });
+
+  it("prevents moving outside valid range", () => {
+    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const resultBelowZero = moveKeyframe({
+      keyframes,
+      fromTime: 0.5,
+      toTime: -0.1,
+    });
+    const resultAboveOne = moveKeyframe({
+      keyframes,
+      fromTime: 0.5,
+      toTime: 1.1,
+    });
+    expect(resultBelowZero).toEqual(keyframes);
+    expect(resultAboveOne).toEqual(keyframes);
+  });
+
+  it("prevents moving too close to another keyframe", () => {
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90 },
+      { time: 0.6, value: 180 },
+    ];
+    const result = moveKeyframe({
+      keyframes,
+      fromTime: 0.5,
+      toTime: 0.61,
+    });
+    expect(result).toEqual(keyframes);
+  });
+});
+
+describe("getAllKeyframeTimeSet", () => {
+  it("returns empty Set when no keyframes exist", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [],
+      scale: [],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const result = getAllKeyframeTimeSet(keyframes);
+    expect(result).toEqual(new Set());
+  });
+
+  it("returns unique times from multiple fields", () => {
+    const keyframes: AnimationKeyframes = {
+      rotation: [
+        { time: 0.2, value: 45 },
+        { time: 0.5, value: 90 },
+      ],
+      scale: [
+        { time: 0.5, value: 1.5 },
+        { time: 0.8, value: 2 },
+      ],
+      translateX: [],
+      translateY: [],
+      centerX: [],
+      centerY: [],
+      flipHorizontal: [],
+      flipVertical: [],
+    };
+    const result = getAllKeyframeTimeSet(keyframes);
+    expect(result).toEqual(new Set([0.2, 0.5, 0.8]));
   });
 });

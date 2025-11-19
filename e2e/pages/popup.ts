@@ -13,14 +13,18 @@ export async function openPopup({
 
   const popup = {
     getResetButton: () => page.getByRole("button", { name: "Reset" }),
-    getCenterXSlider: () => page.getByLabel(/Center X/),
-    getCenterYSlider: () => page.getByLabel(/Center Y/),
-    getRotationSlider: () => page.getByLabel(/Rotation/),
-    getScaleSlider: () => page.getByLabel(/Scale/),
-    getTranslateXSlider: () => page.getByLabel(/Translate X/),
-    getTranslateYSlider: () => page.getByLabel(/Translate Y/),
-    getHorizontalFlipCheckbox: () => page.getByLabel("Horizontal Flip"),
-    getVerticalFlipCheckbox: () => page.getByLabel("Vertical Flip"),
+    getCenterXSlider: () => page.getByRole("slider", { name: /Center X/ }),
+    getCenterYSlider: () => page.getByRole("slider", { name: /Center Y/ }),
+    getRotationSlider: () => page.getByRole("slider", { name: /Rotation/ }),
+    getScaleSlider: () => page.getByRole("slider", { name: /Scale/ }),
+    getTranslateXSlider: () =>
+      page.getByRole("slider", { name: /Translate X/ }),
+    getTranslateYSlider: () =>
+      page.getByRole("slider", { name: /Translate Y/ }),
+    getHorizontalFlipCheckbox: () =>
+      page.getByRole("checkbox", { name: "Horizontal Flip" }),
+    getVerticalFlipCheckbox: () =>
+      page.getByRole("checkbox", { name: "Vertical Flip" }),
     getAddCenterXKeyframeButton: () => page.getByTitle("Add Center X keyframe"),
     getRemoveCenterXKeyframeButton: () =>
       page.getByTitle("Remove Center X keyframe"),

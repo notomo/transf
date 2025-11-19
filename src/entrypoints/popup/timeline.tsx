@@ -7,8 +7,10 @@ import type {
 } from "@/src/feature/animation-state";
 import { keyframeFieldLabels } from "@/src/feature/animation-state";
 import {
+  addKeyframeTo,
   findNextKeyframeTime,
   findPreviousKeyframeTime,
+  interpolateKeyframes,
   moveKeyframe,
 } from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
@@ -174,6 +176,7 @@ function KeyframeLine({
   currentTime,
   onKeyframeClick,
   onKeyframeTimeChange,
+  onAddKeyframe,
 }: {
   fieldName: KeyframeFieldName;
   keyframes: Array<{ time: RelativeTime; value: number }>;
@@ -187,6 +190,13 @@ function KeyframeLine({
     fieldName: KeyframeFieldName;
     fromTime: RelativeTime;
     toTime: RelativeTime;
+  }) => void;
+  onAddKeyframe: ({
+    fieldName,
+    time,
+  }: {
+    fieldName: KeyframeFieldName;
+    time: RelativeTime;
   }) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -232,15 +242,22 @@ function KeyframeLine({
     document.addEventListener("mouseup", handleMouseUp);
   };
 
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    const time = calculateTimeFromPosition(e.clientX);
+    onAddKeyframe({ fieldName, time });
+  };
+
   return (
     <>
       <span key={`${fieldName}-label`} className="text-xs">
         {keyframeFieldLabels[fieldName]}
       </span>
-      <div
+      <section
         ref={containerRef}
         key={`${fieldName}-timeline`}
         className="relative h-full border border-gray-400"
+        onDoubleClick={handleDoubleClick}
+        aria-label={`Keyframe timeline: ${keyframeFieldLabels[fieldName]} (double-click to add)`}
       >
         {keyframes.map((kf, i) => (
           <button
@@ -266,7 +283,7 @@ function KeyframeLine({
             aria-label={`Jump to keyframe at ${Math.round(kf.time * 100)}%`}
           />
         ))}
-      </div>
+      </section>
     </>
   );
 }
@@ -312,6 +329,37 @@ export function Timeline({
         isPlaying: false,
       });
     }
+  };
+
+  const handleAddKeyframe = ({
+    fieldName,
+    time,
+  }: {
+    fieldName: KeyframeFieldName;
+    time: RelativeTime;
+  }) => {
+    const fieldKeyframes = animationState.keyframes[fieldName];
+
+    const value = interpolateKeyframes({
+      keyframes: fieldKeyframes,
+      time,
+      defaultValue: animationState.baseTransform[fieldName],
+    });
+
+    const updatedKeyframes = addKeyframeTo({
+      keyframes: fieldKeyframes,
+      time,
+      value,
+    });
+
+    setAnimationState({
+      keyframes: {
+        ...animationState.keyframes,
+        [fieldName]: updatedKeyframes,
+      },
+      isPlaying: false,
+      currentTime: time,
+    });
   };
 
   return (
@@ -360,6 +408,7 @@ export function Timeline({
                 setAnimationState({ currentTime, isPlaying: false })
               }
               onKeyframeTimeChange={handleKeyframeTimeChange}
+              onAddKeyframe={handleAddKeyframe}
             />
           ),
         )}

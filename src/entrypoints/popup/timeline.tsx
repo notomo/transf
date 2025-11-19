@@ -320,15 +320,14 @@ export function Timeline({
       toTime,
     });
 
-    if (updatedKeyframes !== fieldKeyframes) {
-      setAnimationState({
-        keyframes: {
-          ...animationState.keyframes,
-          [fieldName]: updatedKeyframes,
-        },
-        isPlaying: false,
-      });
-    }
+    setAnimationState({
+      keyframes: {
+        ...animationState.keyframes,
+        [fieldName]: updatedKeyframes,
+      },
+      isPlaying: false,
+      currentTime: toTime,
+    });
   };
 
   const handleAddKeyframe = ({

@@ -24,6 +24,16 @@ test("UI displays values correctly with labels", async ({
 
   await popup.getCenterYSlider().fill("70");
   await expect(page.getByText("Center Y: 70%")).toBeVisible();
+
+  await popup.getDurationSlider().fill("5000");
+  await expect(page.getByText("Duration: 5000ms")).toBeVisible();
+});
+
+test("can change duration", async ({ page, extensionId }) => {
+  const popup = await openPopup({ page, extensionId });
+
+  await popup.getDurationSlider().fill("3000");
+  await expect(page.getByText("Duration: 3000ms")).toBeVisible();
 });
 
 test("can add and remove keyframes", async ({ page, extensionId }) => {

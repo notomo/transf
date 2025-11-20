@@ -9,7 +9,7 @@ export async function openPopup({
 }) {
   await page.goto(`chrome-extension://${extensionId}/popup.html`);
 
-  page.getByText("Page Transform").click();
+  await page.getByText("Page Transform").click();
 
   const popup = {
     getResetButton: () => page.getByRole("button", { name: "Reset" }),

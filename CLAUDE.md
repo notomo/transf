@@ -37,6 +37,9 @@ npm run check
 # Run tests
 npm run test
 
+# Run e2e tests (builds dev extension and runs Playwright tests)
+npm run test:e2e:dev
+
 # File naming lint (kebab-case)
 npm run ls-lint
 

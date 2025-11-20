@@ -58,6 +58,7 @@ export async function openPopup({
     getNextKeyframeButton: () => page.getByTitle("Next keyframe"),
     getTimelineSlider: () => page.getByLabel(/Timeline/),
     getDurationSlider: () => page.getByLabel(/Duration/),
+    getPlayStopButton: () => page.getByRole("button", { name: /[▶■]/ }),
     setTimelineValue: async (value: number) => {
       const slider = page.getByLabel(/Timeline/);
       const box = await slider.boundingBox();

@@ -16,3 +16,16 @@ test("can change current time by clicking timeline", async ({
   const value3 = await timeline.getAttribute("aria-valuenow");
   expect(Number(value3)).toBeCloseTo(0, 1);
 });
+
+test("can toggle play and stop button", async ({ page, extensionId }) => {
+  const popup = await openPopup({ page, extensionId });
+  const playStopButton = popup.getPlayStopButton();
+
+  await expect(playStopButton).toHaveText("▶");
+  await playStopButton.click();
+
+  await expect(playStopButton).toHaveText("■");
+  await playStopButton.click();
+
+  await expect(playStopButton).toHaveText("▶");
+});

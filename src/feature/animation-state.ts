@@ -37,7 +37,7 @@ export const keyframeFieldLabels = {
 
 export type AnimationKeyframes = Record<KeyframeFieldName, Keyframe[]>;
 
-export const DEFAULT_TRANSFORM_VALUES: TransformState = {
+const DEFAULT_TRANSFORM_VALUES: TransformState = {
   centerX: 50,
   centerY: 50,
   rotation: 0,

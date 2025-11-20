@@ -5,7 +5,7 @@ import type {
   Keyframe,
   TransformState,
 } from "@/src/feature/animation-state";
-import { DEFAULT_TRANSFORM_VALUES } from "@/src/feature/animation-state";
+import { DEFAULT_ANIMATION } from "@/src/feature/animation-state";
 import {
   addKeyframeTo,
   deriveTransformFromAnimationState,
@@ -78,17 +78,22 @@ describe("interpolateKeyframes", () => {
   });
 });
 
+const defaultKeyframes: AnimationKeyframes = {
+  rotation: [],
+  scale: [],
+  translateX: [],
+  translateY: [],
+  centerX: [],
+  centerY: [],
+  flipHorizontal: [],
+  flipVertical: [],
+};
+
 describe("findPreviousKeyframeTime", () => {
   it("wraps around to last keyframe when no previous keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 1, value: 90 }],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(1);
@@ -96,14 +101,7 @@ describe("findPreviousKeyframeTime", () => {
 
   it("returns undefined when no keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
-      rotation: [],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
+      ...defaultKeyframes,
     };
     const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBeUndefined();
@@ -111,17 +109,11 @@ describe("findPreviousKeyframeTime", () => {
 
   it("finds the previous keyframe time", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [
         { time: 0.2, value: 45 },
         { time: 0.8, value: 90 },
       ],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(0.2);
@@ -131,14 +123,8 @@ describe("findPreviousKeyframeTime", () => {
 describe("findNextKeyframeTime", () => {
   it("wraps around to first keyframe when no next keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 0.2, value: 90 }],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(0.2);
@@ -146,14 +132,7 @@ describe("findNextKeyframeTime", () => {
 
   it("returns undefined when no keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
-      rotation: [],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
+      ...defaultKeyframes,
     };
     const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBeUndefined();
@@ -161,17 +140,11 @@ describe("findNextKeyframeTime", () => {
 
   it("finds the next keyframe time", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [
         { time: 0.2, value: 45 },
         { time: 0.8, value: 90 },
       ],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(0.8);
@@ -245,20 +218,7 @@ describe("updateKeyframe", () => {
 describe("deriveTransformFromAnimationState", () => {
   it("returns default values when keyframes are empty", () => {
     const state: AnimationState = {
-      keyframes: {
-        rotation: [],
-        scale: [],
-        translateX: [],
-        translateY: [],
-        centerX: [],
-        centerY: [],
-        flipHorizontal: [],
-        flipVertical: [],
-      },
-      duration: 5000,
-      isPlaying: false,
-      currentTime: 0.5,
-      baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
+      ...DEFAULT_ANIMATION,
     };
     const result = deriveTransformFromAnimationState({ state });
     expect(result).toEqual({
@@ -275,7 +235,9 @@ describe("deriveTransformFromAnimationState", () => {
 
   it("interpolates values from keyframes", () => {
     const state: AnimationState = {
+      ...DEFAULT_ANIMATION,
       keyframes: {
+        ...defaultKeyframes,
         rotation: [
           { time: 0, value: 0 },
           { time: 1, value: 90 },
@@ -284,10 +246,6 @@ describe("deriveTransformFromAnimationState", () => {
           { time: 0, value: 1 },
           { time: 1, value: 2 },
         ],
-        translateX: [],
-        translateY: [],
-        centerX: [],
-        centerY: [],
         flipHorizontal: [
           { time: 0, value: 0 },
           { time: 0.4, value: 1 },
@@ -295,9 +253,7 @@ describe("deriveTransformFromAnimationState", () => {
         flipVertical: [],
       },
       duration: 5000,
-      isPlaying: false,
       currentTime: 0.5,
-      baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
     };
     const result = deriveTransformFromAnimationState({ state });
     expect(result).toEqual({
@@ -314,20 +270,13 @@ describe("deriveTransformFromAnimationState", () => {
 
   it("handles boolean flip values correctly", () => {
     const state: AnimationState = {
+      ...DEFAULT_ANIMATION,
       keyframes: {
-        rotation: [],
-        scale: [],
-        translateX: [],
-        translateY: [],
-        centerX: [],
-        centerY: [],
+        ...defaultKeyframes,
         flipHorizontal: [{ time: 0.5, value: 0.6 }],
         flipVertical: [{ time: 0.5, value: 0.4 }],
       },
-      duration: 5000,
-      isPlaying: false,
       currentTime: 0.5,
-      baseTransform: { ...DEFAULT_TRANSFORM_VALUES },
     };
     const result = deriveTransformFromAnimationState({ state });
     expect(result.flipHorizontal).toBe(true);
@@ -336,18 +285,8 @@ describe("deriveTransformFromAnimationState", () => {
 
   it("uses base transform values when no keyframes exist", () => {
     const state: AnimationState = {
-      keyframes: {
-        rotation: [],
-        scale: [],
-        translateX: [],
-        translateY: [],
-        centerX: [],
-        centerY: [],
-        flipHorizontal: [],
-        flipVertical: [],
-      },
+      ...DEFAULT_ANIMATION,
       duration: 5000,
-      isPlaying: false,
       currentTime: 0.5,
       baseTransform: {
         centerX: 25,
@@ -377,14 +316,7 @@ describe("deriveTransformFromAnimationState", () => {
 describe("updateKeyframesWithTransform", () => {
   it("skips fields with no existing keyframes", () => {
     const keyframes: AnimationKeyframes = {
-      rotation: [],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
+      ...defaultKeyframes,
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -400,14 +332,9 @@ describe("updateKeyframesWithTransform", () => {
 
   it("adds new keyframes when time doesn't exist", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 0, value: 0 }],
       scale: [{ time: 0, value: 1 }],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -426,14 +353,9 @@ describe("updateKeyframesWithTransform", () => {
 
   it("updates existing keyframes when time exists", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 0.5, value: 0 }],
       scale: [{ time: 0.5, value: 1 }],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -452,12 +374,7 @@ describe("updateKeyframesWithTransform", () => {
 
   it("converts boolean values to numeric", () => {
     const keyframes: AnimationKeyframes = {
-      rotation: [],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
+      ...defaultKeyframes,
       flipHorizontal: [{ time: 0, value: 0 }],
       flipVertical: [{ time: 0, value: 1 }],
     };
@@ -478,14 +395,8 @@ describe("updateKeyframesWithTransform", () => {
 
   it("ignores undefined values", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 0, value: 0 }],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -502,14 +413,9 @@ describe("updateKeyframesWithTransform", () => {
 
   it("preserves other keyframe fields unchanged", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 0, value: 0 }],
       scale: [{ time: 0.2, value: 1.5 }],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -527,14 +433,8 @@ describe("updateKeyframesWithTransform", () => {
 describe("hasKeyframes", () => {
   it("returns true when any field has keyframes", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [{ time: 0.5, value: 90 }],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const result = hasKeyframes(keyframes);
     expect(result).toBe(true);
@@ -542,14 +442,7 @@ describe("hasKeyframes", () => {
 
   it("returns false when all fields are empty", () => {
     const keyframes: AnimationKeyframes = {
-      rotation: [],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
+      ...defaultKeyframes,
     };
     const result = hasKeyframes(keyframes);
     expect(result).toBe(false);
@@ -607,14 +500,7 @@ describe("moveKeyframe", () => {
 describe("getAllKeyframeTimeSet", () => {
   it("returns empty Set when no keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
-      rotation: [],
-      scale: [],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
+      ...defaultKeyframes,
     };
     const result = getAllKeyframeTimeSet(keyframes);
     expect(result).toEqual(new Set());
@@ -622,6 +508,7 @@ describe("getAllKeyframeTimeSet", () => {
 
   it("returns unique times from multiple fields", () => {
     const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
       rotation: [
         { time: 0.2, value: 45 },
         { time: 0.5, value: 90 },
@@ -630,12 +517,6 @@ describe("getAllKeyframeTimeSet", () => {
         { time: 0.5, value: 1.5 },
         { time: 0.8, value: 2 },
       ],
-      translateX: [],
-      translateY: [],
-      centerX: [],
-      centerY: [],
-      flipHorizontal: [],
-      flipVertical: [],
     };
     const result = getAllKeyframeTimeSet(keyframes);
     expect(result).toEqual(new Set([0.2, 0.5, 0.8]));

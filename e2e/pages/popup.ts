@@ -59,6 +59,16 @@ export async function openPopup({
     getTimelineSlider: () => page.getByLabel(/Timeline/),
     getDurationSlider: () => page.getByLabel(/Duration/),
     getPlayStopButton: () => page.getByRole("button", { name: /[▶■]/ }),
+    getKeyframeTimeline: (fieldLabel: string) =>
+      page.getByLabel(
+        new RegExp(
+          `Keyframe timeline: ${fieldLabel} \\(double-click to add\\)`,
+        ),
+      ),
+    getKeyframeButton: (percentage: number) =>
+      page.getByRole("button", {
+        name: new RegExp(`Jump to keyframe at ${percentage}%`),
+      }),
     setTimelineValue: async (value: number) => {
       const slider = page.getByLabel(/Timeline/);
       const box = await slider.boundingBox();
@@ -66,6 +76,49 @@ export async function openPopup({
       const x = box.x + box.width * value;
       const y = box.y + box.height / 2;
       await page.mouse.click(x, y);
+    },
+    doubleClickKeyframeTimeline: async ({
+      fieldLabel,
+      position,
+    }: {
+      fieldLabel: string;
+      position: number;
+    }) => {
+      const keyframeTimeline = popup.getKeyframeTimeline(fieldLabel);
+      const box = await keyframeTimeline.boundingBox();
+      if (!box) throw new Error("Keyframe timeline not found");
+
+      const clickX = box.x + box.width * position;
+      const clickY = box.y + box.height / 2;
+      await page.mouse.dblclick(clickX, clickY);
+    },
+    dragKeyframe: async ({
+      fieldLabel,
+      fromPercentage,
+      toValue,
+    }: {
+      fieldLabel: string;
+      fromPercentage: number;
+      toValue: number;
+    }) => {
+      const keyframeButton = popup.getKeyframeButton(fromPercentage);
+      const keyframeTimeline = popup.getKeyframeTimeline(fieldLabel);
+
+      const buttonBox = await keyframeButton.boundingBox();
+      const timelineBox = await keyframeTimeline.boundingBox();
+      if (!buttonBox || !timelineBox) {
+        throw new Error("Elements not found for drag operation");
+      }
+
+      const startX = buttonBox.x + buttonBox.width / 2;
+      const startY = buttonBox.y + buttonBox.height / 2;
+      const endX = timelineBox.x + timelineBox.width * toValue;
+      const endY = startY;
+
+      await page.mouse.move(startX, startY);
+      await page.mouse.down();
+      await page.mouse.move(endX, endY);
+      await page.mouse.up();
     },
     clickReset: async () => {
       const resetButton = popup.getResetButton();

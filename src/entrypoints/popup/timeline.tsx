@@ -264,7 +264,7 @@ function KeyframeLine({
             key={`${fieldName}-${kf.time}-${i}`}
             type="button"
             className={cn(
-              "-translate-x-1/2 absolute h-full w-1.5 transform cursor-pointer rounded-full transition-transform hover:scale-110",
+              "-translate-x-1/2 absolute h-full w-2 transform cursor-pointer rounded-full transition-transform",
               kf.time === currentTime
                 ? "border border-blue-500 bg-blue-300"
                 : "bg-gray-400",
@@ -362,7 +362,9 @@ export function Timeline({
   };
 
   return (
-    <div className={cn("grid grid-cols-[auto_1fr] gap-x-2 gap-y-2", className)}>
+    // 88px = 3 buttons (24px each with w-6) + 2 gaps (8px each with gap-2)
+    // This fixed width ensures TimeIndicator and KeyframeLine containers have the same width
+    <div className={cn("grid grid-cols-[88px_1fr] gap-x-1 gap-y-2", className)}>
       <div className="flex gap-2">
         <KeyframeNextPrevButton
           direction="prev"
@@ -395,7 +397,8 @@ export function Timeline({
           setAnimationState({ currentTime, isPlaying: false })
         }
       />
-      <div className="col-span-2 grid grid-cols-[auto_1fr] gap-1">
+      {/* Match the outer grid's first column width to align keyframe timelines with TimeIndicator */}
+      <div className="col-span-2 grid grid-cols-[88px_1fr] gap-1">
         {strictEntries(animationState.keyframes).map(
           ([fieldName, keyframes]) => (
             <KeyframeLine

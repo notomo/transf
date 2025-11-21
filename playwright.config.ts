@@ -12,6 +12,8 @@ export default defineConfig({
     trace: "on-first-retry",
   },
 
+  timeout: 15 * 1000,
+
   projects: [
     {
       name: "chromium",

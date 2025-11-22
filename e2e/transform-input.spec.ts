@@ -56,16 +56,13 @@ test("can navigate between keyframes", async ({ page, extensionId }) => {
   await popup.getRotationSlider().fill("135");
 
   await popup.getPrevKeyframeButton().click();
-  const timeline = popup.getTimelineSlider();
-  const prevValue = await timeline.getAttribute("aria-valuenow");
-  expect(Number(prevValue)).toBeCloseTo(0.4, 1);
+  expect(await popup.getTimelineValue()).toBeCloseTo(0.4, 1);
   await expect(popup.getRotationSlider()).toHaveValue("90");
   await expect(popup.getRemoveRotationKeyframeButton()).toBeVisible();
   await expect(popup.getAddRotationKeyframeButton()).not.toBeVisible();
 
   await popup.getNextKeyframeButton().click();
-  const nextValue = await timeline.getAttribute("aria-valuenow");
-  expect(Number(nextValue)).toBeCloseTo(0.8, 1);
+  expect(await popup.getTimelineValue()).toBeCloseTo(0.8, 1);
   await expect(popup.getRotationSlider()).toHaveValue("135");
   await expect(popup.getRemoveRotationKeyframeButton()).toBeVisible();
   await expect(popup.getAddRotationKeyframeButton()).not.toBeVisible();
@@ -99,9 +96,7 @@ test("can jump to keyframe by clicking on it", async ({
 
   await popup.getKeyframeButton(30).click();
 
-  const timeline = popup.getTimelineSlider();
-  const value = await timeline.getAttribute("aria-valuenow");
-  expect(Number(value)).toBeCloseTo(0.3, 1);
+  expect(await popup.getTimelineValue()).toBeCloseTo(0.3, 1);
   await expect(popup.getRotationSlider()).toHaveValue("90");
 });
 

@@ -57,8 +57,14 @@ export async function openPopup({
     getPrevKeyframeButton: () => page.getByTitle("Previous keyframe"),
     getNextKeyframeButton: () => page.getByTitle("Next keyframe"),
     getTimelineSlider: () => page.getByLabel(/Timeline/),
+    getTimelineValue: async () => {
+      const timeline = popup.getTimelineSlider();
+      const value = await timeline.getAttribute("aria-valuenow");
+      return Number(value);
+    },
     getDurationSlider: () => page.getByLabel(/Duration/),
-    getPlayStopButton: () => page.getByRole("button", { name: /[▶■]/ }),
+    getPlayButton: () => page.getByRole("button", { name: /▶/ }),
+    getStopButton: () => page.getByRole("button", { name: /■/ }),
     getKeyframeTimeline: (fieldLabel: string) =>
       page.getByLabel(
         new RegExp(

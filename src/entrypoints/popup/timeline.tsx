@@ -6,6 +6,7 @@ import type {
   RelativeTime,
 } from "@/src/feature/animation-state";
 import { keyframeFieldLabels } from "@/src/feature/animation-state";
+import { calculateTimeFromPosition } from "@/src/feature/animation-time";
 import {
   addKeyframeTo,
   findNextKeyframeTime,
@@ -118,26 +119,24 @@ function TimeIndicator({
   duration: number;
   onTimeChange: (time: RelativeTime) => void;
 }) {
-  const currentTimePercent = currentTime * 100;
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const calculateTimeFromPosition = (clientX: number): RelativeTime => {
-    const container = containerRef.current;
-    if (!container) return currentTime;
-
-    const rect = container.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const newTime = Math.max(0, Math.min(1, relativeX / rect.width));
-    return newTime;
-  };
+  const ref = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
-    const newTime = calculateTimeFromPosition(e.clientX);
+
+    const newTime =
+      calculateTimeFromPosition({
+        clientX: e.clientX,
+        rect: ref.current?.getBoundingClientRect(),
+      }) ?? currentTime;
     onTimeChange(newTime);
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const updatedTime = calculateTimeFromPosition(moveEvent.clientX);
+      const updatedTime =
+        calculateTimeFromPosition({
+          clientX: moveEvent.clientX,
+          rect: ref.current?.getBoundingClientRect(),
+        }) ?? currentTime;
       onTimeChange(updatedTime);
     };
 
@@ -152,7 +151,7 @@ function TimeIndicator({
 
   return (
     <div
-      ref={containerRef}
+      ref={ref}
       className="relative col-span-1 h-6 cursor-pointer rounded bg-gray-100"
       onMouseDown={handleMouseDown}
       role="slider"
@@ -164,7 +163,7 @@ function TimeIndicator({
     >
       <div
         className="-translate-x-1/2 absolute top-0 h-full w-3 rounded bg-blue-500 hover:bg-blue-600"
-        style={{ left: `${currentTimePercent}%` }}
+        style={{ left: `${currentTime * 100}%` }}
       />
     </div>
   );
@@ -199,20 +198,10 @@ function KeyframeLine({
     time: RelativeTime;
   }) => void;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [draggingKeyframeTime, setDraggingKeyframeTime] = useState<
     number | null
   >(null);
-
-  const calculateTimeFromPosition = (clientX: number): RelativeTime => {
-    const container = containerRef.current;
-    if (!container) return 0;
-
-    const rect = container.getBoundingClientRect();
-    const relativeX = clientX - rect.left;
-    const newTime = Math.max(0, Math.min(1, relativeX / rect.width));
-    return newTime;
-  };
 
   const handleKeyframeMouseDown = (
     e: React.MouseEvent,
@@ -224,7 +213,11 @@ function KeyframeLine({
     setDraggingKeyframeTime(keyframeTime);
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
-      const newTime = calculateTimeFromPosition(moveEvent.clientX);
+      const newTime =
+        calculateTimeFromPosition({
+          clientX: moveEvent.clientX,
+          rect: ref.current?.getBoundingClientRect(),
+        }) ?? 0;
       onKeyframeTimeChange({
         fieldName,
         fromTime: keyframeTime,
@@ -243,7 +236,11 @@ function KeyframeLine({
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
-    const time = calculateTimeFromPosition(e.clientX);
+    const time =
+      calculateTimeFromPosition({
+        clientX: e.clientX,
+        rect: ref.current?.getBoundingClientRect(),
+      }) ?? 0;
     onAddKeyframe({ fieldName, time });
   };
 
@@ -253,7 +250,7 @@ function KeyframeLine({
         {keyframeFieldLabels[fieldName]}
       </span>
       <section
-        ref={containerRef}
+        ref={ref}
         key={`${fieldName}-timeline`}
         className="relative h-full border border-gray-400"
         onDoubleClick={handleDoubleClick}

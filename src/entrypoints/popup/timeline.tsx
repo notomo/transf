@@ -1,4 +1,10 @@
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
 import type {
   AnimationKeyframes,
   AnimationState,
@@ -301,62 +307,79 @@ export function Timeline({
     setAnimationState,
   });
 
-  const handleKeyframeTimeChange = ({
-    fieldName,
-    fromTime,
-    toTime,
-  }: {
-    fieldName: KeyframeFieldName;
-    fromTime: RelativeTime;
-    toTime: RelativeTime;
-  }) => {
-    const fieldKeyframes = animationState.keyframes[fieldName];
-    const updatedKeyframes = moveKeyframe({
-      keyframes: fieldKeyframes,
+  const handleKeyframeTimeChange = useCallback(
+    ({
+      fieldName,
       fromTime,
       toTime,
-    });
+    }: {
+      fieldName: KeyframeFieldName;
+      fromTime: RelativeTime;
+      toTime: RelativeTime;
+    }) => {
+      const fieldKeyframes = animationState.keyframes[fieldName];
+      const updatedKeyframes = moveKeyframe({
+        keyframes: fieldKeyframes,
+        fromTime,
+        toTime,
+      });
 
-    setAnimationState({
-      keyframes: {
-        ...animationState.keyframes,
-        [fieldName]: updatedKeyframes,
-      },
-      isPlaying: false,
-      currentTime: toTime,
-    });
-  };
+      setAnimationState({
+        keyframes: {
+          ...animationState.keyframes,
+          [fieldName]: updatedKeyframes,
+        },
+        isPlaying: false,
+        currentTime: toTime,
+      });
+    },
+    [animationState.keyframes, setAnimationState],
+  );
 
-  const handleAddKeyframe = ({
-    fieldName,
-    time,
-  }: {
-    fieldName: KeyframeFieldName;
-    time: RelativeTime;
-  }) => {
-    const fieldKeyframes = animationState.keyframes[fieldName];
-
-    const value = interpolateKeyframes({
-      keyframes: fieldKeyframes,
+  const handleAddKeyframe = useCallback(
+    ({
+      fieldName,
       time,
-      defaultValue: animationState.baseTransform[fieldName],
-    });
+    }: {
+      fieldName: KeyframeFieldName;
+      time: RelativeTime;
+    }) => {
+      const fieldKeyframes = animationState.keyframes[fieldName];
 
-    const updatedKeyframes = addKeyframeTo({
-      keyframes: fieldKeyframes,
-      time,
-      value,
-    });
+      const value = interpolateKeyframes({
+        keyframes: fieldKeyframes,
+        time,
+        defaultValue: animationState.baseTransform[fieldName],
+      });
 
-    setAnimationState({
-      keyframes: {
-        ...animationState.keyframes,
-        [fieldName]: updatedKeyframes,
-      },
-      isPlaying: false,
-      currentTime: time,
-    });
-  };
+      const updatedKeyframes = addKeyframeTo({
+        keyframes: fieldKeyframes,
+        time,
+        value,
+      });
+
+      setAnimationState({
+        keyframes: {
+          ...animationState.keyframes,
+          [fieldName]: updatedKeyframes,
+        },
+        isPlaying: false,
+        currentTime: time,
+      });
+    },
+    [animationState.keyframes, animationState.baseTransform, setAnimationState],
+  );
+
+  const setCurrentTimeAndPause = useCallback(
+    (currentTime: RelativeTime) => {
+      setAnimationState({ currentTime, isPlaying: false });
+    },
+    [setAnimationState],
+  );
+
+  const togglePlay = useCallback(() => {
+    setAnimationState({ isPlaying: !animationState.isPlaying });
+  }, [animationState.isPlaying, setAnimationState]);
 
   return (
     // 88px = 3 buttons (24px each with w-6) + 2 gaps (8px each with gap-2)
@@ -367,32 +390,24 @@ export function Timeline({
           direction="prev"
           keyframes={animationState.keyframes}
           currentTime={animationState.currentTime}
-          onClick={(currentTime) =>
-            setAnimationState({ currentTime, isPlaying: false })
-          }
+          onClick={setCurrentTimeAndPause}
         />
         <PlayStopButton
           isPlaying={animationState.isPlaying}
-          onTogglePlay={() =>
-            setAnimationState({ isPlaying: !animationState.isPlaying })
-          }
+          onTogglePlay={togglePlay}
         />
         <KeyframeNextPrevButton
           direction="next"
           keyframes={animationState.keyframes}
           currentTime={animationState.currentTime}
-          onClick={(currentTime) =>
-            setAnimationState({ currentTime, isPlaying: false })
-          }
+          onClick={setCurrentTimeAndPause}
         />
       </div>
 
       <TimeIndicator
         currentTime={animationState.currentTime}
         duration={animationState.duration}
-        onTimeChange={(currentTime) =>
-          setAnimationState({ currentTime, isPlaying: false })
-        }
+        onTimeChange={setCurrentTimeAndPause}
       />
       {/* Match the outer grid's first column width to align keyframe timelines with TimeIndicator */}
       <div className="col-span-2 grid grid-cols-[88px_1fr] gap-1">
@@ -403,9 +418,7 @@ export function Timeline({
               fieldName={fieldName}
               keyframes={keyframes}
               currentTime={animationState.currentTime}
-              onKeyframeClick={(currentTime) =>
-                setAnimationState({ currentTime, isPlaying: false })
-              }
+              onKeyframeClick={setCurrentTimeAndPause}
               onKeyframeTimeChange={handleKeyframeTimeChange}
               onAddKeyframe={handleAddKeyframe}
             />

@@ -9,8 +9,8 @@ describe("generateAnimationStyles", () => {
       ...DEFAULT_ANIMATION,
       keyframes: {
         rotation: [
-          { time: 0, value: 0 },
-          { time: 1, value: 360 },
+          { time: 0, value: 0, interpolationType: "linear" },
+          { time: 1, value: 360, interpolationType: "linear" },
         ],
         scale: [],
         translateX: [],

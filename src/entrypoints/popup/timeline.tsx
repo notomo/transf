@@ -8,10 +8,14 @@ import {
 import type {
   AnimationKeyframes,
   AnimationState,
+  InterpolationType,
   KeyframeFieldName,
   RelativeTime,
 } from "@/src/feature/animation-state";
-import { keyframeFieldLabels } from "@/src/feature/animation-state";
+import {
+  interpolationTypes,
+  keyframeFieldLabels,
+} from "@/src/feature/animation-state";
 import { calculateTimeFromPosition } from "@/src/feature/animation-time";
 import {
   addKeyframeTo,
@@ -19,6 +23,7 @@ import {
   findPreviousKeyframeTime,
   interpolateKeyframes,
   moveKeyframe,
+  updateInterpolationType,
 } from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { strictEntries } from "@/src/lib/collection";
@@ -182,9 +187,14 @@ function KeyframeLine({
   onKeyframeClick,
   onKeyframeTimeChange,
   onAddKeyframe,
+  onInterpolationTypeChange,
 }: {
   fieldName: KeyframeFieldName;
-  keyframes: Array<{ time: RelativeTime; value: number }>;
+  keyframes: Array<{
+    time: RelativeTime;
+    value: number;
+    interpolationType: InterpolationType;
+  }>;
   currentTime: RelativeTime;
   onKeyframeClick: (time: RelativeTime) => void;
   onKeyframeTimeChange: ({
@@ -202,6 +212,15 @@ function KeyframeLine({
   }: {
     fieldName: KeyframeFieldName;
     time: RelativeTime;
+  }) => void;
+  onInterpolationTypeChange: ({
+    fieldName,
+    time,
+    interpolationType,
+  }: {
+    fieldName: KeyframeFieldName;
+    time: RelativeTime;
+    interpolationType: InterpolationType;
   }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -263,28 +282,54 @@ function KeyframeLine({
         aria-label={`Keyframe timeline: ${keyframeFieldLabels[fieldName]} (double-click to add)`}
       >
         {keyframes.map((kf, i) => (
-          <button
+          <div
             key={`${fieldName}-${kf.time}-${i}`}
-            type="button"
-            className={cn(
-              "-translate-x-1/2 absolute h-full w-2 transform cursor-pointer rounded-full transition-transform",
-              kf.time === currentTime
-                ? "border border-blue-500 bg-blue-300"
-                : "bg-gray-400",
-              draggingKeyframeTime === kf.time && "cursor-grabbing opacity-70",
-            )}
+            className="-translate-x-1/2 absolute h-full"
             style={{
               left: `${kf.time * 100}%`,
+              zIndex: kf.time === currentTime ? 50 : "auto",
             }}
-            onClick={(_e) => {
-              // Only handle click if not dragging
-              if (draggingKeyframeTime === null) {
-                onKeyframeClick(kf.time);
-              }
-            }}
-            onMouseDown={(e) => handleKeyframeMouseDown(e, kf.time)}
-            aria-label={`Jump to keyframe at ${Math.round(kf.time * 100)}%`}
-          />
+          >
+            <button
+              type="button"
+              className={cn(
+                "h-full w-2 transform cursor-pointer rounded-full transition-transform",
+                kf.time === currentTime
+                  ? "border border-blue-500 bg-blue-300"
+                  : "bg-gray-400",
+                draggingKeyframeTime === kf.time &&
+                  "cursor-grabbing opacity-70",
+              )}
+              onClick={(_e) => {
+                // Only handle click if not dragging
+                if (draggingKeyframeTime === null) {
+                  onKeyframeClick(kf.time);
+                }
+              }}
+              onMouseDown={(e) => handleKeyframeMouseDown(e, kf.time)}
+              aria-label={`Jump to keyframe at ${Math.round(kf.time * 100)}%`}
+            />
+            {kf.time === currentTime && (
+              <select
+                value={kf.interpolationType}
+                onChange={(e) =>
+                  onInterpolationTypeChange({
+                    fieldName,
+                    time: kf.time,
+                    interpolationType: e.target.value as InterpolationType,
+                  })
+                }
+                className="-translate-x-1/2 absolute top-full left-1/2 mt-1 rounded border border-gray-300 bg-white px-1 text-xs"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {interpolationTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
         ))}
       </section>
     </>
@@ -370,6 +415,33 @@ export function Timeline({
     [animationState.keyframes, animationState.baseTransform, setAnimationState],
   );
 
+  const handleInterpolationTypeChange = useCallback(
+    ({
+      fieldName,
+      time,
+      interpolationType,
+    }: {
+      fieldName: KeyframeFieldName;
+      time: RelativeTime;
+      interpolationType: InterpolationType;
+    }) => {
+      const fieldKeyframes = animationState.keyframes[fieldName];
+      const updatedKeyframes = updateInterpolationType({
+        keyframes: fieldKeyframes,
+        time,
+        interpolationType,
+      });
+
+      setAnimationState({
+        keyframes: {
+          ...animationState.keyframes,
+          [fieldName]: updatedKeyframes,
+        },
+      });
+    },
+    [animationState.keyframes, setAnimationState],
+  );
+
   const setCurrentTimeAndPause = useCallback(
     (currentTime: RelativeTime) => {
       setAnimationState({ currentTime, isPlaying: false });
@@ -421,6 +493,7 @@ export function Timeline({
               onKeyframeClick={setCurrentTimeAndPause}
               onKeyframeTimeChange={handleKeyframeTimeChange}
               onAddKeyframe={handleAddKeyframe}
+              onInterpolationTypeChange={handleInterpolationTypeChange}
             />
           ),
         )}

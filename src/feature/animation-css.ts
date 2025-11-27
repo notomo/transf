@@ -1,5 +1,6 @@
 import type {
   AnimationState,
+  InterpolationType,
   TransformState,
 } from "@/src/feature/animation-state";
 import {
@@ -21,10 +22,30 @@ function formatTransform({
   return `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;
 }
 
+function getInterpolationTypeAtTime({
+  keyframes,
+  time,
+}: {
+  keyframes: AnimationState["keyframes"];
+  time: number;
+}): InterpolationType {
+  // Find the interpolationType from any field's keyframe at this exact time
+  // If multiple fields have keyframes at this time, we use the first one found
+  // (in practice, they should all have the same interpolationType if set at the same time)
+  for (const fieldKeyframes of Object.values(keyframes)) {
+    const keyframe = fieldKeyframes.find((kf) => kf.time === time);
+    if (keyframe) {
+      return keyframe.interpolationType;
+    }
+  }
+  return "linear";
+}
+
 function generateKeyframeSteps(animationState: AnimationState): Array<{
   time: number;
   transform: string;
   transformOrigin: string;
+  interpolationType: InterpolationType;
 }> {
   const timeSet = getAllKeyframeTimeSet(animationState.keyframes);
   timeSet.add(0);
@@ -39,6 +60,10 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
       time,
       transform: formatTransform(transformState),
       transformOrigin: `${transformState.centerX}% ${transformState.centerY}%`,
+      interpolationType: getInterpolationTypeAtTime({
+        keyframes: animationState.keyframes,
+        time,
+      }),
     };
   });
 }
@@ -46,12 +71,17 @@ function generateKeyframeSteps(animationState: AnimationState): Array<{
 const ANIMATION_NAME = "transf-animation";
 
 function generateCSSKeyframes(animationState: AnimationState) {
-  const keyframeRules = generateKeyframeSteps(animationState)
+  const steps = generateKeyframeSteps(animationState);
+  const keyframeRules = steps
     .map((step) => {
       const percentage = Math.round(step.time * 100);
+      const timingFunction =
+        percentage === 100
+          ? ""
+          : `\n    animation-timing-function: ${step.interpolationType};`;
       return `  ${percentage}% {
     transform: ${step.transform};
-    transform-origin: ${step.transformOrigin};
+    transform-origin: ${step.transformOrigin};${timingFunction}
   }`;
     })
     .join("\n");

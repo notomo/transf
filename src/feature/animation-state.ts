@@ -4,9 +4,22 @@ const RelativeTimeSchema = v.pipe(v.number(), v.minValue(0), v.maxValue(1));
 
 export type RelativeTime = v.InferOutput<typeof RelativeTimeSchema>;
 
+export const interpolationTypes = [
+  "linear",
+  "ease",
+  "ease-in",
+  "ease-out",
+  "ease-in-out",
+] as const;
+
+export type InterpolationType = (typeof interpolationTypes)[number];
+
+const InterpolationTypeSchema = v.picklist(interpolationTypes);
+
 const KeyframeSchema = v.object({
   time: RelativeTimeSchema,
   value: v.number(),
+  interpolationType: v.optional(InterpolationTypeSchema, "linear"),
 });
 
 export type Keyframe = v.InferOutput<typeof KeyframeSchema>;

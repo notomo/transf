@@ -1,6 +1,7 @@
 import type {
   AnimationKeyframes,
   AnimationState,
+  InterpolationType,
   Keyframe,
   KeyframeValue,
   RelativeTime,
@@ -125,13 +126,15 @@ export function addKeyframeTo({
   keyframes,
   time,
   value,
+  interpolationType = "linear",
 }: {
   keyframes: Keyframe[];
   time: RelativeTime;
   value: KeyframeValue;
+  interpolationType?: InterpolationType;
 }): Keyframe[] {
   const newKeyframes = keyframes.filter((kf) => kf.time !== time);
-  newKeyframes.push({ time, value: toNumericValue(value) });
+  newKeyframes.push({ time, value: toNumericValue(value), interpolationType });
   return newKeyframes;
 }
 
@@ -159,8 +162,17 @@ export function updateKeyframe({
     return keyframes;
   }
 
+  const existingKeyframe = keyframes[keyframeIndex];
+  if (!existingKeyframe) {
+    return keyframes;
+  }
+
   const newKeyframes = [...keyframes];
-  newKeyframes[keyframeIndex] = { time, value: toNumericValue(value) };
+  newKeyframes[keyframeIndex] = {
+    ...existingKeyframe,
+    time,
+    value: toNumericValue(value),
+  };
   return newKeyframes;
 }
 
@@ -337,5 +349,39 @@ export function moveKeyframe({
   }
 
   const withoutOld = keyframes.filter((kf) => kf.time !== fromTime);
-  return [...withoutOld, { time: toTime, value: keyframe.value }];
+  return [
+    ...withoutOld,
+    {
+      time: toTime,
+      value: keyframe.value,
+      interpolationType: keyframe.interpolationType,
+    },
+  ];
+}
+
+export function updateInterpolationType({
+  keyframes,
+  time,
+  interpolationType,
+}: {
+  keyframes: Keyframe[];
+  time: RelativeTime;
+  interpolationType: InterpolationType;
+}): Keyframe[] {
+  const keyframeIndex = keyframes.findIndex((kf) => kf.time === time);
+  if (keyframeIndex === -1) {
+    return keyframes;
+  }
+
+  const existingKeyframe = keyframes[keyframeIndex];
+  if (!existingKeyframe) {
+    return keyframes;
+  }
+
+  const newKeyframes = [...keyframes];
+  newKeyframes[keyframeIndex] = {
+    ...existingKeyframe,
+    interpolationType,
+  };
+  return newKeyframes;
 }

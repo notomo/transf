@@ -32,7 +32,9 @@ describe("interpolateKeyframes", () => {
   });
 
   it("returns first keyframe value when time is before first keyframe", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 20 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 20, interpolationType: "linear" },
+    ];
     const result = interpolateKeyframes({
       keyframes,
       time: 0.2,
@@ -42,7 +44,9 @@ describe("interpolateKeyframes", () => {
   });
 
   it("returns last keyframe value when time is after last keyframe", () => {
-    const keyframes: Keyframe[] = [{ time: 0.2, value: 20 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.2, value: 20, interpolationType: "linear" },
+    ];
     const result = interpolateKeyframes({
       keyframes,
       time: 0.8,
@@ -53,8 +57,8 @@ describe("interpolateKeyframes", () => {
 
   it("interpolates between two keyframes", () => {
     const keyframes: Keyframe[] = [
-      { time: 0, value: 0 },
-      { time: 1, value: 100 },
+      { time: 0, value: 0, interpolationType: "linear" },
+      { time: 1, value: 100, interpolationType: "linear" },
     ];
     const result = interpolateKeyframes({
       keyframes,
@@ -66,8 +70,8 @@ describe("interpolateKeyframes", () => {
 
   it("handles unsorted keyframes", () => {
     const keyframes: Keyframe[] = [
-      { time: 1, value: 100 },
-      { time: 0, value: 0 },
+      { time: 1, value: 100, interpolationType: "linear" },
+      { time: 0, value: 0, interpolationType: "linear" },
     ];
     const result = interpolateKeyframes({
       keyframes,
@@ -93,7 +97,7 @@ describe("findPreviousKeyframeTime", () => {
   it("wraps around to last keyframe when no previous keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 1, value: 90 }],
+      rotation: [{ time: 1, value: 90, interpolationType: "linear" }],
     };
     const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(1);
@@ -111,8 +115,8 @@ describe("findPreviousKeyframeTime", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
       rotation: [
-        { time: 0.2, value: 45 },
-        { time: 0.8, value: 90 },
+        { time: 0.2, value: 45, interpolationType: "linear" },
+        { time: 0.8, value: 90, interpolationType: "linear" },
       ],
     };
     const result = findPreviousKeyframeTime({ keyframes, currentTime: 0.5 });
@@ -124,7 +128,7 @@ describe("findNextKeyframeTime", () => {
   it("wraps around to first keyframe when no next keyframes exist", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 0.2, value: 90 }],
+      rotation: [{ time: 0.2, value: 90, interpolationType: "linear" }],
     };
     const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
     expect(result).toBe(0.2);
@@ -142,8 +146,8 @@ describe("findNextKeyframeTime", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
       rotation: [
-        { time: 0.2, value: 45 },
-        { time: 0.8, value: 90 },
+        { time: 0.2, value: 45, interpolationType: "linear" },
+        { time: 0.8, value: 90, interpolationType: "linear" },
       ],
     };
     const result = findNextKeyframeTime({ keyframes, currentTime: 0.5 });
@@ -153,13 +157,17 @@ describe("findNextKeyframeTime", () => {
 
 describe("hasKeyframeAtTime", () => {
   it("returns false when no keyframe exists at the time", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = hasKeyframeAtTime({ keyframes, time: 0.2 });
     expect(result).toBe(false);
   });
 
   it("returns true when keyframe exists at the time", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = hasKeyframeAtTime({ keyframes, time: 0.5 });
     expect(result).toBe(true);
   });
@@ -167,51 +175,85 @@ describe("hasKeyframeAtTime", () => {
 
 describe("addKeyframeTo", () => {
   it("adds a new keyframe", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = addKeyframeTo({ keyframes, time: 0.2, value: 45 });
     expect(result).toHaveLength(2);
-    expect(result).toContainEqual({ time: 0.2, value: 45 });
+    expect(result).toContainEqual({
+      time: 0.2,
+      value: 45,
+      interpolationType: "linear",
+    });
   });
 
   it("replaces existing keyframe at the same time", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = addKeyframeTo({ keyframes, time: 0.5, value: 180 });
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({ time: 0.5, value: 180 });
+    expect(result[0]).toEqual({
+      time: 0.5,
+      value: 180,
+      interpolationType: "linear",
+    });
   });
 });
 
 describe("removeKeyframeFrom", () => {
   it("removes keyframe at specified time", () => {
     const keyframes: Keyframe[] = [
-      { time: 0.2, value: 45 },
-      { time: 0.5, value: 90 },
+      { time: 0.2, value: 45, interpolationType: "linear" },
+      { time: 0.5, value: 90, interpolationType: "linear" },
     ];
     const result = removeKeyframeFrom({ keyframes, time: 0.2 });
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({ time: 0.5, value: 90 });
+    expect(result[0]).toEqual({
+      time: 0.5,
+      value: 90,
+      interpolationType: "linear",
+    });
   });
 
   it("returns unchanged array when keyframe does not exist", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = removeKeyframeFrom({ keyframes, time: 0.2 });
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({ time: 0.5, value: 90 });
+    expect(result[0]).toEqual({
+      time: 0.5,
+      value: 90,
+      interpolationType: "linear",
+    });
   });
 });
 
 describe("updateKeyframe", () => {
   it("updates existing keyframe value", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = updateKeyframe({ keyframes, time: 0.5, value: 180 });
-    expect(result[0]).toEqual({ time: 0.5, value: 180 });
+    expect(result[0]).toEqual({
+      time: 0.5,
+      value: 180,
+      interpolationType: "linear",
+    });
   });
 
   it("returns unchanged array when keyframe does not exist", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = updateKeyframe({ keyframes, time: 0.2, value: 45 });
     expect(result).toHaveLength(1);
-    expect(result[0]).toEqual({ time: 0.5, value: 90 });
+    expect(result[0]).toEqual({
+      time: 0.5,
+      value: 90,
+      interpolationType: "linear",
+    });
   });
 });
 
@@ -239,16 +281,16 @@ describe("deriveTransformFromAnimationState", () => {
       keyframes: {
         ...defaultKeyframes,
         rotation: [
-          { time: 0, value: 0 },
-          { time: 1, value: 90 },
+          { time: 0, value: 0, interpolationType: "linear" },
+          { time: 1, value: 90, interpolationType: "linear" },
         ],
         scale: [
-          { time: 0, value: 1 },
-          { time: 1, value: 2 },
+          { time: 0, value: 1, interpolationType: "linear" },
+          { time: 1, value: 2, interpolationType: "linear" },
         ],
         flipHorizontal: [
-          { time: 0, value: 0 },
-          { time: 0.4, value: 1 },
+          { time: 0, value: 0, interpolationType: "linear" },
+          { time: 0.4, value: 1, interpolationType: "linear" },
         ],
         flipVertical: [],
       },
@@ -273,8 +315,10 @@ describe("deriveTransformFromAnimationState", () => {
       ...DEFAULT_ANIMATION,
       keyframes: {
         ...defaultKeyframes,
-        flipHorizontal: [{ time: 0.5, value: 0.6 }],
-        flipVertical: [{ time: 0.5, value: 0.4 }],
+        flipHorizontal: [
+          { time: 0.5, value: 0.6, interpolationType: "linear" },
+        ],
+        flipVertical: [{ time: 0.5, value: 0.4, interpolationType: "linear" }],
       },
       currentTime: 0.5,
     };
@@ -333,8 +377,8 @@ describe("updateKeyframesWithTransform", () => {
   it("adds new keyframes when time doesn't exist", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 0, value: 0 }],
-      scale: [{ time: 0, value: 1 }],
+      rotation: [{ time: 0, value: 0, interpolationType: "linear" }],
+      scale: [{ time: 0, value: 1, interpolationType: "linear" }],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -346,16 +390,24 @@ describe("updateKeyframesWithTransform", () => {
       currentTime: 0.5,
     });
     expect(result.rotation).toHaveLength(2);
-    expect(result.rotation).toContainEqual({ time: 0.5, value: 45 });
+    expect(result.rotation).toContainEqual({
+      time: 0.5,
+      value: 45,
+      interpolationType: "linear",
+    });
     expect(result.scale).toHaveLength(2);
-    expect(result.scale).toContainEqual({ time: 0.5, value: 2 });
+    expect(result.scale).toContainEqual({
+      time: 0.5,
+      value: 2,
+      interpolationType: "linear",
+    });
   });
 
   it("updates existing keyframes when time exists", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 0.5, value: 0 }],
-      scale: [{ time: 0.5, value: 1 }],
+      rotation: [{ time: 0.5, value: 0, interpolationType: "linear" }],
+      scale: [{ time: 0.5, value: 1, interpolationType: "linear" }],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -367,16 +419,24 @@ describe("updateKeyframesWithTransform", () => {
       currentTime: 0.5,
     });
     expect(result.rotation).toHaveLength(1);
-    expect(result.rotation[0]).toEqual({ time: 0.5, value: 45 });
+    expect(result.rotation[0]).toEqual({
+      time: 0.5,
+      value: 45,
+      interpolationType: "linear",
+    });
     expect(result.scale).toHaveLength(1);
-    expect(result.scale[0]).toEqual({ time: 0.5, value: 2 });
+    expect(result.scale[0]).toEqual({
+      time: 0.5,
+      value: 2,
+      interpolationType: "linear",
+    });
   });
 
   it("converts boolean values to numeric", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      flipHorizontal: [{ time: 0, value: 0 }],
-      flipVertical: [{ time: 0, value: 1 }],
+      flipHorizontal: [{ time: 0, value: 0, interpolationType: "linear" }],
+      flipVertical: [{ time: 0, value: 1, interpolationType: "linear" }],
     };
     const updates: Partial<TransformState> = {
       flipHorizontal: true,
@@ -388,15 +448,23 @@ describe("updateKeyframesWithTransform", () => {
       currentTime: 0.5,
     });
     expect(result.flipHorizontal).toHaveLength(2);
-    expect(result.flipHorizontal).toContainEqual({ time: 0.5, value: 1 });
+    expect(result.flipHorizontal).toContainEqual({
+      time: 0.5,
+      value: 1,
+      interpolationType: "linear",
+    });
     expect(result.flipVertical).toHaveLength(2);
-    expect(result.flipVertical).toContainEqual({ time: 0.5, value: 0 });
+    expect(result.flipVertical).toContainEqual({
+      time: 0.5,
+      value: 0,
+      interpolationType: "linear",
+    });
   });
 
   it("ignores undefined values", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 0, value: 0 }],
+      rotation: [{ time: 0, value: 0, interpolationType: "linear" }],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -414,8 +482,8 @@ describe("updateKeyframesWithTransform", () => {
   it("preserves other keyframe fields unchanged", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 0, value: 0 }],
-      scale: [{ time: 0.2, value: 1.5 }],
+      rotation: [{ time: 0, value: 0, interpolationType: "linear" }],
+      scale: [{ time: 0.2, value: 1.5, interpolationType: "linear" }],
     };
     const updates: Partial<TransformState> = {
       rotation: 45,
@@ -434,7 +502,7 @@ describe("hasKeyframes", () => {
   it("returns true when any field has keyframes", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
-      rotation: [{ time: 0.5, value: 90 }],
+      rotation: [{ time: 0.5, value: 90, interpolationType: "linear" }],
     };
     const result = hasKeyframes(keyframes);
     expect(result).toBe(true);
@@ -452,23 +520,35 @@ describe("hasKeyframes", () => {
 describe("moveKeyframe", () => {
   it("successfully moves a keyframe to a new time", () => {
     const keyframes: Keyframe[] = [
-      { time: 0.2, value: 45 },
-      { time: 0.5, value: 90 },
+      { time: 0.2, value: 45, interpolationType: "linear" },
+      { time: 0.5, value: 90, interpolationType: "linear" },
     ];
     const result = moveKeyframe({ keyframes, fromTime: 0.2, toTime: 0.8 });
     expect(result).toHaveLength(2);
-    expect(result).toContainEqual({ time: 0.8, value: 45 });
-    expect(result).not.toContainEqual({ time: 0.2, value: 45 });
+    expect(result).toContainEqual({
+      time: 0.8,
+      value: 45,
+      interpolationType: "linear",
+    });
+    expect(result).not.toContainEqual({
+      time: 0.2,
+      value: 45,
+      interpolationType: "linear",
+    });
   });
 
   it("returns unchanged array when source keyframe doesn't exist", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const result = moveKeyframe({ keyframes, fromTime: 0.2, toTime: 0.8 });
     expect(result).toEqual(keyframes);
   });
 
   it("prevents moving outside valid range", () => {
-    const keyframes: Keyframe[] = [{ time: 0.5, value: 90 }];
+    const keyframes: Keyframe[] = [
+      { time: 0.5, value: 90, interpolationType: "linear" },
+    ];
     const resultBelowZero = moveKeyframe({
       keyframes,
       fromTime: 0.5,
@@ -485,8 +565,8 @@ describe("moveKeyframe", () => {
 
   it("prevents moving too close to another keyframe", () => {
     const keyframes: Keyframe[] = [
-      { time: 0.5, value: 90 },
-      { time: 0.6, value: 180 },
+      { time: 0.5, value: 90, interpolationType: "linear" },
+      { time: 0.6, value: 180, interpolationType: "linear" },
     ];
     const result = moveKeyframe({
       keyframes,
@@ -510,12 +590,12 @@ describe("getAllKeyframeTimeSet", () => {
     const keyframes: AnimationKeyframes = {
       ...defaultKeyframes,
       rotation: [
-        { time: 0.2, value: 45 },
-        { time: 0.5, value: 90 },
+        { time: 0.2, value: 45, interpolationType: "linear" },
+        { time: 0.5, value: 90, interpolationType: "linear" },
       ],
       scale: [
-        { time: 0.5, value: 1.5 },
-        { time: 0.8, value: 2 },
+        { time: 0.5, value: 1.5, interpolationType: "linear" },
+        { time: 0.8, value: 2, interpolationType: "linear" },
       ],
     };
     const result = getAllKeyframeTimeSet(keyframes);

@@ -23,7 +23,7 @@ import {
   findPreviousKeyframeTime,
   interpolateKeyframes,
   moveKeyframe,
-  updateInterpolationType,
+  updateInterpolationTypeForAllFieldsAtTime,
 } from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { strictEntries } from "@/src/lib/collection";
@@ -121,6 +121,70 @@ function KeyframeNextPrevButton({
   );
 }
 
+function InterpolationTypeSelector({
+  keyframes,
+  currentTime,
+  onInterpolationTypeChange,
+}: {
+  keyframes: AnimationKeyframes;
+  currentTime: RelativeTime;
+  onInterpolationTypeChange: ({
+    time,
+    interpolationType,
+  }: {
+    time: RelativeTime;
+    interpolationType: InterpolationType;
+  }) => void;
+}) {
+  const hasKeyframeAtCurrentTime = Object.values(keyframes).some(
+    (fieldKeyframes) => fieldKeyframes.some((kf) => kf.time === currentTime),
+  );
+
+  const currentInterpolationType = (() => {
+    for (const fieldKeyframes of Object.values(keyframes)) {
+      const keyframe = fieldKeyframes.find((kf) => kf.time === currentTime);
+      if (keyframe) {
+        return keyframe.interpolationType;
+      }
+    }
+    return "linear";
+  })();
+
+  return (
+    <div className="col-span-1 flex items-center gap-2">
+      <label
+        htmlFor="interpolation-type"
+        className={cn("text-xs", !hasKeyframeAtCurrentTime && "text-gray-400")}
+      >
+        Easing:
+      </label>
+      <select
+        id="interpolation-type"
+        value={currentInterpolationType}
+        onChange={(e) =>
+          onInterpolationTypeChange({
+            time: currentTime,
+            interpolationType: e.target.value as InterpolationType,
+          })
+        }
+        disabled={!hasKeyframeAtCurrentTime}
+        className="rounded border border-gray-300 bg-white px-2 py-1 text-xs disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-400"
+        title={
+          hasKeyframeAtCurrentTime
+            ? "Animation easing for all fields at this keyframe time"
+            : "No keyframes at current time"
+        }
+      >
+        {interpolationTypes.map((type) => (
+          <option key={type} value={type}>
+            {type}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 function TimeIndicator({
   currentTime,
   duration,
@@ -187,7 +251,6 @@ function KeyframeLine({
   onKeyframeClick,
   onKeyframeTimeChange,
   onAddKeyframe,
-  onInterpolationTypeChange,
 }: {
   fieldName: KeyframeFieldName;
   keyframes: Array<{
@@ -212,15 +275,6 @@ function KeyframeLine({
   }: {
     fieldName: KeyframeFieldName;
     time: RelativeTime;
-  }) => void;
-  onInterpolationTypeChange: ({
-    fieldName,
-    time,
-    interpolationType,
-  }: {
-    fieldName: KeyframeFieldName;
-    time: RelativeTime;
-    interpolationType: InterpolationType;
   }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -309,26 +363,6 @@ function KeyframeLine({
               onMouseDown={(e) => handleKeyframeMouseDown(e, kf.time)}
               aria-label={`Jump to keyframe at ${Math.round(kf.time * 100)}%`}
             />
-            {kf.time === currentTime && (
-              <select
-                value={kf.interpolationType}
-                onChange={(e) =>
-                  onInterpolationTypeChange({
-                    fieldName,
-                    time: kf.time,
-                    interpolationType: e.target.value as InterpolationType,
-                  })
-                }
-                className="-translate-x-1/2 absolute top-full left-1/2 mt-1 rounded border border-gray-300 bg-white px-1 text-xs"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {interpolationTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            )}
           </div>
         ))}
       </section>
@@ -417,26 +451,20 @@ export function Timeline({
 
   const handleInterpolationTypeChange = useCallback(
     ({
-      fieldName,
       time,
       interpolationType,
     }: {
-      fieldName: KeyframeFieldName;
       time: RelativeTime;
       interpolationType: InterpolationType;
     }) => {
-      const fieldKeyframes = animationState.keyframes[fieldName];
-      const updatedKeyframes = updateInterpolationType({
-        keyframes: fieldKeyframes,
+      const updatedKeyframes = updateInterpolationTypeForAllFieldsAtTime({
+        keyframes: animationState.keyframes,
         time,
         interpolationType,
       });
 
       setAnimationState({
-        keyframes: {
-          ...animationState.keyframes,
-          [fieldName]: updatedKeyframes,
-        },
+        keyframes: updatedKeyframes,
       });
     },
     [animationState.keyframes, setAnimationState],
@@ -481,6 +509,15 @@ export function Timeline({
         duration={animationState.duration}
         onTimeChange={setCurrentTimeAndPause}
       />
+
+      <div className="col-span-2">
+        <InterpolationTypeSelector
+          keyframes={animationState.keyframes}
+          currentTime={animationState.currentTime}
+          onInterpolationTypeChange={handleInterpolationTypeChange}
+        />
+      </div>
+
       {/* Match the outer grid's first column width to align keyframe timelines with TimeIndicator */}
       <div className="col-span-2 grid grid-cols-[88px_1fr] gap-1">
         {strictEntries(animationState.keyframes).map(
@@ -493,7 +530,6 @@ export function Timeline({
               onKeyframeClick={setCurrentTimeAndPause}
               onKeyframeTimeChange={handleKeyframeTimeChange}
               onAddKeyframe={handleAddKeyframe}
-              onInterpolationTypeChange={handleInterpolationTypeChange}
             />
           ),
         )}

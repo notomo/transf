@@ -17,6 +17,7 @@ import {
   interpolateKeyframes,
   moveKeyframe,
   removeKeyframeFrom,
+  updateInterpolationTypeForAllFieldsAtTime,
   updateKeyframe,
   updateKeyframesWithTransform,
 } from "./keyframe";
@@ -600,5 +601,82 @@ describe("getAllKeyframeTimeSet", () => {
     };
     const result = getAllKeyframeTimeSet(keyframes);
     expect(result).toEqual(new Set([0.2, 0.5, 0.8]));
+  });
+});
+
+describe("updateInterpolationTypeForAllFieldsAtTime", () => {
+  it("updates interpolationType for all fields at the same time", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+      rotation: [
+        { time: 0.5, value: 90, interpolationType: "linear" },
+        { time: 0.8, value: 180, interpolationType: "linear" },
+      ],
+      scale: [
+        { time: 0.5, value: 2, interpolationType: "linear" },
+        { time: 0.8, value: 3, interpolationType: "linear" },
+      ],
+      translateX: [{ time: 0.5, value: 100, interpolationType: "linear" }],
+    };
+    const result = updateInterpolationTypeForAllFieldsAtTime({
+      keyframes,
+      time: 0.5,
+      interpolationType: "ease-in-out",
+    });
+
+    expect(result.rotation[0]?.interpolationType).toBe("ease-in-out");
+    expect(result.rotation[1]?.interpolationType).toBe("linear");
+    expect(result.scale[0]?.interpolationType).toBe("ease-in-out");
+    expect(result.scale[1]?.interpolationType).toBe("linear");
+    expect(result.translateX[0]?.interpolationType).toBe("ease-in-out");
+  });
+
+  it("only updates fields that have keyframes at the specified time", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+      rotation: [{ time: 0.5, value: 90, interpolationType: "linear" }],
+      scale: [{ time: 0.8, value: 2, interpolationType: "linear" }],
+    };
+    const result = updateInterpolationTypeForAllFieldsAtTime({
+      keyframes,
+      time: 0.5,
+      interpolationType: "ease-in",
+    });
+
+    expect(result.rotation[0]?.interpolationType).toBe("ease-in");
+    expect(result.scale[0]?.interpolationType).toBe("linear");
+  });
+
+  it("returns unchanged keyframes when no fields have keyframes at the specified time", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+      rotation: [{ time: 0.2, value: 90, interpolationType: "linear" }],
+      scale: [{ time: 0.8, value: 2, interpolationType: "linear" }],
+    };
+    const result = updateInterpolationTypeForAllFieldsAtTime({
+      keyframes,
+      time: 0.5,
+      interpolationType: "ease-out",
+    });
+
+    expect(result).toEqual(keyframes);
+  });
+
+  it("preserves other keyframe properties", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+      rotation: [{ time: 0.5, value: 90, interpolationType: "linear" }],
+    };
+    const result = updateInterpolationTypeForAllFieldsAtTime({
+      keyframes,
+      time: 0.5,
+      interpolationType: "ease",
+    });
+
+    expect(result.rotation[0]).toEqual({
+      time: 0.5,
+      value: 90,
+      interpolationType: "ease",
+    });
   });
 });

@@ -385,3 +385,24 @@ export function updateInterpolationType({
   };
   return newKeyframes;
 }
+
+export function updateInterpolationTypeForAllFieldsAtTime({
+  keyframes,
+  time,
+  interpolationType,
+}: {
+  keyframes: AnimationKeyframes;
+  time: RelativeTime;
+  interpolationType: InterpolationType;
+}): AnimationKeyframes {
+  const updatedKeyframes = { ...keyframes };
+  for (const field of keyframeFieldNames) {
+    const fieldKeyframes = updatedKeyframes[field];
+    updatedKeyframes[field] = updateInterpolationType({
+      keyframes: fieldKeyframes,
+      time,
+      interpolationType,
+    });
+  }
+  return updatedKeyframes;
+}

@@ -333,11 +333,8 @@ export function App() {
         <TranslateInput {...getKeyframeProps("translateY")} />
         <AxisPercentInput {...getKeyframeProps("centerX")} />
         <AxisPercentInput {...getKeyframeProps("centerY")} />
-        <RotationInput
-          className="col-span-2"
-          {...getKeyframeProps("rotation")}
-        />
-        <ScaleInput className="col-span-2" {...getKeyframeProps("scale")} />
+        <RotationInput {...getKeyframeProps("rotation")} />
+        <ScaleInput {...getKeyframeProps("scale")} />
         <FlipCheckbox {...getKeyframeProps("flipHorizontal")} />
         <FlipCheckbox {...getKeyframeProps("flipVertical")} />
 

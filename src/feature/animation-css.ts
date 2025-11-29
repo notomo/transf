@@ -6,6 +6,7 @@ import type {
 import {
   deriveTransformFromAnimationState,
   getAllKeyframeTimeSet,
+  getInterpolationTypeAtTime,
   hasKeyframes,
 } from "@/src/feature/keyframe";
 
@@ -20,25 +21,6 @@ function formatTransform({
   const scaleX = flipHorizontal ? -scale : scale;
   const scaleY = flipVertical ? -scale : scale;
   return `translate(${translateX}px, ${translateY}px) rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;
-}
-
-function getInterpolationTypeAtTime({
-  keyframes,
-  time,
-}: {
-  keyframes: AnimationState["keyframes"];
-  time: number;
-}): InterpolationType {
-  // Find the interpolationType from any field's keyframe at this exact time
-  // If multiple fields have keyframes at this time, we use the first one found
-  // (in practice, they should all have the same interpolationType if set at the same time)
-  for (const fieldKeyframes of Object.values(keyframes)) {
-    const keyframe = fieldKeyframes.find((kf) => kf.time === time);
-    if (keyframe) {
-      return keyframe.interpolationType;
-    }
-  }
-  return "linear";
 }
 
 function generateKeyframeSteps(animationState: AnimationState): Array<{

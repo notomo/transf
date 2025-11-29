@@ -21,6 +21,7 @@ import {
   addKeyframeTo,
   findNextKeyframeTime,
   findPreviousKeyframeTime,
+  getInterpolationTypeAtTime,
   interpolateKeyframes,
   moveKeyframe,
   updateInterpolationTypeForAllFieldsAtTime,
@@ -140,15 +141,10 @@ function InterpolationTypeSelector({
     (fieldKeyframes) => fieldKeyframes.some((kf) => kf.time === currentTime),
   );
 
-  const currentInterpolationType = (() => {
-    for (const fieldKeyframes of Object.values(keyframes)) {
-      const keyframe = fieldKeyframes.find((kf) => kf.time === currentTime);
-      if (keyframe) {
-        return keyframe.interpolationType;
-      }
-    }
-    return "linear";
-  })();
+  const currentInterpolationType = getInterpolationTypeAtTime({
+    keyframes,
+    time: currentTime,
+  });
 
   return (
     <div className="col-span-1 flex items-center gap-2">

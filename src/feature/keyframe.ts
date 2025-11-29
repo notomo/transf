@@ -406,3 +406,22 @@ export function updateInterpolationTypeForAllFieldsAtTime({
   }
   return updatedKeyframes;
 }
+
+export function getInterpolationTypeAtTime({
+  keyframes,
+  time,
+}: {
+  keyframes: AnimationKeyframes;
+  time: number;
+}): InterpolationType {
+  // Find the interpolationType from any field's keyframe at this exact time
+  // If multiple fields have keyframes at this time, we use the first one found
+  // (in practice, they should all have the same interpolationType if set at the same time)
+  for (const fieldKeyframes of Object.values(keyframes)) {
+    const keyframe = fieldKeyframes.find((kf) => kf.time === time);
+    if (keyframe) {
+      return keyframe.interpolationType;
+    }
+  }
+  return "linear";
+}

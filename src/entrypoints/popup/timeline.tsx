@@ -22,6 +22,7 @@ import {
   findNextKeyframeTime,
   findPreviousKeyframeTime,
   getInterpolationTypeAtTime,
+  hasKeyframeAtTimeInAllFields,
   interpolateKeyframes,
   moveKeyframe,
   updateInterpolationTypeForAllFieldsAtTime,
@@ -137,9 +138,10 @@ function InterpolationTypeSelector({
     interpolationType: InterpolationType;
   }) => void;
 }) {
-  const hasKeyframeAtCurrentTime = Object.values(keyframes).some(
-    (fieldKeyframes) => fieldKeyframes.some((kf) => kf.time === currentTime),
-  );
+  const hasKeyframeAtCurrentTime = hasKeyframeAtTimeInAllFields({
+    keyframes,
+    time: currentTime,
+  });
 
   const currentInterpolationType = getInterpolationTypeAtTime({
     keyframes,

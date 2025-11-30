@@ -76,6 +76,16 @@ export function getAllKeyframeTimeSet(
   return times;
 }
 
+export function hasKeyframeAtTimeInAllFields({
+  keyframes,
+  time,
+}: {
+  keyframes: AnimationKeyframes;
+  time: RelativeTime;
+}): boolean {
+  return getAllKeyframeTimeSet(keyframes).has(time);
+}
+
 function getAllKeyframeTimes(keyframes: AnimationKeyframes): number[] {
   return Array.from(getAllKeyframeTimeSet(keyframes)).sort((a, b) => a - b);
 }

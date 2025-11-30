@@ -13,6 +13,7 @@ import {
   findPreviousKeyframeTime,
   getAllKeyframeTimeSet,
   hasKeyframeAtTime,
+  hasKeyframeAtTimeInAllFields,
   hasKeyframes,
   interpolateKeyframes,
   moveKeyframe,
@@ -601,6 +602,36 @@ describe("getAllKeyframeTimeSet", () => {
     };
     const result = getAllKeyframeTimeSet(keyframes);
     expect(result).toEqual(new Set([0.2, 0.5, 0.8]));
+  });
+});
+
+describe("hasKeyframeAtTimeInAllFields", () => {
+  it("returns false when no keyframes exist", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+    };
+    const result = hasKeyframeAtTimeInAllFields({ keyframes, time: 0.5 });
+    expect(result).toBe(false);
+  });
+
+  it("returns false when no keyframe exists at the specified time", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+      rotation: [{ time: 0.2, value: 45, interpolationType: "linear" }],
+      scale: [{ time: 0.8, value: 2, interpolationType: "linear" }],
+    };
+    const result = hasKeyframeAtTimeInAllFields({ keyframes, time: 0.5 });
+    expect(result).toBe(false);
+  });
+
+  it("returns true when a keyframe exists at the specified time in one field", () => {
+    const keyframes: AnimationKeyframes = {
+      ...defaultKeyframes,
+      rotation: [{ time: 0.5, value: 90, interpolationType: "linear" }],
+      scale: [{ time: 0.8, value: 2, interpolationType: "linear" }],
+    };
+    const result = hasKeyframeAtTimeInAllFields({ keyframes, time: 0.5 });
+    expect(result).toBe(true);
   });
 });
 

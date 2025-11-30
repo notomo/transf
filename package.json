@@ -17,6 +17,7 @@
     "test:e2e:ci": "playwright test",
     "test:e2e:dev": "npm run build:dev && npm run test:e2e:ci",
     "test:e2e:ui": "playwright test --ui",
+    "screenshot": "npm run build:dev && SCREENSHOT=true playwright test e2e/screenshot.spec.ts",
     "ls-lint": "ls-lint",
     "check_all": "npm run format && npm run check && npm run typecheck && npm run ls-lint && npm run test && npm run test:e2e:dev",
     "setup:e2e-mcp": "playwright init-agents --loop=claude",

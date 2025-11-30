@@ -45,7 +45,27 @@ npm run ls-lint
 
 # Format, lint, typecheck, and file naming (run before commits)
 npm run check_all
+
+# Take screenshots of extension UI
+npm run screenshot
 ```
+
+## Taking Screenshots
+
+To take screenshots of the extension UI for agents or documentation:
+
+```bash
+npm run screenshot
+```
+
+This command will:
+1. Build the extension in development mode
+2. Run the screenshot test (`e2e/screenshot.spec.ts`)
+3. Save screenshots to `e2e/screenshots/` directory
+
+The screenshot test is automatically skipped during regular test runs (`npm run test:e2e:dev`).
+
+**Note for agents**: Since the extension ID changes with each dev build, you cannot use the regular dev server for screenshots. Use `npm run screenshot` instead, which leverages the existing e2e test infrastructure.
 
 ## Extension Development
 

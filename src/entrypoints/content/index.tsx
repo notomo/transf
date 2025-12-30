@@ -5,7 +5,7 @@ import { App } from "./app";
 export default defineContentScript({
   matches: ["<all_urls>"],
   runAt: "document_end",
-  cssInjectionMode: "ui",
+  cssInjectionMode: "manual",
 
   async main(ctx) {
     const ui = await createShadowRootUi(ctx, {

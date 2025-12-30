@@ -17,12 +17,7 @@ export default defineConfig({
     background: {
       service_worker: "src/entrypoints/background.ts",
     },
-    content_scripts: [
-      {
-        matches: ["http://*/*", "https://*/*"],
-        js: ["src/entrypoints/content.ts"],
-      },
-    ],
+    content_scripts: [],
   },
   dev: {
     server: {

@@ -235,7 +235,7 @@ function TimeIndicator({
       tabIndex={0}
     >
       <div
-        className="-translate-x-1/2 absolute top-0 h-full w-3 rounded bg-blue-500 hover:bg-blue-600"
+        className="absolute top-0 h-full w-3 -translate-x-1/2 rounded bg-blue-500 hover:bg-blue-600"
         style={{ left: `${currentTime * 100}%` }}
       />
     </div>
@@ -336,7 +336,7 @@ function KeyframeLine({
         {keyframes.map((kf, i) => (
           <div
             key={`${fieldName}-${kf.time}-${i}`}
-            className="-translate-x-1/2 absolute h-full"
+            className="absolute h-full -translate-x-1/2"
             style={{
               left: `${kf.time * 100}%`,
               zIndex: kf.time === currentTime ? 50 : "auto",

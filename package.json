@@ -24,7 +24,7 @@
     "deploy_for_local": "npm run build && mkdir -p $TRANSF_LOCAL && cp -rf ./.output/chrome-mv3/* $TRANSF_LOCAL"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.3.11",
+    "@biomejs/biome": "^2.3.12",
     "@ls-lint/ls-lint": "^2.3.1",
     "@playwright/test": "^1.58.0",
     "@tailwindcss/vite": "^4.1.18",

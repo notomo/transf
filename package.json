@@ -27,7 +27,7 @@
     "@biomejs/biome": "^2.3.15",
     "@ls-lint/ls-lint": "^2.3.1",
     "@playwright/test": "^1.58.2",
-    "@tailwindcss/vite": "^4.1.18",
+    "@tailwindcss/vite": "^4.2.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@wxt-dev/module-react": "^1.1.5",

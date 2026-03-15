@@ -333,9 +333,9 @@ function KeyframeLine({
         onDoubleClick={handleDoubleClick}
         aria-label={`Keyframe timeline: ${keyframeFieldLabels[fieldName]} (double-click to add)`}
       >
-        {keyframes.map((kf, i) => (
+        {keyframes.map((kf) => (
           <div
-            key={`${fieldName}-${kf.time}-${i}`}
+            key={`${fieldName}-${kf.time}`}
             className="absolute h-full -translate-x-1/2"
             style={{
               left: `${kf.time * 100}%`,

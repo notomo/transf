@@ -307,6 +307,7 @@ function PopupLink() {
       href={`chrome-extension://${browser.runtime.id}/popup.html`}
       target="_blank"
       className="rounded border px-4 py-2"
+      rel="noopener"
     >
       Dev
     </a>

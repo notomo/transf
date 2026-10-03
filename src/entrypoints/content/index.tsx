@@ -7,25 +7,16 @@ export default defineContentScript({
   runAt: "document_end",
   cssInjectionMode: "manual",
 
-  async main(ctx) {
-    const ui = await createShadowRootUi(ctx, {
-      name: "transf-app",
-      position: "inline",
-      anchor: "body",
-      onMount: (container) => {
-        const root = ReactDOM.createRoot(container);
-        root.render(
-          <StrictMode>
-            <App />
-          </StrictMode>,
-        );
-        return { root };
-      },
-      onRemove: (elements) => {
-        elements?.root.unmount();
-      },
+  main(ctx) {
+    const container = document.createElement("div");
+    const root = ReactDOM.createRoot(container);
+    root.render(
+      <StrictMode>
+        <App />
+      </StrictMode>,
+    );
+    ctx.onInvalidated(() => {
+      root.unmount();
     });
-
-    ui.mount();
   },
 });

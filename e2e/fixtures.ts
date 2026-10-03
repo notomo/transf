@@ -1,5 +1,10 @@
 import path from "node:path";
-import { type BrowserContext, test as base, chromium } from "@playwright/test";
+import {
+  type BrowserContext,
+  test as base,
+  chromium,
+  type Worker,
+} from "@playwright/test";
 
 const pathToExtension = process.env["CI"]
   ? path.resolve(".output/chrome-mv3")
@@ -8,6 +13,7 @@ const pathToExtension = process.env["CI"]
 export const test = base.extend<{
   context: BrowserContext;
   extensionId: string;
+  serviceWorker: Worker;
 }>({
   // biome-ignore lint/correctness/noEmptyPattern: playwirght error(First argument must use the object destructuring pattern)
   context: async ({}, use) => {
@@ -35,6 +41,12 @@ export const test = base.extend<{
 
     await page.close();
     await use(extensionId);
+  },
+  serviceWorker: async ({ context }, use) => {
+    const serviceWorker =
+      context.serviceWorkers()[0] ??
+      (await context.waitForEvent("serviceworker"));
+    await use(serviceWorker);
   },
 });
 export const expect = test.expect;

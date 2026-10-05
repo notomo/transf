@@ -382,6 +382,40 @@ for (const quirksMode of [false, true]) {
   });
 }
 
+test("moves pivot vertically on page whose root element has no height", async ({
+  page,
+  serviceWorker,
+}) => {
+  await openTestPage({ page, url, mainHeight: "5000px", absoluteMain: true });
+  await page.evaluate(() => window.scrollTo(0, 2000));
+  expect(await page.evaluate(() => document.documentElement.offsetHeight)).toBe(
+    0,
+  );
+
+  await sendShowGizmoToContent({ serviceWorker, url });
+  const moveHandle = page.getByTestId("transf-gizmo-move");
+  await expect(moveHandle).toBeVisible();
+
+  const center = await getViewportCenter(page);
+  const pivotBefore = await getCenter(moveHandle);
+  expect(pivotBefore.x).toBeCloseTo(center.x, 0);
+  expect(pivotBefore.y).toBeCloseTo(center.y, 0);
+
+  await page.getByTestId("transf-gizmo-pivot-mode").click();
+  const from = await getCenter(page.getByTestId("transf-gizmo-move-y"));
+  await drag({ page, from, to: { x: from.x, y: from.y - 100 } });
+
+  await expect
+    .poll(async () => {
+      const pivot = await getCenter(moveHandle);
+      return Math.round(pivot.y - pivotBefore.y);
+    })
+    .toBe(-100);
+  await page.waitForTimeout(400);
+  const main = await page.locator("main").boundingBox();
+  expect(main?.y).toBeCloseTo(-2000, 0);
+});
+
 test("shows gizmo when popup is opened", async ({
   page,
   context,

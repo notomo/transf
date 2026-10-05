@@ -66,6 +66,7 @@ describe("generateAnimationStyles", () => {
       "transform: translate(100px, -50px) rotate(45deg) scale(1.5, 1.5);",
     );
     expect(result).toContain("transition: transform 0.3s ease;");
+    expect(result).toContain("min-height: 100%;");
     expect(result).not.toContain("@keyframes");
     expect(result).not.toContain("animation:");
   });

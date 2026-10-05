@@ -11,18 +11,21 @@ export async function openTestPage({
   url,
   mainHeight = "100vh",
   quirksMode = false,
+  absoluteMain = false,
 }: {
   page: Page;
   url: string;
   mainHeight?: string;
   quirksMode?: boolean;
+  // Makes the root element height 0.
+  absoluteMain?: boolean;
 }) {
   await page.route(url, (route) =>
     route.fulfill({
       contentType: "text/html",
       body: `${quirksMode ? "" : "<!doctype html>"}
 <html>
-  <head><style>html, body { margin: 0; } main { height: ${mainHeight}; }</style></head>
+  <head><style>html, body { margin: 0; } main { height: ${mainHeight};${absoluteMain ? " position: absolute; top: 0; width: 100%;" : ""} }</style></head>
   <body><main>content</main></body>
 </html>`,
     }),

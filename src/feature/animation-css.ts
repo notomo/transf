@@ -76,6 +76,11 @@ ${keyframeRules}
   };
 }
 
+// Percentages of transform-origin are relative to the root element box.
+// Its height can be 0 if the page content is absolutely positioned,
+// so make the box cover at least the viewport.
+const ROOT_MIN_HEIGHT = "min-height: 100%;";
+
 export function generateAnimationStyles(state: AnimationState): string {
   if (hasKeyframes(state.keyframes)) {
     const config = generateCSSKeyframes(state);
@@ -84,6 +89,7 @@ export function generateAnimationStyles(state: AnimationState): string {
     return `
 ${config.keyframes}
 html {
+  ${ROOT_MIN_HEIGHT}
   animation: ${config.animation} !important;
   animation-delay: ${delay}ms !important;
 }`;
@@ -91,6 +97,7 @@ html {
 
   return `
 html {
+  ${ROOT_MIN_HEIGHT}
   transform-origin: ${state.baseTransform.centerX}% ${state.baseTransform.centerY}%;
   transform: ${formatTransform(state.baseTransform)};
   transition: transform 0.3s ease;

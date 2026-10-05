@@ -12,14 +12,17 @@ function readViewportSize(): Size {
 
 export function readRootLayout(): RootLayout {
   const root = document.documentElement;
+  const viewport = readViewportSize();
   return {
     box: {
       left: -window.scrollX,
       top: -window.scrollY,
       width: root.offsetWidth,
-      height: root.offsetHeight,
+      // The generated style makes the root element at least as tall as the viewport.
+      // Apply it here too so that the box is the same before the style is applied.
+      height: Math.max(root.offsetHeight, viewport.height),
     },
-    viewport: readViewportSize(),
+    viewport,
   };
 }
 

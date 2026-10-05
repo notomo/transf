@@ -12,9 +12,9 @@ The extension follows WXT's entrypoint-based architecture:
 
 - **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for transformation controls (center X/Y coordinates as percentages, rotation angle in degrees, scale factor, translation in pixels, flips), keyframe timeline, and gizmo toggle.
 - **Background** (`src/entrypoints/background/`): Persists animation state per URL in storage and forwards it to the content script. Handles the `toggle-gizmo` command (Alt+Shift+G).
-- **Content Script** (`src/entrypoints/content/`): Renders a `<style>` into `document.head` that applies CSS transforms/animations to `document.documentElement`. Also renders the gizmo (drag handles for move/rotate/scale/pivot) in the top layer via a `popover` + shadow root so that it is not affected by the page transform. The gizmo is shown only when the page has an animation state, it is not playing, and the gizmo setting is enabled (default: enabled).
+- **Content Script** (`src/entrypoints/content/`): Renders a `<style>` into `document.head` that applies CSS transforms/animations to `document.documentElement`. Also renders the gizmo (drag handles for move/rotate/scale/pivot) in the top layer via a `popover` + shadow root so that it is not affected by the page transform. The gizmo is shown when the gizmo setting is enabled (default: enabled), the animation is not playing, and either the page has an animation state or the popup has been opened on the page (`SHOW_GIZMO` message; the content script returns an initial state whose pivot is at the viewport center without saving it). When the pivot is outside the viewport, an indicator on the viewport edge scrolls to it.
 
-Communication flow: Popup UI / Gizmo → `runtime.sendMessage` (`UPDATE_ANIMATION_STATE`) → Background (merge + save) → `tabs.sendMessage` → Content Script (update style).
+Communication flow: Popup UI / Gizmo → `runtime.sendMessage` (`UPDATE_ANIMATION_STATE`) → Background (merge + save) → `tabs.sendMessage` (`UPDATE_CONTENT`) → Content Script (update style).
 
 ## Development Commands
 

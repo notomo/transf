@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import type { Size } from "@/src/feature/gizmo-geometry";
 
 const HOST_STYLE = {
   position: "fixed",
@@ -17,8 +18,14 @@ const HOST_STYLE = {
 };
 
 // Renders children in the top layer so that the transform applied to <html> does not affect them.
-export function TopLayerPortal({ children }: { children: ReactNode }) {
+// Children receive the viewport size excluding scrollbars, measured by the host covering the viewport.
+export function TopLayerPortal({
+  children,
+}: {
+  children: (viewport: Size) => ReactNode;
+}) {
   const [container, setContainer] = useState<ShadowRoot | null>(null);
+  const [viewport, setViewport] = useState<Size>({ width: 0, height: 0 });
 
   useEffect(() => {
     const host = document.createElement("div");
@@ -30,8 +37,21 @@ export function TopLayerPortal({ children }: { children: ReactNode }) {
     const shadowRoot = host.attachShadow({ mode: "open" });
     document.documentElement.append(host);
     host.showPopover();
+
+    // Scrollbars can appear without scroll or resize events (e.g. by the page transform).
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) {
+        setViewport({
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(host);
+
     setContainer(shadowRoot);
     return () => {
+      observer.disconnect();
       host.remove();
       setContainer(null);
     };
@@ -40,5 +60,5 @@ export function TopLayerPortal({ children }: { children: ReactNode }) {
   if (container === null) {
     return null;
   }
-  return createPortal(children, container);
+  return createPortal(children(viewport), container);
 }

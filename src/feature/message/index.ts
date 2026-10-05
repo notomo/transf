@@ -4,6 +4,10 @@ import {
   handleGetAnimationStateMessage,
 } from "@/src/feature/message/get-animation-state";
 import {
+  handleShowGizmoMessage,
+  ShowGizmoMessageSchema,
+} from "@/src/feature/message/show-gizmo";
+import {
   handleUpdateAnimationStateMessage,
   UpdateAnimationStateMessageSchema,
   UpdateContentMessageSchema,
@@ -12,10 +16,16 @@ import {
 const MessageInBackgroundSchema = v.union([
   UpdateAnimationStateMessageSchema,
   GetAnimationStateMessageSchema,
+  ShowGizmoMessageSchema,
+]);
+
+const MessageInContentSchema = v.variant("type", [
+  UpdateContentMessageSchema,
+  ShowGizmoMessageSchema,
 ]);
 
 export function validateMessageInContent(data: unknown) {
-  return v.parse(UpdateContentMessageSchema, data);
+  return v.parse(MessageInContentSchema, data);
 }
 
 export async function handleMessageInBackground(rawMessage: unknown) {
@@ -41,6 +51,13 @@ export async function handleMessageInBackground(rawMessage: unknown) {
         type: "response" as const,
         messageType: typ,
         body: await handleGetAnimationStateMessage({ tab }),
+      };
+
+    case "SHOW_GIZMO":
+      return {
+        type: "response" as const,
+        messageType: typ,
+        body: await handleShowGizmoMessage({ tab }),
       };
 
     default:

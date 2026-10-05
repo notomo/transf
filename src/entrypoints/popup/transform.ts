@@ -13,35 +13,46 @@ import {
   removeKeyframeFrom,
 } from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
+import { sendShowGizmoMessage } from "@/src/feature/message/show-gizmo";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
 import { buildTransformUpdate } from "@/src/feature/transform-update";
 
 function useAnimationState() {
   const [state, setState] = useState<AnimationState | null>(null);
+  const [initialState, setInitialState] = useState<AnimationState | null>(null);
+
+  const showGizmo = useCallback(async () => {
+    const response = await sendShowGizmoMessage();
+    setInitialState(response.initialAnimationState);
+  }, []);
 
   useEffect(() => {
     (async () => {
       const response = await sendGetAnimationStateMessage();
       setState(response.animationState);
     })();
-  }, []);
+    showGizmo();
+  }, [showGizmo]);
 
-  const animationState = state ?? DEFAULT_ANIMATION;
+  const animationState = state ?? initialState ?? DEFAULT_ANIMATION;
   const setAnimationState = useCallback(
     async (updates: Partial<AnimationState | null>) => {
-      if (updates !== null) {
-        setState({
-          ...animationState,
-          ...updates,
-        });
-      } else {
+      if (updates === null) {
         setState(null);
+        await sendUpdateAnimationStateMessage({ animationState: null });
+        // Recreate the initial state at the current viewport.
+        await showGizmo();
+        return;
       }
+
+      const merged = { ...animationState, ...updates };
+      setState(merged);
       await sendUpdateAnimationStateMessage({
-        animationState: updates,
+        // Send all fields for the first update so that the initial state is saved.
+        animationState: state === null ? merged : updates,
       });
     },
-    [animationState],
+    [animationState, state, showGizmo],
   );
 
   return {

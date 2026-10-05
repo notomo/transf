@@ -6,13 +6,23 @@ import { expect } from "../fixtures";
 // Available in the extension service worker where evaluate() runs.
 declare const chrome: typeof Browser;
 
-export async function openTestPage({ page, url }: { page: Page; url: string }) {
+export async function openTestPage({
+  page,
+  url,
+  mainHeight = "100vh",
+  quirksMode = false,
+}: {
+  page: Page;
+  url: string;
+  mainHeight?: string;
+  quirksMode?: boolean;
+}) {
   await page.route(url, (route) =>
     route.fulfill({
       contentType: "text/html",
-      body: `<!doctype html>
+      body: `${quirksMode ? "" : "<!doctype html>"}
 <html>
-  <head><style>html, body { margin: 0; } main { height: 100vh; }</style></head>
+  <head><style>html, body { margin: 0; } main { height: ${mainHeight}; }</style></head>
   <body><main>content</main></body>
 </html>`,
     }),
@@ -37,11 +47,35 @@ export async function sendAnimationStateToContent({
         if (tab?.id === undefined) {
           throw new Error(`tab not found: ${url}`);
         }
-        await chrome.tabs.sendMessage(tab.id, { animationState });
+        await chrome.tabs.sendMessage(tab.id, {
+          type: "UPDATE_CONTENT",
+          animationState,
+        });
       },
       { url, animationState },
     );
   }).toPass();
+}
+
+export async function sendShowGizmoToContent({
+  serviceWorker,
+  url,
+}: {
+  serviceWorker: Worker;
+  url: string;
+}): Promise<unknown> {
+  let response: unknown;
+  // Retry until the content script's message listener is registered.
+  await expect(async () => {
+    response = await serviceWorker.evaluate(async (url) => {
+      const [tab] = await chrome.tabs.query({ url });
+      if (tab?.id === undefined) {
+        throw new Error(`tab not found: ${url}`);
+      }
+      return await chrome.tabs.sendMessage(tab.id, { type: "SHOW_GIZMO" });
+    }, url);
+  }).toPass();
+  return response;
 }
 
 export async function getStoredAnimationState({

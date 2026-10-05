@@ -4,10 +4,12 @@ import { DEFAULT_ANIMATION } from "@/src/feature/animation-state";
 import {
   type Box,
   calculateMove,
+  calculateOffscreenIndicator,
   calculatePivotMove,
   calculatePivotPosition,
   calculateRotation,
   calculateScale,
+  calculateViewportCenterOrigin,
   type Point,
 } from "./gizmo-geometry";
 
@@ -182,5 +184,52 @@ describe("calculatePivotMove", () => {
       expect(after.x).toBeCloseTo(before.x);
       expect(after.y).toBeCloseTo(before.y);
     }
+  });
+});
+
+describe("calculateViewportCenterOrigin", () => {
+  it("returns origin at the viewport center in percent of the box", () => {
+    const transform = transformOf(
+      calculateViewportCenterOrigin({
+        box: { left: 0, top: -1500, width: 1000, height: 5000 },
+        viewport: { width: 1000, height: 1000 },
+      }),
+    );
+    expect(transform.centerX).toBeCloseTo(50);
+    expect(transform.centerY).toBeCloseTo(40);
+  });
+});
+
+describe("calculateOffscreenIndicator", () => {
+  const viewport = { width: 800, height: 600 };
+
+  it("returns undefined when pivot is inside viewport", () => {
+    expect(
+      calculateOffscreenIndicator({
+        pivot: { x: 400, y: 300 },
+        viewport,
+        margin: 20,
+      }),
+    ).toBeUndefined();
+  });
+
+  it("returns position on the edge pointing to pivot below viewport", () => {
+    expect(
+      calculateOffscreenIndicator({
+        pivot: { x: 400, y: 2000 },
+        viewport,
+        margin: 20,
+      }),
+    ).toEqual({ position: { x: 400, y: 580 }, angle: 90 });
+  });
+
+  it("returns position at the corner for pivot at upper-left", () => {
+    expect(
+      calculateOffscreenIndicator({
+        pivot: { x: -100, y: -100 },
+        viewport,
+        margin: 20,
+      }),
+    ).toEqual({ position: { x: 20, y: 20 }, angle: -135 });
   });
 });

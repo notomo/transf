@@ -1,13 +1,16 @@
 import type { Locator, Page } from "@playwright/test";
+import * as v from "valibot";
 import {
   type AnimationState,
   DEFAULT_ANIMATION,
 } from "../src/feature/animation-state";
+import { ShowGizmoResponseSchema } from "../src/feature/message/show-gizmo";
 import { expect, test } from "./fixtures";
 import {
   getStoredAnimationState,
   openTestPage,
   sendAnimationStateToContent,
+  sendShowGizmoToContent,
   setGizmoEnabled,
 } from "./pages/content";
 
@@ -215,4 +218,117 @@ test("hides gizmo when disabled", async ({ page, serviceWorker }) => {
 
   await setGizmoEnabled({ serviceWorker, enabled: true });
   await expect(moveHandle).toBeVisible();
+});
+
+async function getViewportCenter(page: Page) {
+  return await page.evaluate(() => {
+    const element = document.scrollingElement ?? document.documentElement;
+    return { x: element.clientWidth / 2, y: element.clientHeight / 2 };
+  });
+}
+
+test("shows gizmo at viewport center without transform when requested", async ({
+  page,
+  serviceWorker,
+}) => {
+  await openTestPage({ page, url, mainHeight: "5000px" });
+  await page.evaluate(() => window.scrollTo(0, 2000));
+
+  const initial = v.parse(
+    ShowGizmoResponseSchema,
+    await sendShowGizmoToContent({ serviceWorker, url }),
+  );
+  const moveHandle = page.getByTestId("transf-gizmo-move");
+  await expect(moveHandle).toBeVisible();
+  await expect(page.locator("#transf-animation-styles")).not.toBeAttached();
+
+  const center = await getViewportCenter(page);
+  const from = await getCenter(moveHandle);
+  expect(from.x).toBeCloseTo(center.x, 0);
+  expect(from.y).toBeCloseTo(center.y, 0);
+
+  await drag({ page, from, to: { x: from.x + 50, y: from.y } });
+
+  await expect
+    .poll(async () => {
+      const state = await getStoredAnimationState({ serviceWorker, url });
+      return state?.baseTransform.translateX;
+    })
+    .toBe(50);
+  // The initial pivot is saved with the first edit.
+  const state = await getStoredAnimationState({ serviceWorker, url });
+  expect(state?.baseTransform.centerY).toBe(
+    initial.initialAnimationState?.baseTransform.centerY,
+  );
+  expect(state?.baseTransform.centerY).not.toBe(50);
+});
+
+test("restores no transform when cancelling drag from initial state", async ({
+  page,
+  serviceWorker,
+}) => {
+  await openTestPage({ page, url });
+  await sendShowGizmoToContent({ serviceWorker, url });
+  const moveHandle = page.getByTestId("transf-gizmo-move");
+  await expect(moveHandle).toBeVisible();
+
+  const from = await getCenter(moveHandle);
+  await page.mouse.move(from.x, from.y);
+  await page.mouse.down();
+  await page.mouse.move(from.x + 100, from.y, { steps: 5 });
+  await expect(page.locator("#transf-animation-styles")).toBeAttached();
+
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+
+  await expect(page.locator("#transf-animation-styles")).not.toBeAttached();
+  await expect(moveHandle).toBeVisible();
+});
+
+for (const quirksMode of [false, true]) {
+  test(`scrolls to offscreen gizmo by indicator (quirks mode: ${quirksMode})`, async ({
+    page,
+    serviceWorker,
+  }) => {
+    await openTestPage({ page, url, mainHeight: "5000px", quirksMode });
+    await sendAnimationStateToContent({
+      serviceWorker,
+      url,
+      animationState: DEFAULT_ANIMATION,
+    });
+
+    const indicator = page.getByTestId("transf-gizmo-indicator");
+    await expect(indicator).toBeVisible();
+
+    await indicator.click();
+
+    await expect(indicator).not.toBeAttached();
+    const center = await getViewportCenter(page);
+    await expect
+      .poll(async () => {
+        const pivot = await getCenter(page.getByTestId("transf-gizmo-move"));
+        return Math.round(pivot.y - center.y);
+      })
+      .toBe(0);
+  });
+}
+
+test("shows gizmo when popup is opened", async ({
+  page,
+  context,
+  extensionId,
+}) => {
+  await openTestPage({ page, url, mainHeight: "5000px" });
+  await page.evaluate(() => window.scrollTo(0, 2000));
+
+  // Open the popup in a background tab so that the test page stays the active tab.
+  const popupPage = await context.newPage();
+  await page.bringToFront();
+  await popupPage.goto(`chrome-extension://${extensionId}/popup.html`);
+
+  await expect(page.getByTestId("transf-gizmo-move")).toBeVisible();
+  // The popup uses the initial pivot at the viewport center.
+  await expect(
+    popupPage.getByRole("slider", { name: /Center Y/ }),
+  ).not.toHaveValue("50");
 });

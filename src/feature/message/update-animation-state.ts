@@ -71,6 +71,7 @@ export async function restoreAnimationForTab(tabId: number): Promise<void> {
 }
 
 export const UpdateContentMessageSchema = v.object({
+  type: v.literal("UPDATE_CONTENT"),
   animationState: v.nullable(AnimationStateSchema),
 });
 
@@ -84,6 +85,7 @@ async function sendToContent({
   animationState: AnimationState | null;
 }): Promise<void> {
   const message: UpdateContentMessage = {
+    type: "UPDATE_CONTENT",
     animationState,
   };
   await browser.tabs.sendMessage(tabId, message);

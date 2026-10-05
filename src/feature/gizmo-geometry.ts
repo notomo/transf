@@ -5,6 +5,8 @@ export type Point = { x: number; y: number };
 // Untransformed box of the root element in viewport coordinates.
 export type Box = { left: number; top: number; width: number; height: number };
 
+export type Size = { width: number; height: number };
+
 export type MoveAxis = "x" | "y" | "free";
 
 const MIN_SCALE = 0.1;
@@ -134,4 +136,53 @@ export function calculatePivotMove({
     translateX: to.x - box.left - newOrigin.x,
     translateY: to.y - box.top - newOrigin.y,
   };
+}
+
+// Returns the transform origin that is placed at the center of the viewport.
+export function calculateViewportCenterOrigin({
+  box,
+  viewport,
+}: {
+  box: Box;
+  viewport: Size;
+}): Pick<TransformState, "centerX" | "centerY"> {
+  return {
+    centerX:
+      box.width === 0
+        ? 50
+        : ((viewport.width / 2 - box.left) / box.width) * 100,
+    centerY:
+      box.height === 0
+        ? 50
+        : ((viewport.height / 2 - box.top) / box.height) * 100,
+  };
+}
+
+// Returns where to show the indicator for the pivot outside the viewport,
+// or undefined if the pivot is inside the viewport.
+export function calculateOffscreenIndicator({
+  pivot,
+  viewport,
+  margin,
+}: {
+  pivot: Point;
+  viewport: Size;
+  margin: number;
+}): { position: Point; angle: number } | undefined {
+  const inside =
+    pivot.x >= 0 &&
+    pivot.x <= viewport.width &&
+    pivot.y >= 0 &&
+    pivot.y <= viewport.height;
+  if (inside) {
+    return undefined;
+  }
+
+  const position = {
+    x: Math.min(viewport.width - margin, Math.max(margin, pivot.x)),
+    y: Math.min(viewport.height - margin, Math.max(margin, pivot.y)),
+  };
+  const angle =
+    (Math.atan2(pivot.y - position.y, pivot.x - position.x) * 180) / Math.PI;
+  return { position, angle };
 }

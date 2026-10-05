@@ -10,10 +10,11 @@ This is a browser extension called "transf" that allows users to transform web p
 
 The extension follows WXT's entrypoint-based architecture:
 
-- **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for transformation controls (center X/Y coordinates as percentages, rotation angle in degrees, scale factor, and translation in pixels). Uses `browser.scripting.executeScript` for direct code injection.
-- **Content Script Injection**: Uses `browser.scripting.executeScript` to directly inject transformation code into active tabs, applying CSS transforms to `document.documentElement` for page transformation (rotation, scaling, translation).
+- **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for transformation controls (center X/Y coordinates as percentages, rotation angle in degrees, scale factor, translation in pixels, flips), keyframe timeline, and gizmo toggle.
+- **Background** (`src/entrypoints/background/`): Persists animation state per URL in storage and forwards it to the content script. Handles the `toggle-gizmo` command (Alt+Shift+G).
+- **Content Script** (`src/entrypoints/content/`): Renders a `<style>` into `document.head` that applies CSS transforms/animations to `document.documentElement`. Also renders the gizmo (drag handles for move/rotate/scale/pivot) in the top layer via a `popover` + shadow root so that it is not affected by the page transform. The gizmo is shown only when the page has an animation state, it is not playing, and the gizmo setting is enabled (default: enabled).
 
-Communication flow: Popup UI → `browser.scripting.executeScript` → Direct DOM manipulation with CSS transforms for comprehensive page transformation.
+Communication flow: Popup UI / Gizmo → `runtime.sendMessage` (`UPDATE_ANIMATION_STATE`) → Background (merge + save) → `tabs.sendMessage` → Content Script (update style).
 
 ## Development Commands
 

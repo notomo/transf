@@ -1,5 +1,6 @@
 import { useId } from "react";
 import { keyframeFieldLabels } from "@/src/feature/animation-state";
+import { gizmoEnabled, useGizmoEnabled } from "@/src/feature/gizmo-setting";
 import { cn } from "@/src/lib/tailwind";
 import { Timeline } from "./timeline";
 import { useTransform } from "./transform";
@@ -289,6 +290,26 @@ function FlipCheckbox({
   );
 }
 
+function GizmoCheckbox() {
+  const id = useId();
+  const enabled = useGizmoEnabled();
+
+  return (
+    <div className="flex items-center space-x-1">
+      <input
+        id={id}
+        type="checkbox"
+        checked={enabled ?? true}
+        onChange={(e) => gizmoEnabled.setValue(e.target.checked)}
+        className="h-4 w-4"
+      />
+      <label htmlFor={id} className="select-none font-medium text-sm">
+        Gizmo
+      </label>
+    </div>
+  );
+}
+
 function ResetButton({ reset }: { reset: () => void }) {
   return (
     <button
@@ -324,6 +345,7 @@ export function App() {
         <h1 className="flex-1 text-center font-bold text-xl">Page Transform</h1>
 
         <div className="flex items-center gap-2">
+          <GizmoCheckbox />
           <ResetButton reset={reset} />
           <PopupLink />
         </div>

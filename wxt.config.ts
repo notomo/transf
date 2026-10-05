@@ -18,6 +18,12 @@ export default defineConfig({
       service_worker: "src/entrypoints/background.ts",
     },
     content_scripts: [],
+    commands: {
+      "toggle-gizmo": {
+        suggested_key: { default: "Alt+Shift+G" },
+        description: "Toggle gizmo",
+      },
+    },
   },
   dev: {
     server: {

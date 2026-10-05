@@ -1,3 +1,4 @@
+import { toggleGizmoEnabled } from "@/src/feature/gizmo-setting";
 import { handleMessageInBackground } from "@/src/feature/message";
 import { restoreAnimationForTab } from "@/src/feature/message/update-animation-state";
 
@@ -26,6 +27,12 @@ export default defineBackground({
         return true;
       },
     );
+
+    browser.commands.onCommand.addListener(async (command) => {
+      if (command === "toggle-gizmo") {
+        await toggleGizmoEnabled();
+      }
+    });
 
     browser.tabs.onActivated.addListener(async (activeInfo) => {
       await restoreAnimationForTab(activeInfo.tabId);

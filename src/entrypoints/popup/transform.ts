@@ -11,10 +11,10 @@ import {
   deriveTransformFromAnimationState,
   hasKeyframeAtTime,
   removeKeyframeFrom,
-  updateKeyframesWithTransform,
 } from "@/src/feature/keyframe";
 import { sendGetAnimationStateMessage } from "@/src/feature/message/get-animation-state";
 import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
+import { buildTransformUpdate } from "@/src/feature/transform-update";
 
 function useAnimationState() {
   const [state, setState] = useState<AnimationState | null>(null);
@@ -55,18 +55,9 @@ export function useTransform() {
 
   const applyTransform = useCallback(
     async (updates: Partial<TransformState>) => {
-      const updatedKeyframes = updateKeyframesWithTransform({
-        keyframes: animationState.keyframes,
-        updates,
-        currentTime: animationState.currentTime,
-      });
-      await setAnimationState({
-        baseTransform: {
-          ...animationState.baseTransform,
-          ...updates,
-        },
-        keyframes: updatedKeyframes,
-      });
+      await setAnimationState(
+        buildTransformUpdate({ state: animationState, updates }),
+      );
     },
     [animationState, setAnimationState],
   );

@@ -289,6 +289,32 @@ test("hides gizmo when disabled", async ({ page, serviceWorker }) => {
   await expect(moveHandle).toBeVisible();
 });
 
+test("prevents clicks around gizmo from reaching page", async ({
+  page,
+  serviceWorker,
+}) => {
+  const { moveHandle } = await setup({ page, serviceWorker });
+  await page.evaluate(() => {
+    const w = window as unknown as { clickCount: number };
+    w.clickCount = 0;
+    document.addEventListener("click", () => {
+      w.clickCount++;
+    });
+  });
+  const getClickCount = () =>
+    page.evaluate(
+      () => (window as unknown as { clickCount: number }).clickCount,
+    );
+
+  // Between the handles, outside of the ring.
+  const center = await getCenter(moveHandle);
+  await page.mouse.click(center.x, center.y + 95);
+  expect(await getClickCount()).toBe(0);
+
+  await page.mouse.click(center.x, center.y + 200);
+  expect(await getClickCount()).toBe(1);
+});
+
 async function getViewportCenter(page: Page) {
   return await page.evaluate(() => {
     const element = document.scrollingElement ?? document.documentElement;

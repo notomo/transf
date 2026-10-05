@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type SyntheticEvent, useState } from "react";
 import type { AnimationState } from "@/src/feature/animation-state";
 import {
   calculateOffscreenIndicator,
@@ -19,6 +19,8 @@ const INDICATOR_MARGIN = INDICATOR_RADIUS + 6;
 const PIVOT_COLOR = "#fa8c16";
 // Dashed move handles indicate that they move only the pivot.
 const PIVOT_DASH = "5 3";
+// Covers the area around the handles so that slightly missed clicks do not reach the page.
+const GUARD_RADIUS = ARROW_LENGTH + 12;
 
 const STYLE = `
 svg {
@@ -30,7 +32,8 @@ svg {
   pointer-events: none;
   filter: drop-shadow(0 0 1px rgb(0 0 0 / 0.8));
 }
-.handle {
+.handle,
+.guard {
   pointer-events: all;
 }
 .handle:hover .visible {
@@ -136,6 +139,26 @@ function OffscreenIndicator({
   );
 }
 
+function Guard() {
+  const swallow = (e: SyntheticEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+  return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: decorative area in aria-hidden svg that only swallows events
+    <circle
+      className="guard"
+      r={GUARD_RADIUS}
+      fill="transparent"
+      data-testid="transf-gizmo-guard"
+      onPointerDown={swallow}
+      onMouseDown={swallow}
+      onClick={swallow}
+      onDoubleClick={swallow}
+    />
+  );
+}
+
 function PivotModeToggle({
   pivotMode,
   setPivotMode,
@@ -207,6 +230,7 @@ export function Gizmo({
           <style>{STYLE}</style>
           <svg aria-hidden="true">
             <g transform={`translate(${pivot.x} ${pivot.y})`}>
+              <Guard />
               <g
                 className="handle"
                 style={{ cursor: "grab", pointerEvents: "stroke" }}

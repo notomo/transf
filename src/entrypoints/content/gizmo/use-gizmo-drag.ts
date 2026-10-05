@@ -22,7 +22,7 @@ export type DragMode =
   | { type: "move"; axis: MoveAxis }
   | { type: "rotate" }
   | { type: "scale" }
-  | { type: "pivot" };
+  | { type: "pivot"; axis: MoveAxis };
 
 type Drag = {
   mode: DragMode;
@@ -51,8 +51,23 @@ function calculateUpdates({
       };
     case "scale":
       return { scale: calculateScale({ start, pivot, from: drag.from, to }) };
-    case "pivot":
-      return calculatePivotMove({ start, box: drag.box, to });
+    case "pivot": {
+      // Moves the pivot by the pointer movement so that it does not jump to the pointer.
+      const moved = calculateMove({
+        start,
+        from: drag.from,
+        to,
+        axis: mode.axis,
+      });
+      return calculatePivotMove({
+        start,
+        box: drag.box,
+        to: {
+          x: pivot.x + moved.translateX - start.translateX,
+          y: pivot.y + moved.translateY - start.translateY,
+        },
+      });
+    }
     default:
       throw new Error(`unexpected drag mode: ${mode satisfies never}`);
   }
@@ -61,11 +76,14 @@ function calculateUpdates({
 export function useGizmoDrag({
   animationState,
   box,
+  pivotMode,
   setAnimationState,
   setIsDragging,
 }: {
   animationState: AnimationState;
   box: Box;
+  // If true, move handles move only the pivot. Alt key inverts it while dragging.
+  pivotMode: boolean;
   setAnimationState: (state: AnimationState) => void;
   setIsDragging: (isDragging: boolean) => void;
 }) {
@@ -106,8 +124,8 @@ export function useGizmoDrag({
       e.currentTarget.setPointerCapture(e.pointerId);
       dragRef.current = {
         mode:
-          mode.type === "move" && mode.axis === "free" && e.altKey
-            ? { type: "pivot" }
+          mode.type === "move" && pivotMode !== e.altKey
+            ? { type: "pivot", axis: mode.axis }
             : mode,
         from: { x: e.clientX, y: e.clientY },
         box,

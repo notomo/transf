@@ -193,6 +193,75 @@ test("moves pivot without moving page by alt+dragging move handle", async ({
   expect(pivot.y).toBeCloseTo(to.y, 0);
 });
 
+test("moves pivot only along axis in pivot mode", async ({
+  page,
+  serviceWorker,
+}) => {
+  const { moveHandle } = await setup({
+    page,
+    serviceWorker,
+    animationState: {
+      ...DEFAULT_ANIMATION,
+      baseTransform: {
+        ...DEFAULT_ANIMATION.baseTransform,
+        rotation: 30,
+        scale: 0.5,
+      },
+    },
+  });
+  // Wait for the transition to finish.
+  await page.waitForTimeout(400);
+  const mainBefore = await page.locator("main").boundingBox();
+
+  const toggle = page.getByTestId("transf-gizmo-pivot-mode");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("data-active", "true");
+
+  const pivotBefore = await getCenter(moveHandle);
+  const from = await getCenter(page.getByTestId("transf-gizmo-move-x"));
+  await drag({ page, from, to: { x: from.x + 80, y: from.y + 40 } });
+
+  await expect
+    .poll(async () => {
+      const pivot = await getCenter(moveHandle);
+      return {
+        x: Math.round(pivot.x - pivotBefore.x),
+        y: Math.round(pivot.y - pivotBefore.y),
+      };
+    })
+    .toEqual({ x: 80, y: 0 });
+  await page.waitForTimeout(400);
+  const mainAfter = await page.locator("main").boundingBox();
+  expect(mainAfter?.x).toBeCloseTo(mainBefore?.x ?? Number.NaN, 0);
+  expect(mainAfter?.y).toBeCloseTo(mainBefore?.y ?? Number.NaN, 0);
+});
+
+test("moves page by alt+dragging in pivot mode", async ({
+  page,
+  serviceWorker,
+}) => {
+  const { moveHandle } = await setup({ page, serviceWorker });
+
+  await page.getByTestId("transf-gizmo-pivot-mode").click();
+
+  const from = await getCenter(moveHandle);
+  await page.keyboard.down("Alt");
+  await drag({ page, from, to: { x: from.x + 100, y: from.y + 50 } });
+  await page.keyboard.up("Alt");
+
+  await expect
+    .poll(async () => {
+      const state = await getStoredAnimationState({ serviceWorker, url });
+      return state?.baseTransform;
+    })
+    .toMatchObject({
+      translateX: 100,
+      translateY: 50,
+      centerX: 50,
+      centerY: 50,
+    });
+});
+
 test("cancels drag by escape", async ({ page, serviceWorker }) => {
   const { moveHandle } = await setup({ page, serviceWorker });
 

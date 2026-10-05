@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { AnimationState } from "@/src/feature/animation-state";
 import {
   calculateOffscreenIndicator,
@@ -15,6 +16,9 @@ const ARROW_LENGTH = 110;
 const SCALE_HANDLE_DISTANCE = (RING_RADIUS + 26) / Math.SQRT2;
 const INDICATOR_RADIUS = 14;
 const INDICATOR_MARGIN = INDICATOR_RADIUS + 6;
+const PIVOT_COLOR = "#fa8c16";
+// Dashed move handles indicate that they move only the pivot.
+const PIVOT_DASH = "5 3";
 
 const STYLE = `
 svg {
@@ -37,15 +41,17 @@ svg {
 function Arrow({
   axis,
   color,
+  pivotMode,
   handleProps,
 }: {
   axis: "x" | "y";
   color: string;
+  pivotMode: boolean;
   handleProps: ReturnType<ReturnType<typeof useGizmoDrag>["getHandleProps"]>;
 }) {
   // Screen y axis points down, so the y arrow is drawn upward like a 3D gizmo.
   const rotate = axis === "x" ? 0 : -90;
-  const label = axis === "x" ? "Move X" : "Move Y";
+  const label = `${pivotMode ? "Move pivot" : "Move"} ${axis.toUpperCase()}`;
   return (
     <g
       className="handle"
@@ -64,6 +70,7 @@ function Arrow({
         y2={0}
         stroke={color}
         strokeWidth={3}
+        strokeDasharray={pivotMode ? PIVOT_DASH : undefined}
       />
       <polygon
         points={`${ARROW_LENGTH},0 ${ARROW_LENGTH - 14},-6 ${ARROW_LENGTH - 14},6`}
@@ -129,6 +136,46 @@ function OffscreenIndicator({
   );
 }
 
+function PivotModeToggle({
+  pivotMode,
+  setPivotMode,
+}: {
+  pivotMode: boolean;
+  setPivotMode: (pivotMode: boolean) => void;
+}) {
+  return (
+    <g
+      className="handle"
+      transform={`translate(${-SCALE_HANDLE_DISTANCE} ${SCALE_HANDLE_DISTANCE})`}
+      style={{ cursor: "pointer" }}
+      data-testid="transf-gizmo-pivot-mode"
+      data-active={pivotMode}
+      onPointerDown={(e) => {
+        if (e.button !== 0) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        setPivotMode(!pivotMode);
+      }}
+    >
+      <title>
+        {pivotMode
+          ? "Move pivot only: on (Alt+drag: move page)"
+          : "Move pivot only: off (Alt+drag: move pivot)"}
+      </title>
+      <circle
+        className="visible"
+        r={9}
+        fill={pivotMode ? PIVOT_COLOR : "rgb(255 255 255 / 0.6)"}
+        stroke={PIVOT_COLOR}
+        strokeWidth={2}
+      />
+      <circle r={3} fill={pivotMode ? "white" : PIVOT_COLOR} />
+    </g>
+  );
+}
+
 export function Gizmo({
   animationState,
   setAnimationState,
@@ -139,9 +186,11 @@ export function Gizmo({
   setIsDragging: (isDragging: boolean) => void;
 }) {
   const box = useRootBox();
+  const [pivotMode, setPivotMode] = useState(false);
   const { getHandleProps } = useGizmoDrag({
     animationState,
     box,
+    pivotMode,
     setAnimationState,
     setIsDragging,
   });
@@ -183,11 +232,13 @@ export function Gizmo({
               <Arrow
                 axis="x"
                 color="#ff4d4f"
+                pivotMode={pivotMode}
                 handleProps={getHandleProps({ type: "move", axis: "x" })}
               />
               <Arrow
                 axis="y"
                 color="#52c41a"
+                pivotMode={pivotMode}
                 handleProps={getHandleProps({ type: "move", axis: "y" })}
               />
 
@@ -218,7 +269,7 @@ export function Gizmo({
                 data-testid="transf-gizmo-move"
                 {...getHandleProps({ type: "move", axis: "free" })}
               >
-                <title>Move (Alt+drag: move pivot)</title>
+                <title>{pivotMode ? "Move pivot" : "Move"}</title>
                 <rect
                   className="visible"
                   x={-8}
@@ -226,10 +277,16 @@ export function Gizmo({
                   width={16}
                   height={16}
                   fill="rgb(255 255 255 / 0.6)"
-                  stroke="#4dabf7"
+                  stroke={pivotMode ? PIVOT_COLOR : "#4dabf7"}
                   strokeWidth={2}
+                  strokeDasharray={pivotMode ? PIVOT_DASH : undefined}
                 />
               </g>
+
+              <PivotModeToggle
+                pivotMode={pivotMode}
+                setPivotMode={setPivotMode}
+              />
             </g>
             <OffscreenIndicator pivot={pivot} viewport={viewport} />
           </svg>

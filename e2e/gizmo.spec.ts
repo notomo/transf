@@ -262,6 +262,38 @@ test("moves page by alt+dragging in pivot mode", async ({
     });
 });
 
+test("resets transform except pivot by clicking reset button", async ({
+  page,
+  serviceWorker,
+}) => {
+  const baseTransform = {
+    ...DEFAULT_ANIMATION.baseTransform,
+    centerX: 30,
+    centerY: 40,
+    rotation: 45,
+    scale: 2,
+    translateX: 100,
+    translateY: 50,
+  };
+  await setup({
+    page,
+    serviceWorker,
+    animationState: { ...DEFAULT_ANIMATION, baseTransform },
+  });
+
+  await page.getByTestId("transf-gizmo-reset").click();
+
+  await expect
+    .poll(() => getRootMatrix(page))
+    .toMatchObject({ a: 1, b: 0, e: 0, f: 0 });
+  await expect
+    .poll(async () => {
+      const state = await getStoredAnimationState({ serviceWorker, url });
+      return state?.baseTransform;
+    })
+    .toEqual({ ...DEFAULT_ANIMATION.baseTransform, centerX: 30, centerY: 40 });
+});
+
 test("cancels drag by escape", async ({ page, serviceWorker }) => {
   const { moveHandle } = await setup({ page, serviceWorker });
 

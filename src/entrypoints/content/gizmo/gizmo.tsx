@@ -7,6 +7,8 @@ import {
   type Size,
 } from "@/src/feature/gizmo-geometry";
 import { deriveTransformFromAnimationState } from "@/src/feature/keyframe";
+import { sendUpdateAnimationStateMessage } from "@/src/feature/message/update-animation-state";
+import { buildTransformReset } from "@/src/feature/transform-update";
 import { TopLayerPortal } from "./top-layer-portal";
 import { useGizmoDrag } from "./use-gizmo-drag";
 import { useRootBox } from "./use-root-layout";
@@ -199,6 +201,49 @@ function PivotModeToggle({
   );
 }
 
+function ResetButton({
+  animationState,
+  setAnimationState,
+}: {
+  animationState: AnimationState;
+  setAnimationState: (state: AnimationState) => void;
+}) {
+  return (
+    <g
+      className="handle"
+      transform={`translate(${-SCALE_HANDLE_DISTANCE} ${-SCALE_HANDLE_DISTANCE})`}
+      style={{ cursor: "pointer" }}
+      data-testid="transf-gizmo-reset"
+      onPointerDown={async (e) => {
+        if (e.button !== 0) {
+          return;
+        }
+        e.preventDefault();
+        e.stopPropagation();
+        const update = buildTransformReset(animationState);
+        setAnimationState({ ...animationState, ...update });
+        await sendUpdateAnimationStateMessage({ animationState: update });
+      }}
+    >
+      <title>Reset transform (keep pivot)</title>
+      <circle
+        className="visible"
+        r={9}
+        fill="rgb(255 255 255 / 0.6)"
+        stroke="#4dabf7"
+        strokeWidth={2}
+      />
+      <path
+        d="M 4 -1.5 A 4.5 4.5 0 1 1 1.5 -4.2"
+        fill="none"
+        stroke="#4dabf7"
+        strokeWidth={1.5}
+      />
+      <polygon points="0,-6.5 3.5,-4 0,-1.8" fill="#4dabf7" />
+    </g>
+  );
+}
+
 export function Gizmo({
   animationState,
   setAnimationState,
@@ -310,6 +355,10 @@ export function Gizmo({
               <PivotModeToggle
                 pivotMode={pivotMode}
                 setPivotMode={setPivotMode}
+              />
+              <ResetButton
+                animationState={animationState}
+                setAnimationState={setAnimationState}
               />
             </g>
             <OffscreenIndicator pivot={pivot} viewport={viewport} />

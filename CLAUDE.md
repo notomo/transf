@@ -19,6 +19,9 @@ Communication flow: Popup UI / Gizmo → `runtime.sendMessage` (`UPDATE_ANIMATIO
 ## Development Commands
 
 ```bash
+# Enable git hooks (.githooks/)
+npm run setup
+
 # Development with hot reload
 npm run dev
 
@@ -79,7 +82,7 @@ The screenshot test is automatically skipped during regular test runs (`npm run 
 ## Code Quality
 
 - Uses Biome for formatting and linting (configured in `biome.json`)
-- Lefthook for pre-commit hooks that auto-format code
+- Git hooks in `.githooks/` (enabled by `npm run setup`) run `npm run check` on pre-commit
 - TypeScript with strict configuration  
 - Vitest for testing framework
 - ls-lint enforces kebab-case file naming for TypeScript files

@@ -14,7 +14,7 @@ transf is a WXT-powered React extension. Core code lives in `src`: `src/entrypoi
 - `npm run check_all`: convenience task that formats, lints, type-checks, and runs e2e tests.
 
 ## Coding Style & Naming Conventions
-Biome formats staged `*.ts`/`*.tsx`/`*.json` via Lefthook; keep changes staged so it can rewrite files. Use spaces for indentation, double quotes for strings, and organized imports. Name React components in PascalCase, shared utilities in camelCase, and keep related hooks with their component. Tailwind class strings should stay sorted (Biome `useSortedClasses`), and export helpers by name.
+The `.githooks/pre-commit` hook (enable with `npm run setup`) runs `npm run check`; run `npm run format` to fix Biome errors. Use spaces for indentation, double quotes for strings, and organized imports. Name React components in PascalCase, shared utilities in camelCase, and keep related hooks with their component. Tailwind class strings should stay sorted (Biome `useSortedClasses`), and export helpers by name.
 
 ## Testing Guidelines
 Use Vitest for logic coverage and Playwright for user journeys. Name Playwright specs `feature-name.spec.ts` in `e2e`, keeping shared utilities in `e2e/pages` and `e2e/fixtures.ts`. Run `npm run test` before committing helper changes, and `npm run test:e2e:dev` when touching UI flows.

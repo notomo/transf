@@ -72,7 +72,7 @@ function PlayStopButton({
     <button
       type="button"
       onClick={onTogglePlay}
-      className="flex h-full w-6 items-center justify-center rounded bg-blue-500 px-3 py-1 text-white text-xs hover:bg-blue-600"
+      className="flex h-full w-6 items-center justify-center rounded bg-blue-500 px-3 py-1 text-xs text-white hover:bg-blue-600"
     >
       {isPlaying ? "■" : "▶"}
     </button>

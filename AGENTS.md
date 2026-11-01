@@ -1,9 +1,11 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
+
 transf is a WXT-powered React extension. Core code lives in `src`: `src/entrypoints/popup` for the popup UI, `src/lib` for shared logic, and `src/assets` for static files. Build and manifest settings are in `wxt.config.ts`, and TypeScript config in `tsconfig.json`. Playwright specs and page objects live in `e2e`, with shared setup in `e2e/fixtures.ts`. Builds are emitted to `.output`.
 
 ## Build, Test, and Development Commands
+
 - `npm run dev`: launch the WXT dev server (Chrome on port 3000) with hot reload.
 - `npm run build`: produce a production-ready bundle in `.output`.
 - `npm run build:dev`: compile a development build used by Playwright CI tests.
@@ -14,10 +16,13 @@ transf is a WXT-powered React extension. Core code lives in `src`: `src/entrypoi
 - `npm run check_all`: convenience task that formats, lints, type-checks, and runs e2e tests.
 
 ## Coding Style & Naming Conventions
-The `.githooks/pre-commit` hook (enable with `npm run setup`) runs `npm run check`; run `npm run format` to fix Biome errors. Use spaces for indentation, double quotes for strings, and organized imports. Name React components in PascalCase, shared utilities in camelCase, and keep related hooks with their component. Tailwind class strings should stay sorted (Biome `useSortedClasses`), and export helpers by name.
+
+The `.githooks/pre-commit` hook (enable with `npm run setup`) runs `npm run check`; run `npm run format` to fix Biome errors. Use spaces for indentation, double quotes for strings, and organized imports. Name React components in PascalCase, shared utilities in camelCase, and keep related hooks with their component. Tailwind class strings should stay sorted (Biome `useTailwindSortedClasses`), and export helpers by name.
 
 ## Testing Guidelines
+
 Use Vitest for logic coverage and Playwright for user journeys. Name Playwright specs `feature-name.spec.ts` in `e2e`, keeping shared utilities in `e2e/pages` and `e2e/fixtures.ts`. Run `npm run test` before committing helper changes, and `npm run test:e2e:dev` when touching UI flows.
 
 ## Commit & Pull Request Guidelines
+
 Follow Conventional Commit prefixes (`feat`, `fix`, `refactor`, etc.) visible in `git log --oneline`. Add body notes for notable UX or manifest changes. Before a PR, run `npm run check_all`, attach screenshots for UI updates, and link issues. Call out new permissions or environment variables in the PR description.

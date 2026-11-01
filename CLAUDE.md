@@ -9,7 +9,6 @@ This is a browser extension called "transf" that allows users to transform web p
 ## Architecture
 
 The extension follows WXT's entrypoint-based architecture:
-
 - **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for transformation controls (center X/Y coordinates as percentages, rotation angle in degrees, scale factor, translation in pixels, flips), keyframe timeline, and gizmo toggle.
 - **Background** (`src/entrypoints/background/`): Persists animation state per URL in storage and forwards it to the content script. Handles the `toggle-gizmo` command (Alt+Shift+G).
 - **Content Script** (`src/entrypoints/content/`): Renders a `<style>` into `document.head` that applies CSS transforms/animations to `document.documentElement`. Also renders the gizmo (drag handles for move/rotate/scale/pivot) in the top layer via a `popover` + shadow root so that it is not affected by the page transform. The gizmo is shown when the gizmo setting is enabled (default: enabled), the animation is not playing, and either the page has an animation state or the popup has been opened on the page (`SHOW_GIZMO` message; the content script returns an initial state whose pivot is at the viewport center without saving it). When the pivot is outside the viewport, an indicator on the viewport edge scrolls to it.
@@ -83,7 +82,7 @@ The screenshot test is automatically skipped during regular test runs (`npm run 
 
 - Uses Biome for formatting and linting (configured in `biome.json`)
 - Git hooks in `.githooks/` (enabled by `npm run setup`) run `npm run check` on pre-commit
-- TypeScript with strict configuration  
+- TypeScript with strict configuration
 - Vitest for testing framework
 - ls-lint enforces kebab-case file naming for TypeScript files
 - TailwindCSS for styling with custom configuration

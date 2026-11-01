@@ -21,7 +21,7 @@ function KeyframeButton({
       type="button"
       onClick={hasKeyframe ? onRemoveKeyframe : onAddKeyframe}
       className={cn(
-        "flex h-6 w-6 select-none items-center justify-center rounded px-2 py-1 font-bold text-lg text-white",
+        "flex h-6 w-6 items-center justify-center rounded px-2 py-1 text-lg font-bold text-white select-none",
         hasKeyframe
           ? "bg-red-500 hover:bg-red-600"
           : "bg-green-500 hover:bg-green-600",
@@ -45,7 +45,7 @@ function DurationInput({
   const durationId = useId();
   return (
     <div className={className}>
-      <label htmlFor={durationId} className="block font-medium text-sm">
+      <label htmlFor={durationId} className="block text-sm font-medium">
         Duration: {duration}ms
       </label>
       <input
@@ -84,7 +84,7 @@ function AxisPercentInput({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="block select-none font-medium text-sm">
+        <label htmlFor={id} className="block text-sm font-medium select-none">
           {label}: {Math.round(value * 10) / 10}%
         </label>
         <KeyframeButton
@@ -130,7 +130,7 @@ function RotationInput({
   return (
     <div className={className}>
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="block select-none font-medium text-sm">
+        <label htmlFor={id} className="block text-sm font-medium select-none">
           {label}: {Math.round(value * 10) / 10}°
         </label>
         <KeyframeButton
@@ -176,7 +176,7 @@ function ScaleInput({
   return (
     <div className={className}>
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="block select-none font-medium text-sm">
+        <label htmlFor={id} className="block text-sm font-medium select-none">
           {label}: {Math.round(value * 100) / 100}x
         </label>
         <KeyframeButton
@@ -223,7 +223,7 @@ function TranslateInput({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="block select-none font-medium text-sm">
+        <label htmlFor={id} className="block text-sm font-medium select-none">
           {label}: {Math.round(value)}px
         </label>
         <KeyframeButton
@@ -276,7 +276,7 @@ function FlipCheckbox({
           onChange={(e) => onChange(e.target.checked)}
           className="h-4 w-4"
         />
-        <label htmlFor={id} className="select-none font-medium text-sm">
+        <label htmlFor={id} className="text-sm font-medium select-none">
           {label}
         </label>
       </div>
@@ -303,7 +303,7 @@ function GizmoCheckbox() {
         onChange={(e) => gizmoEnabled.setValue(e.target.checked)}
         className="h-4 w-4"
       />
-      <label htmlFor={id} className="select-none font-medium text-sm">
+      <label htmlFor={id} className="text-sm font-medium select-none">
         Gizmo
       </label>
     </div>
@@ -342,7 +342,7 @@ export function App() {
   return (
     <div className="w-128 border border-gray-200 p-4">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="flex-1 text-center font-bold text-xl">Page Transform</h1>
+        <h1 className="flex-1 text-center text-xl font-bold">Page Transform</h1>
 
         <div className="flex items-center gap-2">
           <GizmoCheckbox />

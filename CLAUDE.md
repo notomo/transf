@@ -9,6 +9,7 @@ This is a browser extension called "transf" that allows users to transform web p
 ## Architecture
 
 The extension follows WXT's entrypoint-based architecture:
+
 - **Popup UI** (`src/entrypoints/popup/`): React-based interface with sliders for transformation controls (center X/Y coordinates as percentages, rotation angle in degrees, scale factor, translation in pixels, flips), keyframe timeline, and gizmo toggle.
 - **Background** (`src/entrypoints/background/`): Persists animation state per URL in storage and forwards it to the content script. Handles the `toggle-gizmo` command (Alt+Shift+G).
 - **Content Script** (`src/entrypoints/content/`): Renders a `<style>` into `document.head` that applies CSS transforms/animations to `document.documentElement`. Also renders the gizmo (drag handles for move/rotate/scale/pivot) in the top layer via a `popover` + shadow root so that it is not affected by the page transform. The gizmo is shown when the gizmo setting is enabled (default: enabled), the animation is not playing, and either the page has an animation state or the popup has been opened on the page (`SHOW_GIZMO` message; the content script returns an initial state whose pivot is at the viewport center without saving it). When the pivot is outside the viewport, an indicator on the viewport edge scrolls to it.
@@ -62,6 +63,7 @@ npm run screenshot
 ```
 
 This command will:
+
 1. Build the extension in development mode
 2. Run the screenshot test (`e2e/screenshot.spec.ts`)
 3. Save screenshots to `e2e/screenshots/` directory
